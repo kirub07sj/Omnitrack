@@ -1,35 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppStore } from './store/useAppStore';
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const navigate = useNavigate();
+  const { isSetupComplete, isLoadingStatus, checkSetupStatus } = useAppStore();
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const checkSetupStatus = async () => {
-      try {
-        const res = await fetch('/api/business/status');
-        const data = await res.json();
-        
-        if (data.success && data.isSetup) {
-          // Business profile exists
-          setLoading(false);
-        } else {
-          // Go to setup wizard
-          navigate('/setup');
-        }
-      } catch (err) {
-        console.error("Failed to connect to backend", err);
-        setError(true);
-        setLoading(false);
+    checkSetupStatus().catch(() => setError(true));
+  }, [checkSetupStatus]);
+
+  useEffect(() => {
+    if (!isLoadingStatus && !error) {
+      if (!isSetupComplete) {
+        navigate('/setup');
       }
-    };
+    }
+  }, [isSetupComplete, isLoadingStatus, error, navigate]);
 
-    checkSetupStatus();
-  }, [navigate]);
-
-  if (loading) {
+  if (isLoadingStatus) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>

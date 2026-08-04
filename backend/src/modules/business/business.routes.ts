@@ -5,8 +5,16 @@ const router = Router();
 
 router.get('/status', async (req, res) => {
   try {
-    const existing = await prisma.business.findFirst();
-    res.json({ success: true, isSetup: !!existing });
+    const existingBusiness = await prisma.business.findFirst();
+    const existingOwner = await prisma.user.findFirst({
+      where: { role: { name: 'Owner' } }
+    });
+    res.json({ 
+      success: true, 
+      hasBusiness: !!existingBusiness,
+      hasOwner: !!existingOwner,
+      isSetup: !!existingBusiness && !!existingOwner 
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error checking setup status' });
   }
