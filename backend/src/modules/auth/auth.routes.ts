@@ -64,4 +64,40 @@ router.post('/setup-owner', async (req, res) => {
   }
 });
 
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    const user = await prisma.user.findUnique({
+      where: { username },
+      include: { role: true, employee: true }
+    });
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid username or password.' });
+    }
+
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    if (!isValid) {
+      return res.status(401).json({ success: false, message: 'Invalid username or password.' });
+    }
+
+    // For MVP, returning the user object directly. In production, issue a JWT here.
+    res.json({ 
+      success: true, 
+      user: {
+        id: user.id,
+        username: user.username,
+        firstName: user.employee.first_name,
+        lastName: user.employee.last_name,
+        role: user.role.name
+      }
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ success: false, message: 'An error occurred during login.' });
+  }
+});
+
 export default router;

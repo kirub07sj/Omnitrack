@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import bcrypt from 'bcrypt';
 import prisma from '../../database';
 
 const router = Router();
@@ -48,6 +49,72 @@ router.post('/setup', async (req, res) => {
   } catch (error) {
     console.error('Business setup error:', error);
     res.status(500).json({ success: false, message: 'An internal server error occurred during setup.' });
+  }
+});
+
+router.post('/setup-employee', async (req, res) => {
+  try {
+    const { firstName, lastName, roleName, username, password } = req.body;
+    const business = await prisma.business.findFirst();
+    if (!business) return res.status(400).json({ success: false, message: 'Business not found' });
+    
+    let role = await prisma.role.findFirst({ where: { name: roleName } });
+    if (!role) {
+      role = await prisma.role.create({ data: { name: roleName } });
+    }
+
+    const employee = await prisma.employee.create({
+      data: {
+        business_id: business.id,
+        first_name: firstName,
+        last_name: lastName,
+        status: 'Active'
+      }
+    });
+
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(password, salt);
+
+    await prisma.user.create({
+      data: {
+        business_id: business.id,
+        employee_id: employee.id,
+        role_id: role.id,
+        username,
+        password_hash,
+        status: 'Active'
+      }
+    });
+
+    res.json({ success: true, message: 'Employee added' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error adding employee' });
+  }
+});
+
+router.post('/setup-product', async (req, res) => {
+  try {
+    const { name, price } = req.body;
+    const business = await prisma.business.findFirst();
+    if (!business) return res.status(400).json({ success: false, message: 'Business not found' });
+    
+    let category = await prisma.category.findFirst({ where: { business_id: business.id } });
+    if (!category) {
+      category = await prisma.category.create({ data: { business_id: business.id, name: 'General' } });
+    }
+
+    await prisma.product.create({
+      data: {
+        business_id: business.id,
+        category_id: category.id,
+        name,
+        price: parseFloat(price) || 0,
+        status: 'Active'
+      }
+    });
+    res.json({ success: true, message: 'Product added' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error adding product' });
   }
 });
 
