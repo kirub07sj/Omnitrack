@@ -123,3 +123,219 @@ User roles
 Local networking for waiter access
 Cloud backup
 Reservation management, online ordering, accounting integrations, and customer loyalty programs are outside the scope of Version 1.0.
+
+4. Database
+
+Table businesses {
+  id uuid [pk]
+  name varchar
+  phone varchar
+  email varchar
+  address text
+  logo text
+  currency varchar
+  tax_rate decimal
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table roles {
+  id uuid [pk]
+  name varchar
+}
+
+Table employees {
+  id uuid [pk]
+  business_id uuid
+  first_name varchar
+  last_name varchar
+  phone varchar
+  salary decimal
+  hire_date date
+  status varchar
+}
+
+Table users {
+  id uuid [pk]
+  business_id uuid
+  employee_id uuid
+  role_id uuid
+  username varchar
+  password_hash text
+  status varchar
+  last_login timestamp
+}
+
+Table restaurant_tables {
+  id uuid [pk]
+  business_id uuid
+  table_number varchar
+  capacity int
+  status varchar
+}
+
+Table categories {
+  id uuid [pk]
+  business_id uuid
+  name varchar
+}
+
+Table products {
+  id uuid [pk]
+  business_id uuid
+  category_id uuid
+  name varchar
+  sku varchar
+  price decimal
+  cost decimal
+  status varchar
+}
+
+Table inventory {
+  id uuid [pk]
+  business_id uuid
+  product_id uuid
+  quantity decimal
+  minimum_quantity decimal
+}
+
+Table inventory_movements {
+  id uuid [pk]
+  business_id uuid
+  product_id uuid
+  type varchar
+  quantity decimal
+  reference_type varchar
+  reference_id uuid
+  created_at timestamp
+}
+
+Table suppliers {
+  id uuid [pk]
+  business_id uuid
+  name varchar
+  phone varchar
+  email varchar
+  address text
+}
+
+Table purchases {
+  id uuid [pk]
+  business_id uuid
+  supplier_id uuid
+  total decimal
+  status varchar
+  created_at timestamp
+}
+
+Table purchase_items {
+  id uuid [pk]
+  purchase_id uuid
+  product_id uuid
+  quantity decimal
+  cost decimal
+}
+
+Table orders {
+  id uuid [pk]
+  business_id uuid
+  table_id uuid
+  waiter_id uuid
+  status varchar
+  notes text
+  created_at timestamp
+}
+
+Table order_items {
+  id uuid [pk]
+  order_id uuid
+  product_id uuid
+  quantity decimal
+  price decimal
+}
+
+Table payments {
+  id uuid [pk]
+  business_id uuid
+  order_id uuid
+  amount decimal
+  method varchar
+  status varchar
+  proof_image text
+  paid_at timestamp
+}
+
+Table sales {
+  id uuid [pk]
+  business_id uuid
+  order_id uuid
+  cashier_id uuid
+  subtotal decimal
+  tax decimal
+  discount decimal
+  total decimal
+  created_at timestamp
+}
+
+Table expenses {
+  id uuid [pk]
+  business_id uuid
+  category varchar
+  amount decimal
+  description text
+  receipt_image text
+  created_at timestamp
+}
+
+Table sync_queue {
+  id uuid [pk]
+  business_id uuid
+  entity varchar
+  entity_id uuid
+  operation varchar
+  status varchar
+  created_at timestamp
+}
+
+Ref: employees.business_id > businesses.id
+Ref: users.business_id > businesses.id
+Ref: users.employee_id > employees.id
+Ref: users.role_id > roles.id
+
+Ref: restaurant_tables.business_id > businesses.id
+
+Ref: categories.business_id > businesses.id
+Ref: products.business_id > businesses.id
+Ref: products.category_id > categories.id
+
+Ref: inventory.business_id > businesses.id
+Ref: inventory.product_id > products.id
+
+Ref: inventory_movements.business_id > businesses.id
+Ref: inventory_movements.product_id > products.id
+
+Ref: suppliers.business_id > businesses.id
+
+Ref: purchases.business_id > businesses.id
+Ref: purchases.supplier_id > suppliers.id
+
+Ref: purchase_items.purchase_id > purchases.id
+Ref: purchase_items.product_id > products.id
+
+Ref: orders.business_id > businesses.id
+Ref: orders.table_id > restaurant_tables.id
+Ref: orders.waiter_id > employees.id
+
+Ref: order_items.order_id > orders.id
+Ref: order_items.product_id > products.id
+
+Ref: payments.business_id > businesses.id
+Ref: payments.order_id > orders.id
+
+Ref: sales.business_id > businesses.id
+Ref: sales.order_id > orders.id
+Ref: sales.cashier_id > employees.id
+
+Ref: expenses.business_id > businesses.id
+
+Ref: sync_queue.business_id > businesses.id

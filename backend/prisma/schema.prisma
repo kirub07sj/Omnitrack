@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Business {
+  id         String   @id @default(uuid())
+  name       String
+  phone      String?
+  email      String?
+  address    String?
+  logo       String?
+  currency   String?
+  tax_rate   Decimal?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  employees  Employee[]
+  users      User[]
+  tables     RestaurantTable[]
+  categories Category[]
+  products   Product[]
+  inventory  Inventory[]
+  movements  InventoryMovement[]
+  suppliers  Supplier[]
+  purchases  Purchase[]
+  orders     Order[]
+  payments   Payment[]
+  sales      Sale[]
+  expenses   Expense[]
+  sync_queue SyncQueue[]
+
+  @@map("businesses")
+}
+
+model Role {
+  id   String @id @default(uuid())
+  name String
+
+  users User[]
+
+  @@map("roles")
+}
+
+model Employee {
+  id          String    @id @default(uuid())
+  business_id String
+  first_name  String
+  last_name   String
+  phone       String?
+  salary      Decimal?
+  hire_date   DateTime?
+  status      String?
+
+  business Business @relation(fields: [business_id], references: [id])
+  users    User[]
+  orders   Order[]
+  sales    Sale[]
+
+  @@map("employees")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  business_id   String
+  employee_id   String
+  role_id       String
+  username      String    @unique
+  password_hash String
+  status        String?
+  last_login    DateTime?
+
+  business Business @relation(fields: [business_id], references: [id])
+  employee Employee @relation(fields: [employee_id], references: [id])
+  role     Role     @relation(fields: [role_id], references: [id])
+
+  @@map("users")
+}
+
+model RestaurantTable {
+  id           String  @id @default(uuid())
+  business_id  String
+  table_number String
+  capacity     Int?
+  status       String?
+
+  business Business @relation(fields: [business_id], references: [id])
+  orders   Order[]
+
+  @@map("restaurant_tables")
+}
+
+model Category {
+  id          String @id @default(uuid())
+  business_id String
+  name        String
+
+  business Business  @relation(fields: [business_id], references: [id])
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  business_id String
+  category_id String
+  name        String
+  sku         String?
+  price       Decimal
+  cost        Decimal?
+  status      String?
+
+  business  Business            @relation(fields: [business_id], references: [id])
+  category  Category            @relation(fields: [category_id], references: [id])
+  inventory Inventory[]
+  movements InventoryMovement[]
+  purchases PurchaseItem[]
+  orders    OrderItem[]
+
+  @@map("products")
+}
+
+model Inventory {
+  id               String   @id @default(uuid())
+  business_id      String
+  product_id       String
+  quantity         Decimal
+  minimum_quantity Decimal?
+
+  business Business @relation(fields: [business_id], references: [id])
+  product  Product  @relation(fields: [product_id], references: [id])
+
+  @@map("inventory")
+}
+
+model InventoryMovement {
+  id             String   @id @default(uuid())
+  business_id    String
+  product_id     String
+  type           String
+  quantity       Decimal
+  reference_type String?
+  reference_id   String?
+  created_at     DateTime @default(now())
+
+  business Business @relation(fields: [business_id], references: [id])
+  product  Product  @relation(fields: [product_id], references: [id])
+
+  @@map("inventory_movements")
+}
+
+model Supplier {
+  id          String  @id @default(uuid())
+  business_id String
+  name        String
+  phone       String?
+  email       String?
+  address     String?
+
+  business  Business   @relation(fields: [business_id], references: [id])
+  purchases Purchase[]
+
+  @@map("suppliers")
+}
+
+model Purchase {
+  id          String   @id @default(uuid())
+  business_id String
+  supplier_id String
+  total       Decimal
+  status      String?
+  created_at  DateTime @default(now())
+
+  business Business       @relation(fields: [business_id], references: [id])
+  supplier Supplier       @relation(fields: [supplier_id], references: [id])
+  items    PurchaseItem[]
+
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id          String  @id @default(uuid())
+  purchase_id String
+  product_id  String
+  quantity    Decimal
+  cost        Decimal
+
+  purchase Purchase @relation(fields: [purchase_id], references: [id])
+  product  Product  @relation(fields: [product_id], references: [id])
+
+  @@map("purchase_items")
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  business_id String
+  table_id    String
+  waiter_id   String
+  status      String?
+  notes       String?
+  created_at  DateTime @default(now())
+
+  business Business        @relation(fields: [business_id], references: [id])
+  table    RestaurantTable @relation(fields: [table_id], references: [id])
+  waiter   Employee        @relation(fields: [waiter_id], references: [id])
+  items    OrderItem[]
+  payments Payment[]
+  sales    Sale[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  order_id   String
+  product_id String
+  quantity   Decimal
+  price      Decimal
+
+  order   Order   @relation(fields: [order_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("order_items")
+}
+
+model Payment {
+  id          String    @id @default(uuid())
+  business_id String
+  order_id    String
+  amount      Decimal
+  method      String
+  status      String?
+  proof_image String?
+  paid_at     DateTime?
+
+  business Business @relation(fields: [business_id], references: [id])
+  order    Order    @relation(fields: [order_id], references: [id])
+
+  @@map("payments")
+}
+
+model Sale {
+  id          String   @id @default(uuid())
+  business_id String
+  order_id    String
+  cashier_id  String
+  subtotal    Decimal
+  tax         Decimal
+  discount    Decimal?
+  total       Decimal
+  created_at  DateTime @default(now())
+
+  business Business @relation(fields: [business_id], references: [id])
+  order    Order    @relation(fields: [order_id], references: [id])
+  cashier  Employee @relation(fields: [cashier_id], references: [id])
+
+  @@map("sales")
+}
+
+model Expense {
+  id            String   @id @default(uuid())
+  business_id   String
+  category      String
+  amount        Decimal
+  description   String?
+  receipt_image String?
+  created_at    DateTime @default(now())
+
+  business Business @relation(fields: [business_id], references: [id])
+
+  @@map("expenses")
+}
+
+model SyncQueue {
+  id          String   @id @default(uuid())
+  business_id String
+  entity      String
+  entity_id   String
+  operation   String
+  status      String
+  created_at  DateTime @default(now())
+
+  business Business @relation(fields: [business_id], references: [id])
+
+  @@map("sync_queue")
+}
