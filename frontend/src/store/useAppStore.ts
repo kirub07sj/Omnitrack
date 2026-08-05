@@ -58,6 +58,8 @@ export const useAppStore = create<AppState>((set) => ({
           currentSetupStep: step,
           isLoadingStatus: false
         });
+      } else {
+        set({ isLoadingStatus: false });
       }
     } catch (e) {
       console.error("Failed to fetch setup status", e);
