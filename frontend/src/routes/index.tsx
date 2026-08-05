@@ -10,6 +10,10 @@ import EmployeeListPage from '../modules/employees/pages/EmployeeListPage';
 import EmployeeDetailsPage from '../modules/employees/pages/EmployeeDetailsPage';
 import AddEditEmployeePage from '../modules/employees/pages/AddEditEmployeePage';
 
+import ProductListPage from '../modules/products/pages/ProductListPage';
+import ProductDetailsPage from '../modules/products/pages/ProductDetailsPage';
+import AddEditProductPage from '../modules/products/pages/AddEditProductPage';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -52,6 +56,22 @@ export const router = createBrowserRouter([
       {
         path: 'employees/:id/edit',
         element: <AddEditEmployeePage />
+      },
+      {
+        path: 'products',
+        element: <ProductListPage />
+      },
+      {
+        path: 'products/new',
+        element: <AddEditProductPage />
+      },
+      {
+        path: 'products/:id',
+        element: <ProductDetailsPage />
+      },
+      {
+        path: 'products/:id/edit',
+        element: <AddEditProductPage />
       }
     ]
   },
@@ -78,6 +98,22 @@ export const router = createBrowserRouter([
       {
         path: 'employees/:id/edit',
         element: <AddEditEmployeePage />
+      },
+      {
+        path: 'products',
+        element: <ProductListPage />
+      },
+      {
+        path: 'products/new',
+        element: <AddEditProductPage />
+      },
+      {
+        path: 'products/:id',
+        element: <ProductDetailsPage />
+      },
+      {
+        path: 'products/:id/edit',
+        element: <AddEditProductPage />
       }
     ]
   }

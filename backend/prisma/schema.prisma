@@ -105,9 +105,11 @@ model RestaurantTable {
 }
 
 model Category {
-  id          String @id @default(uuid())
+  id          String  @id @default(uuid())
   business_id String
   name        String
+  description String?
+  status      String  @default("Active") // Active, Inactive
 
   business Business  @relation(fields: [business_id], references: [id])
   products Product[]
@@ -116,14 +118,22 @@ model Category {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  business_id String
-  category_id String
-  name        String
-  sku         String?
-  price       Decimal
-  cost        Decimal?
-  status      String?
+  id              String   @id @default(uuid())
+  business_id     String
+  category_id     String
+  name            String
+  sku             String?  @unique
+  barcode         String?
+  description     String?
+  price           Decimal
+  cost            Decimal?
+  unit            String?
+  track_inventory Boolean  @default(false)
+  min_stock       Decimal?
+  image_url       String?
+  status          String   @default("Active") // Active, Inactive
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   business  Business            @relation(fields: [business_id], references: [id])
   category  Category            @relation(fields: [category_id], references: [id])

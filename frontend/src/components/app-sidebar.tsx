@@ -76,7 +76,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Box,
       items: [
         { title: "Inventory", url: "#" },
-        { title: "Products", url: "#" },
+        { title: "Products", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/products` },
         ...(isManager ? [] : [{ title: "Categories", url: "#" }]),
         { title: "Suppliers", url: "#" },
         { title: "Purchases", url: "#" },
