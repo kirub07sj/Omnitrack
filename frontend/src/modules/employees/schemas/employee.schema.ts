@@ -6,11 +6,11 @@ export const employeeSchema = z.object({
   lastName: z.string().min(2, "Last name is required"),
   gender: z.enum(["Male", "Female", "Other"]),
   age: z.preprocess((val) => (val === "" || val === undefined || val === null) ? undefined : Number(val), z.number().min(16, "Must be at least 16 years old").max(100, "Invalid age").optional()),
-  phoneNumber: z.string().min(10, "Valid phone number is required"),
+  phoneNumber: z.string().regex(/^\+251\d{9}$/, "Must be +251 followed by exactly 9 digits"),
   email: z.string().email("Invalid email address"),
   address: z.string().min(5, "Address is required"),
-  nationalId: z.string().optional(),
-  emergencyContact: z.string().min(10, "Emergency contact is required"),
+  nationalId: z.string().regex(/^\d{4}-\d{4}-\d{4}-\d{4}$/, "Must be 16 digits (e.g. 1234-5678-9123-2412)"),
+  emergencyContact: z.string().regex(/^\+251\d{9}$/, "Must be +251 followed by exactly 9 digits"),
 
   // Employment Information
   employeeNumber: z.string().optional(),

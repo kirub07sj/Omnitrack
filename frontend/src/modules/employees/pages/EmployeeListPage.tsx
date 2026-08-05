@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { DeleteEmployeeDialog } from "../components/DeleteEmployeeDialog";
 import { DeactivateEmployeeDialog } from "../components/DeactivateEmployeeDialog";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function EmployeeListPage() {
   const navigate = useNavigate();
@@ -78,20 +80,32 @@ export default function EmployeeListPage() {
   };
 
   const handleExport = () => {
-    // Build CSV
-    const headers = ["Employee ID", "First Name", "Last Name", "Position", "Department", "Status", "Phone", "Email", "Salary", "Hire Date"];
-    const rows = employees.map(e => [
-      e.employeeNumber, e.firstName, e.lastName, e.position, e.department,
-      e.status, e.phoneNumber, e.email, e.salary, e.hireDate
+    const doc = new jsPDF("landscape");
+    doc.text("Omnitrack - Employee List", 14, 15);
+    
+    const headers = [["Employee ID", "First Name", "Last Name", "Position", "Department", "Status", "Phone", "Salary", "Hire Date"]];
+    const data = employees.map(e => [
+      e.employeeNumber || 'N/A', 
+      e.firstName, 
+      e.lastName, 
+      e.position, 
+      e.department,
+      e.status, 
+      e.phoneNumber, 
+      `${e.salary} ETB`,
+      new Date(e.hireDate).toLocaleDateString()
     ]);
-    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `employees_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    
+    autoTable(doc, {
+      head: headers,
+      body: data,
+      startY: 20,
+      theme: 'grid',
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [6, 95, 70] } // Emerald green header
+    });
+    
+    doc.save(`employees_${new Date().toISOString().slice(0,10)}.pdf`);
   };
 
   return (

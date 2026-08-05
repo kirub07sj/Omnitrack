@@ -170,7 +170,21 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="+1 234 567 8900" {...field} className="bg-background border-border" />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-border bg-muted text-muted-foreground text-sm font-medium">
+                        +251
+                      </span>
+                      <Input 
+                        placeholder="912345678" 
+                        {...field} 
+                        value={field.value ? field.value.replace(/^\+251/, '') : ''}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 9);
+                          field.onChange(val ? `+251${val}` : '');
+                        }}
+                        className="rounded-l-none bg-background border-border" 
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -183,7 +197,21 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                 <FormItem>
                   <FormLabel>Emergency Contact</FormLabel>
                   <FormControl>
-                    <Input placeholder="+1 098 765 4321" {...field} className="bg-background border-border" />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-border bg-muted text-muted-foreground text-sm font-medium">
+                        +251
+                      </span>
+                      <Input 
+                        placeholder="912345678" 
+                        {...field} 
+                        value={field.value ? field.value.replace(/^\+251/, '') : ''}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 9);
+                          field.onChange(val ? `+251${val}` : '');
+                        }}
+                        className="rounded-l-none bg-background border-border" 
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -196,7 +224,17 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                 <FormItem>
                   <FormLabel>National ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="ID Number" {...field} className="bg-background border-border" />
+                    <Input 
+                      placeholder="1234-5678-9123-2412" 
+                      {...field} 
+                      value={field.value || ''}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/\D/g, '').slice(0, 16);
+                        let formatted = val.match(/.{1,4}/g)?.join('-') || val;
+                        field.onChange(formatted);
+                      }}
+                      className="bg-background border-border" 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -293,7 +331,12 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                 <FormItem>
                   <FormLabel>Salary (Monthly in ETB)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="45000" {...field} className="bg-background border-border" />
+                    <Input 
+                      type="number" 
+                      placeholder="45000" 
+                      {...field} 
+                      className="bg-background border-border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
