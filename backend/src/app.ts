@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import licenseRoutes from './modules/license/license.routes';
 import businessRoutes from './modules/business/business.routes';
 import authRoutes from './modules/auth/auth.routes';
+import employeeRoutes from './modules/employees/employee.routes';
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/api/license', licenseRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/employees', employeeRoutes);
 
 // Basic health check route to verify connection
 app.get('/api/health', (req, res) => {

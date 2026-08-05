@@ -1,77 +1,220 @@
-You are designing the Owner Dashboard for Omnitrack, an offline-first Restaurant ERP desktop application.
+You are building the Employee Management module for Omnitrack, an offline-first Restaurant ERP system.
 
-Target User:
-Business Owner
+## Tech Stack
+- React 19
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- TanStack Table
+- TanStack Query
+- React Hook Form
+- Zod
+- Desktop-first
+- Light theme
 
-Objective:
-Design a professional enterprise dashboard that gives the owner a complete overview of the business performance. The dashboard should focus on business intelligence, financial health, and strategic decision making rather than daily restaurant operations.
+## Goal
 
+Create a complete Employee Management module that allows restaurant owners and managers to manage employees.
 
-Sidebar Navigation:
-- Dashboard
-- Orders
-- Tables
-- Kitchen
-- Sales
-- Payments
-- Inventory
-- Products
-- Categories
-- Suppliers
-- Purchases
-- Expenses
-- Employees
-- Accounts & Permissions
-- Reports
-- Synchronization
-- Settings
-- License & Subscription
+The module must be clean, reusable, modular, and production-ready.
 
-Dashboard Content:
+DO NOT create mockup-only UI.
+Generate real React components.
 
-Top KPI Cards:
-- Today's Revenue
-- Monthly Revenue
-- Monthly Expenses
-- Net Profit
-- Active Orders
-- Inventory Value
+--------------------------------
 
-Charts:
-- Daily Revenue (Last 7 Days)
-- Monthly Revenue vs Expenses
-- Best Selling Products
-- Sales by Category
+EMPLOYEE LIST PAGE
 
-Widgets:
-- Recent Sales
-- Low Stock Alerts
-- Pending Supplier Purchases
-- Recent Expenses
-- Top Performing Employees
-- Recent Activity
+Features
 
-Notifications:
-- Pending Sync
-- License Expiration
-- Failed Backups
-- Low Inventory Warnings
+- Search employee
+- Filter by role
+- Filter by status
+- Sort columns
+- Pagination
 
-Quick Actions:
-- New Product
-- New Purchase
-- Add Expense
+Columns
+
+- Profile Photo
+- Employee ID
+- Full Name
+- Position
+- Phone Number
+- Salary
+- Employment Status
+- Hire Date
+- Actions
+
+Top Actions
+
 - Add Employee
-- View Reports
+- Export
+- Refresh
 
-Design Requirements:
-- Professional ERP appearance
-- Data-dense but easy to scan
-- Large tables
-- Consistent spacing (8px grid)
-- shadcn/ui components only
-- Minimal animations
-- Accessibility focused
-- Responsive for 1440px+ desktop displays
+Row Actions
 
-Generate reusable React components with clean folder organization and production-quality code.
+- View
+- Edit
+- Deactivate
+- Delete
+
+--------------------------------
+
+ADD / EDIT EMPLOYEE
+
+Fields
+
+Personal Information
+
+- First Name
+- Last Name
+- Gender
+- Date of Birth
+- Phone Number
+- Email
+- Address
+- National ID (optional)
+- Emergency Contact
+
+Employment Information
+
+- Employee Number
+- Position
+- Department
+- Salary
+- Employment Type
+    - Full Time
+    - Part Time
+    - Contract
+
+- Hire Date
+- Status
+    - Active
+    - On Leave
+    - Suspended
+    - Terminated
+
+Optional Login Account
+
+Checkbox:
+
+Create Login Account
+
+If enabled:
+
+- Username
+- Password
+- Confirm Password
+- Role
+
+Roles
+
+- Owner
+- Manager
+- Cashier
+- Waiter
+- Kitchen
+
+--------------------------------
+
+EMPLOYEE DETAILS PAGE
+
+Tabs
+
+Overview
+
+Employment
+
+Attendance (placeholder)
+
+Activity Log (placeholder)
+
+Documents (placeholder)
+
+Display
+
+- Profile Photo
+- Contact Information
+- Employment Details
+- Salary
+- Current Status
+- Assigned Role
+
+--------------------------------
+
+VALIDATION
+
+Use React Hook Form and Zod.
+
+Validate
+
+- Required fields
+- Valid email
+- Phone number
+- Salary must be positive
+- Password confirmation
+
+--------------------------------
+
+COMPONENTS
+
+Create reusable components
+
+EmployeeTable
+
+EmployeeForm
+
+EmployeeCard
+
+EmployeeAvatar
+
+EmployeeStatusBadge
+
+EmployeeDetails
+
+DeleteEmployeeDialog
+
+DeactivateEmployeeDialog
+
+--------------------------------
+
+DESIGN
+
+Use shadcn/ui only.
+
+Large data table.
+
+Consistent spacing.
+
+Professional ERP layout.
+
+Desktop-first.
+
+Minimal animations.
+
+Accessible.
+
+Keyboard friendly.
+
+--------------------------------
+
+FOLDER STRUCTURE
+
+Generate the module using feature-based architecture.
+
+src/modules/employees
+
+├── components
+├── pages
+├── hooks
+├── services
+├── schemas
+├── types
+├── utils
+└── index.ts
+
+Keep every component reusable.
+
+Avoid duplicated code.
+
+Generate production-quality React + TypeScript code.

@@ -4,7 +4,10 @@ import SetupWizard from '../modules/setup/SetupWizard';
 import App from '../App';
 import DashboardLayout from '../layouts/DashboardLayout';
 import OwnerDashboard from '../modules/dashboard/OwnerDashboard';
+import ManagerDashboard from '../modules/dashboard/ManagerDashboard';
 import AddProperty from '../modules/dashboard/AddProperty';
+import EmployeeListPage from '../modules/employees/pages/EmployeeListPage';
+import EmployeeDetailsPage from '../modules/employees/pages/EmployeeDetailsPage';
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +35,32 @@ export const router = createBrowserRouter([
       {
         path: 'add-property',
         element: <AddProperty />
+      },
+      {
+        path: 'employees',
+        element: <EmployeeListPage />
+      },
+      {
+        path: 'employees/:id',
+        element: <EmployeeDetailsPage />
+      }
+    ]
+  },
+  {
+    path: '/manager',
+    element: <DashboardLayout />,
+    children: [
+      {
+        path: '',
+        element: <ManagerDashboard />
+      },
+      {
+        path: 'employees',
+        element: <EmployeeListPage />
+      },
+      {
+        path: 'employees/:id',
+        element: <EmployeeDetailsPage />
       }
     ]
   }

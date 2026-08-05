@@ -20,28 +20,38 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-// This is the data for the RestaurantOS owner dashboard.
-const data = {
-  teams: [
-    {
-      name: "RestaurantOS HQ",
-      logo: Building,
-      plan: "Enterprise",
-    },
-    {
-      name: "Branch 1 (Downtown)",
-      logo: Building,
-      plan: "Standard",
-    }
-  ],
-  navMain: [
+const teams = [
+  {
+    name: "Omnitrack",
+    logo: Building,
+    plan: "Enterprise",
+  },
+  {
+    name: "Branch 1 (Downtown)",
+    logo: Building,
+    plan: "Standard",
+  }
+];
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { currentUser } = useAppStore();
+
+  const user = {
+    name: currentUser?.firstName + " " + currentUser?.lastName,
+    email: (currentUser as any)?.email || `${currentUser?.role || 'user'}@example.com`,
+    avatar: "", // could be fetched from user data later
+  };
+
+  const isManager = currentUser?.role?.toLowerCase() === "manager";
+  
+  const navMain = [
     {
       title: "Operations",
-      url: "/owner",
+      url: `/${currentUser?.role?.toLowerCase() || 'owner'}`,
       icon: LayoutDashboard,
       isActive: true,
       items: [
-        { title: "Dashboard", url: "/owner" },
+        { title: "Dashboard", url: `/${currentUser?.role?.toLowerCase() || 'owner'}` },
         { title: "Orders", url: "#" },
         { title: "Tables", url: "#" },
         { title: "Kitchen", url: "#" },
@@ -51,7 +61,10 @@ const data = {
       title: "Finance & Sales",
       url: "#",
       icon: Wallet,
-      items: [
+      items: isManager ? [
+        { title: "Sales", url: "#" },
+        { title: "Expenses", url: "#" },
+      ] : [
         { title: "Sales", url: "#" },
         { title: "Payments", url: "#" },
         { title: "Expenses", url: "#" },
@@ -64,7 +77,7 @@ const data = {
       items: [
         { title: "Inventory", url: "#" },
         { title: "Products", url: "#" },
-        { title: "Categories", url: "#" },
+        ...(isManager ? [] : [{ title: "Categories", url: "#" }]),
         { title: "Suppliers", url: "#" },
         { title: "Purchases", url: "#" },
       ],
@@ -73,13 +86,16 @@ const data = {
       title: "HR & Admin",
       url: "#",
       icon: Users,
-      items: [
-        { title: "Employees", url: "#" },
+      items: isManager ? [
+        { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
+        { title: "Reports", url: "#" },
+      ] : [
+        { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
         { title: "Accounts & Permissions", url: "#" },
         { title: "Reports", url: "#" },
       ],
     },
-    {
+    ...(isManager ? [] : [{
       title: "System",
       url: "#",
       icon: Settings,
@@ -88,26 +104,16 @@ const data = {
         { title: "Settings", url: "#" },
         { title: "License & Subscription", url: "#" },
       ],
-    },
-  ],
-}
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { currentUser } = useAppStore();
-
-  const user = {
-    name: currentUser?.firstName + " " + currentUser?.lastName,
-    email: (currentUser as any)?.email || "owner@example.com",
-    avatar: "", // could be fetched from user data later
-  };
+    }]),
+  ];
 
   return (
     <Sidebar collapsible="icon" {...props} className="border-r border-border !bg-sidebar">
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

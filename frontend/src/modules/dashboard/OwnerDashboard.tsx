@@ -59,7 +59,7 @@ export default function OwnerDashboard() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">RestaurantOS Dashboard</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Omnitrack Dashboard</h1>
             <p className="text-muted-foreground mt-1">Enterprise Overview & Business Intelligence</p>
           </div>
           
