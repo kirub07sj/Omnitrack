@@ -45,10 +45,11 @@ export default function DashboardLayout() {
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-background text-foreground relative overflow-hidden">
-           {/* Dynamic Background Elements */}
-           <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-emerald-900/20 via-background to-emerald-950/20 pointer-events-none -z-10" />
-          <Outlet />
+        <div className="flex flex-1 flex-col gap-4 p-6 pt-2 bg-[#f4f7f6] text-foreground relative overflow-hidden transition-all duration-500 ease-in-out">
+           <div className="absolute top-0 left-0 w-full h-64 bg-white border-b border-border pointer-events-none -z-10 transition-all duration-500 ease-in-out" />
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both h-full">
+            <Outlet />
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>

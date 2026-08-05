@@ -78,12 +78,12 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
       accessorKey: "salary",
       header: ({ column }) => (
         <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="p-0 hover:bg-transparent">
-          Salary <ArrowUpDown className="ml-1 h-3 w-3" />
+          Salary (ETB) <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
       cell: ({ row }) => {
         const val = row.getValue("salary");
-        return <span className="text-card-foreground font-medium">{val ? `$${Number(val).toLocaleString()}` : "—"}</span>;
+        return <span className="text-card-foreground font-medium">{val ? `${Number(val).toLocaleString()}` : "—"}</span>;
       }
     },
     {

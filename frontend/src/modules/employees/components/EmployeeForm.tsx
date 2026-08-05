@@ -225,24 +225,27 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control as any}
-              name="employeeNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Employee Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Auto-generated upon save" disabled {...field} className="bg-muted border-border" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control as any}
               name="position"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Position</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                      if (val === 'Manager') {
+                        form.setValue('department', 'Management');
+                        form.setValue('role', 'Manager');
+                      } else if (val === 'Chief' || val === 'Cleaner' || val === 'Dishwasher') {
+                        form.setValue('department', 'Kitchen');
+                        form.setValue('role', 'Kitchen');
+                      } else {
+                        form.setValue('department', 'Front of House');
+                        if (val === 'Casher') form.setValue('role', 'Cashier');
+                        else if (val === 'Waiter') form.setValue('role', 'Waiter');
+                      }
+                    }} 
+                    value={field.value || undefined}
+                  >
                     <FormControl>
                       <SelectTrigger className="bg-background border-border">
                         <SelectValue placeholder="Select position" />
@@ -267,7 +270,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Department</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger className="bg-background border-border">
                         <SelectValue placeholder="Select department" />
@@ -288,7 +291,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
               name="salary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Salary (Annual)</FormLabel>
+                  <FormLabel>Salary (Monthly in ETB)</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="45000" {...field} className="bg-background border-border" />
                   </FormControl>
@@ -403,11 +406,11 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Role</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel>System Role (Auto-assigned)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || undefined} disabled>
                         <FormControl>
-                          <SelectTrigger className="bg-background border-border">
-                            <SelectValue placeholder="Select a role" />
+                          <SelectTrigger className="bg-muted border-border">
+                            <SelectValue placeholder="Role based on position" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>

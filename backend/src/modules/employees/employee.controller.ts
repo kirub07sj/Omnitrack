@@ -137,6 +137,16 @@ export const updateEmployee = async (req: Request, res: Response) => {
     if (data.hire_date) data.hire_date = new Date(data.hire_date);
     if (data.age) data.age = parseInt(data.age, 10);
 
+    const existingEmployee = await prisma.employee.findUnique({ where: { id } });
+    if (existingEmployee?.position === 'Owner') {
+      if (data.position && data.position !== 'Owner') {
+        return res.status(403).json({ message: 'Cannot change the position of the system owner' });
+      }
+      if (data.status && data.status !== 'Active') {
+        return res.status(403).json({ message: 'Cannot deactivate or terminate the system owner' });
+      }
+    }
+
     const employee = await prisma.employee.update({
       where: { id },
       data,
@@ -152,6 +162,11 @@ export const updateEmployee = async (req: Request, res: Response) => {
 export const deleteEmployee = async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id);
+    
+    const employee = await prisma.employee.findUnique({ where: { id } });
+    if (employee?.position === 'Owner') {
+      return res.status(403).json({ message: 'Cannot delete the system owner' });
+    }
     
     // Must delete related users first
     await prisma.user.deleteMany({
