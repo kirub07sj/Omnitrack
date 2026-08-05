@@ -3,7 +3,7 @@ import { Employee } from "../types/employee";
 export const EmployeeService = {
   getEmployees: async (): Promise<Employee[]> => {
     // For now, assume a hardcoded or single business ID until auth is fully implemented
-    const businessId = "1";
+    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
     if (!businessId) throw new Error("No business selected");
     
     const response = await fetch(`/api/employees?business_id=${businessId}`);
@@ -16,7 +16,7 @@ export const EmployeeService = {
       ...emp,
       firstName: emp.first_name,
       lastName: emp.last_name,
-      dateOfBirth: emp.date_of_birth,
+      age: emp.age,
       phoneNumber: emp.phone,
       nationalId: emp.national_id,
       emergencyContact: emp.emergency_contact,
@@ -38,7 +38,7 @@ export const EmployeeService = {
       ...emp,
       firstName: emp.first_name,
       lastName: emp.last_name,
-      dateOfBirth: emp.date_of_birth,
+      age: emp.age,
       phoneNumber: emp.phone,
       nationalId: emp.national_id,
       emergencyContact: emp.emergency_contact,
@@ -51,7 +51,7 @@ export const EmployeeService = {
   },
 
   createEmployee: async (data: any): Promise<Employee> => {
-    const businessId = "1";
+    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
     if (!businessId) throw new Error("No business selected");
 
     const payload = { 
@@ -59,7 +59,7 @@ export const EmployeeService = {
       first_name: data.firstName,
       last_name: data.lastName,
       gender: data.gender,
-      date_of_birth: data.dateOfBirth,
+      age: data.age,
       phone: data.phoneNumber,
       email: data.email,
       address: data.address,
@@ -75,9 +75,7 @@ export const EmployeeService = {
       createLoginAccount: data.createLoginAccount,
       username: data.username,
       password_hash: data.password, // This should be a hash in a real app
-      // Find role_id based on role name
-      // This is mocked for now, usually you'd query the DB for the role ID
-      role_id: data.role ? "1" : undefined
+      role: data.role
     };
 
     const response = await fetch(`/api/employees`, {
@@ -100,7 +98,7 @@ export const EmployeeService = {
       first_name: data.firstName,
       last_name: data.lastName,
       gender: data.gender,
-      date_of_birth: data.dateOfBirth,
+      age: data.age,
       phone: data.phoneNumber,
       email: data.email,
       address: data.address,

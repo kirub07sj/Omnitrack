@@ -18,8 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmployeeAvatar } from "./EmployeeAvatar";
 import { EmployeeStatusBadge } from "./EmployeeStatusBadge";
-import { ArrowUpDown, MoreHorizontal, Eye, Edit, UserX, Trash2 } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Eye, Edit, UserX, Trash2, ArrowUpDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface Props {
   data: Employee[];
@@ -32,11 +32,16 @@ interface Props {
 export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const columns: ColumnDef<Employee>[] = [
     {
       accessorKey: "firstName",
-      header: "Employee",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="p-0 hover:bg-transparent">
+          Employee <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
       cell: ({ row }) => {
         const emp = row.original;
         return (
@@ -53,25 +58,58 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
     {
       accessorKey: "employeeNumber",
       header: "ID",
-      cell: ({ row }) => <span className="text-muted-foreground">{row.getValue("employeeNumber")}</span>
+      cell: ({ row }) => <span className="font-mono text-sm text-muted-foreground">{row.getValue("employeeNumber") || "—"}</span>
     },
     {
       accessorKey: "position",
-      header: "Position",
-      cell: ({ row }) => <span className="text-card-foreground">{row.getValue("position")}</span>
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="p-0 hover:bg-transparent">
+          Position <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => <span className="text-card-foreground">{row.getValue("position") || "—"}</span>
     },
     {
-      accessorKey: "department",
-      header: "Department",
-      cell: ({ row }) => <span className="text-muted-foreground">{row.getValue("department")}</span>
+      accessorKey: "phoneNumber",
+      header: "Phone",
+      cell: ({ row }) => <span className="text-muted-foreground">{row.getValue("phoneNumber") || "—"}</span>
+    },
+    {
+      accessorKey: "salary",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="p-0 hover:bg-transparent">
+          Salary <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const val = row.getValue("salary");
+        return <span className="text-card-foreground font-medium">{val ? `$${Number(val).toLocaleString()}` : "—"}</span>;
+      }
     },
     {
       accessorKey: "status",
       header: "Status",
+      filterFn: (row, id, value) => {
+        if (!value || value === "all") return true;
+        return row.getValue(id) === value;
+      },
       cell: ({ row }) => <EmployeeStatusBadge status={row.getValue("status")} />
     },
     {
+      accessorKey: "hireDate",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="p-0 hover:bg-transparent">
+          Hire Date <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const val = row.getValue("hireDate");
+        return <span className="text-muted-foreground">{val ? new Date(val as string).toLocaleDateString() : "—"}</span>;
+      }
+    },
+    {
       id: "actions",
+      header: "",
       cell: ({ row }) => {
         const emp = row.original;
         return (
@@ -84,10 +122,20 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => onView(emp)}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(emp)}><Edit className="mr-2 h-4 w-4" /> Edit Employee</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDeactivate(emp)}><UserX className="mr-2 h-4 w-4" /> Deactivate</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDelete(emp)} className="text-red-500"><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onView(emp)}>
+                <Eye className="mr-2 h-4 w-4" /> View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit(emp)}>
+                <Edit className="mr-2 h-4 w-4" /> Edit Employee
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onDeactivate(emp)} className="text-amber-500 focus:text-amber-500">
+                <UserX className="mr-2 h-4 w-4" /> Deactivate
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDelete(emp)} className="text-red-500 focus:text-red-500">
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -104,46 +152,55 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       columnFilters,
+      globalFilter,
     },
+    initialState: {
+      pagination: { pageSize: 10 }
+    }
   });
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
         <Input
-          placeholder="Filter employees..."
-          value={(table.getColumn("firstName")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn("firstName")?.setFilterValue(event.target.value)}
-          className="max-w-sm bg-background border-border"
+          placeholder="Search employees..."
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          className="max-w-xs bg-background border-border"
         />
-        <div className="flex gap-2">
-          <Select
-            value={(table.getColumn("department")?.getFilterValue() as string) ?? "all"}
-            onValueChange={(val) => table.getColumn("department")?.setFilterValue(val === "all" ? "" : val)}
-          >
-            <SelectTrigger className="w-[180px] bg-background border-border">
-              <SelectValue placeholder="Department" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Departments</SelectItem>
-              <SelectItem value="Management">Management</SelectItem>
-              <SelectItem value="Kitchen">Kitchen</SelectItem>
-              <SelectItem value="Front of House">Front of House</SelectItem>
-            </SelectContent>
-          </Select>
+        <Select
+          value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
+          onValueChange={(val) => table.getColumn("status")?.setFilterValue(val === "all" ? "" : val)}
+        >
+          <SelectTrigger className="w-[160px] bg-background border-border">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="Active">Active</SelectItem>
+            <SelectItem value="On Leave">On Leave</SelectItem>
+            <SelectItem value="Suspended">Suspended</SelectItem>
+            <SelectItem value="Terminated">Terminated</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="ml-auto text-sm text-muted-foreground">
+          {table.getFilteredRowModel().rows.length} of {data.length} employees
         </div>
       </div>
-      
+
+      {/* Table */}
       <div className="rounded-md border border-border overflow-hidden">
         <Table>
           <TableHeader className="bg-muted/50">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-border hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="text-muted-foreground">
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -155,7 +212,12 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="border-border hover:bg-muted/50">
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="border-border hover:bg-muted/30 cursor-pointer"
+                  onDoubleClick={() => onView(row.original)}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -165,8 +227,8 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                  No employees found.
                 </TableCell>
               </TableRow>
             )}
@@ -174,25 +236,31 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
         </Table>
       </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          className="border-border"
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          className="border-border"
-        >
-          Next
-        </Button>
+      {/* Pagination */}
+      <div className="flex items-center justify-between py-2">
+        <div className="text-sm text-muted-foreground">
+          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="border-border"
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="border-border"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

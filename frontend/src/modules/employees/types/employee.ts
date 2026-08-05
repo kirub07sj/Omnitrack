@@ -7,7 +7,7 @@ export interface Employee {
   firstName: string;
   lastName: string;
   gender: string;
-  dateOfBirth: string; // ISO date string
+  age: number;
   phoneNumber: string;
   email: string;
   address: string;

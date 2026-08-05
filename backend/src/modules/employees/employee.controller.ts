@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -49,7 +50,7 @@ export const createEmployee = async (req: Request, res: Response) => {
       first_name, 
       last_name, 
       gender, 
-      date_of_birth, 
+      age, 
       phone, 
       email, 
       address, 
@@ -66,8 +67,24 @@ export const createEmployee = async (req: Request, res: Response) => {
       createLoginAccount,
       username,
       password_hash,
-      role_id
+      role
     } = req.body;
+
+    let role_id = null;
+    let final_password_hash = password_hash;
+    
+    if (createLoginAccount && role) {
+      let foundRole = await prisma.role.findFirst({ where: { name: role } });
+      if (!foundRole) {
+        foundRole = await prisma.role.create({ data: { name: role } });
+      }
+      role_id = foundRole.id;
+      
+      if (password_hash) {
+        const salt = await bcrypt.genSalt(10);
+        final_password_hash = await bcrypt.hash(password_hash, salt);
+      }
+    }
 
     const employee = await prisma.employee.create({
       data: {
@@ -75,25 +92,25 @@ export const createEmployee = async (req: Request, res: Response) => {
         first_name,
         last_name,
         gender,
-        date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
+        age: age ? parseInt(age, 10) : null,
         phone,
         email,
         address,
         national_id,
         emergency_contact,
-        employee_number,
+        employee_number: employee_number && employee_number !== "Auto-generated upon save" ? employee_number : `EMP-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000)}`,
         position,
         department,
         salary,
         employment_type,
         hire_date: hire_date ? new Date(hire_date) : null,
         status,
-        ...(createLoginAccount && username && password_hash && role_id ? {
+        ...(createLoginAccount && username && final_password_hash && role_id ? {
           users: {
             create: {
               business_id,
               username,
-              password_hash, // You should hash this in a real scenario
+              password_hash: final_password_hash,
               role_id,
               status: 'Active'
             }
@@ -117,8 +134,8 @@ export const updateEmployee = async (req: Request, res: Response) => {
     const data = req.body;
     
     // Convert dates if present
-    if (data.date_of_birth) data.date_of_birth = new Date(data.date_of_birth);
     if (data.hire_date) data.hire_date = new Date(data.hire_date);
+    if (data.age) data.age = parseInt(data.age, 10);
 
     const employee = await prisma.employee.update({
       where: { id },

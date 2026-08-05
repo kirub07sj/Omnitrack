@@ -8,6 +8,7 @@ import ManagerDashboard from '../modules/dashboard/ManagerDashboard';
 import AddProperty from '../modules/dashboard/AddProperty';
 import EmployeeListPage from '../modules/employees/pages/EmployeeListPage';
 import EmployeeDetailsPage from '../modules/employees/pages/EmployeeDetailsPage';
+import AddEditEmployeePage from '../modules/employees/pages/AddEditEmployeePage';
 
 export const router = createBrowserRouter([
   {
@@ -41,8 +42,16 @@ export const router = createBrowserRouter([
         element: <EmployeeListPage />
       },
       {
+        path: 'employees/new',
+        element: <AddEditEmployeePage />
+      },
+      {
         path: 'employees/:id',
         element: <EmployeeDetailsPage />
+      },
+      {
+        path: 'employees/:id/edit',
+        element: <AddEditEmployeePage />
       }
     ]
   },
@@ -59,8 +68,16 @@ export const router = createBrowserRouter([
         element: <EmployeeListPage />
       },
       {
+        path: 'employees/new',
+        element: <AddEditEmployeePage />
+      },
+      {
         path: 'employees/:id',
         element: <EmployeeDetailsPage />
+      },
+      {
+        path: 'employees/:id/edit',
+        element: <AddEditEmployeePage />
       }
     ]
   }

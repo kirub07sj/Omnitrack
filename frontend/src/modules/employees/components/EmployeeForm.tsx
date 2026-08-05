@@ -1,4 +1,5 @@
 //@ts-nocheck
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { employeeSchema, EmployeeFormData } from "../schemas/employee.schema";
@@ -14,16 +15,17 @@ interface Props {
   initialData?: Partial<EmployeeFormData>;
   onSubmit: (data: EmployeeFormData) => void;
   isLoading?: boolean;
+  onCancel?: () => void;
 }
 
-export function EmployeeForm({ initialData, onSubmit, isLoading }: Props) {
+export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Props) {
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema) as any,
     defaultValues: {
       firstName: initialData?.firstName || "",
       lastName: initialData?.lastName || "",
       gender: initialData?.gender || "Male",
-      dateOfBirth: initialData?.dateOfBirth || new Date(),
+      age: initialData?.age || undefined,
       phoneNumber: initialData?.phoneNumber || "",
       email: initialData?.email || "",
       address: initialData?.address || "",
@@ -47,6 +49,36 @@ export function EmployeeForm({ initialData, onSubmit, isLoading }: Props) {
   });
 
   const createLoginAccount = form.watch("createLoginAccount");
+
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        firstName: initialData.firstName || "",
+        lastName: initialData.lastName || "",
+        gender: initialData.gender || "Male",
+        age: initialData.age || undefined,
+        phoneNumber: initialData.phoneNumber || "",
+        email: initialData.email || "",
+        address: initialData.address || "",
+        nationalId: initialData.nationalId || "",
+        emergencyContact: initialData.emergencyContact || "",
+        
+        employeeNumber: initialData.employeeNumber || "",
+        position: initialData.position || "",
+        department: initialData.department || "",
+        salary: initialData.salary || 0,
+        employmentType: initialData.employmentType || "Full Time",
+        hireDate: initialData.hireDate ? new Date(initialData.hireDate) : new Date(),
+        status: initialData.status || "Active",
+        
+        createLoginAccount: initialData.createLoginAccount || initialData.hasLoginAccount || false,
+        username: initialData.username || "",
+        password: "",
+        confirmPassword: "",
+        role: initialData.role || undefined,
+      });
+    }
+  }, [initialData, form]);
 
   return (
     <Form {...form}>
@@ -107,6 +139,19 @@ export function EmployeeForm({ initialData, onSubmit, isLoading }: Props) {
             />
             <FormField
               control={form.control as any}
+              name="age"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Age</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="25" {...field} className="bg-background border-border" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control as any}
               name="email"
               render={({ field }) => (
                 <FormItem>
@@ -146,6 +191,19 @@ export function EmployeeForm({ initialData, onSubmit, isLoading }: Props) {
             />
             <FormField
               control={form.control as any}
+              name="nationalId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>National ID</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ID Number" {...field} className="bg-background border-border" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control as any}
               name="address"
               render={({ field }) => (
                 <FormItem className="md:col-span-2">
@@ -172,7 +230,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading }: Props) {
                 <FormItem>
                   <FormLabel>Employee Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="EMP-001" {...field} className="bg-background border-border" />
+                    <Input placeholder="Auto-generated upon save" disabled {...field} className="bg-muted border-border" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -184,9 +242,21 @@ export function EmployeeForm({ initialData, onSubmit, isLoading }: Props) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Position</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Waitress" {...field} className="bg-background border-border" />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background border-border">
+                        <SelectValue placeholder="Select position" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Manager">Manager</SelectItem>
+                      <SelectItem value="Chief">Chief</SelectItem>
+                      <SelectItem value="Waiter">Waiter</SelectItem>
+                      <SelectItem value="Dishwasher">Dishwasher</SelectItem>
+                      <SelectItem value="Cleaner">Cleaner</SelectItem>
+                      <SelectItem value="Casher">Casher</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -221,6 +291,19 @@ export function EmployeeForm({ initialData, onSubmit, isLoading }: Props) {
                   <FormLabel>Salary (Annual)</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="45000" {...field} className="bg-background border-border" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control as any}
+              name="hireDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Hire Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} className="bg-background border-border" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -371,7 +454,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading }: Props) {
         </Card>
 
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" className="border-border">Cancel</Button>
+          <Button type="button" variant="outline" onClick={onCancel} className="border-border">Cancel</Button>
           <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90">
             {isLoading ? "Saving..." : "Save Employee"}
           </Button>

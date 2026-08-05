@@ -7,13 +7,18 @@ import { EmployeeStatusBadge } from "../components/EmployeeStatusBadge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Mail, Phone, MapPin, Building, Briefcase, Calendar } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Mail, Phone, MapPin, Building, Briefcase, Calendar } from "lucide-react";
+import { useAppStore } from "@/store/useAppStore";
+import { DeleteEmployeeDialog } from "../components/DeleteEmployeeDialog";
 
 export default function EmployeeDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { currentUser } = useAppStore();
+  const roleBase = `/${currentUser?.role?.toLowerCase() || 'owner'}`;
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDelete, setShowDelete] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -54,8 +59,11 @@ export default function EmployeeDetailsPage() {
             <EmployeeStatusBadge status={employee.status} />
           </h1>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => navigate(`${roleBase}/employees/${id}/edit`)}>
           <Edit className="w-4 h-4 mr-2" /> Edit Profile
+        </Button>
+        <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setShowDelete(true)}>
+          <Trash2 className="w-4 h-4 mr-2" /> Delete
         </Button>
       </div>
 
@@ -115,8 +123,8 @@ export default function EmployeeDetailsPage() {
                       <p className="font-medium text-foreground">{employee.gender}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">Date of Birth</p>
-                      <p className="font-medium text-foreground">{new Date(employee.dateOfBirth).toLocaleDateString()}</p>
+                      <p className="text-sm text-muted-foreground mb-1">Age</p>
+                      <p className="font-medium text-foreground">{employee.age || 'N/A'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">National ID</p>
@@ -206,6 +214,18 @@ export default function EmployeeDetailsPage() {
           </Tabs>
         </div>
       </div>
+
+      <DeleteEmployeeDialog
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        employee={employee}
+        onConfirm={async () => {
+          if (employee) {
+            await EmployeeService.deleteEmployee(employee.id);
+            navigate(`${roleBase}/employees`);
+          }
+        }}
+      />
     </div>
   );
 }

@@ -52,7 +52,7 @@ model Employee {
   first_name       String
   last_name        String
   gender           String?
-  date_of_birth    DateTime?
+  age              Int?
   phone            String?
   email            String?
   address          String?
