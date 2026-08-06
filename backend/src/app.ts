@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import licenseRoutes from './modules/license/license.routes';
@@ -7,6 +8,7 @@ import authRoutes from './modules/auth/auth.routes';
 import employeeRoutes from './modules/employees/employee.routes';
 import categoryRoutes from './modules/products/category.routes';
 import productRoutes from './modules/products/product.routes';
+import uploadRoutes from './modules/upload/upload.routes';
 
 dotenv.config();
 
@@ -22,6 +24,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/upload', uploadRoutes);
+
+// Serve static uploaded files
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Basic health check route to verify connection
 app.get('/api/health', (req, res) => {

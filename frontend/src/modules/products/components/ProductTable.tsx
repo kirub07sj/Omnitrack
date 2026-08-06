@@ -49,7 +49,7 @@ export function ProductTable({ data, onView, onEdit, onDuplicate, onDelete }: Pr
       cell: ({ row }) => {
         const val = row.getValue("imageUrl") as string;
         return val ? (
-          <img src={val} alt="Product" className="w-10 h-10 rounded-md object-cover border border-border" />
+          <img src={val.startsWith('/') ? `http://localhost:5000${val}` : val} alt="Product" className="w-10 h-10 rounded-md object-cover border border-border" />
         ) : (
           <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center border border-border">
             <Box className="w-5 h-5 text-muted-foreground" />

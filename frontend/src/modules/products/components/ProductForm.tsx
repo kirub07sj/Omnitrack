@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Loader2 } from "lucide-react";
+import { UploadService } from "@/services/upload.service";
 
 // Placeholder schema until foundation agent finishes
 const tempSchema = z.object({
@@ -49,6 +50,8 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
       status: initialData?.status || "Active",
     },
   });
+
+  const [isUploading, setIsUploading] = useState(false);
 
   const trackInventory = form.watch("trackInventory");
 
@@ -147,7 +150,7 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
                       {field.value ? (
                         <div className="relative w-full h-full flex flex-col items-center justify-center">
                           <img 
-                            src={field.value} 
+                            src={field.value.startsWith('/') ? `http://localhost:5000${field.value}` : field.value} 
                             alt="Preview" 
                             className="max-h-[200px] w-auto max-w-full object-contain rounded-md shadow-sm mb-4"
                           />
@@ -164,25 +167,36 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
                       ) : (
                         <div className="text-center space-y-4 py-8">
                           <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
-                            <Upload className="h-6 w-6" />
+                            {isUploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Upload className="h-6 w-6" />}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">Upload Image</p>
+                            <p className="text-sm font-medium text-foreground">
+                              {isUploading ? "Uploading..." : "Upload Image"}
+                            </p>
                             <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 5MB</p>
                           </div>
                           <div className="relative inline-block">
-                            <Button type="button" variant="outline" size="sm" className="relative z-0 border-border">
-                              Choose File
+                            <Button type="button" variant="outline" size="sm" className="relative z-0 border-border" disabled={isUploading}>
+                              {isUploading ? "Please wait" : "Choose File"}
                             </Button>
                             <Input 
                               type="file" 
                               accept="image/*" 
                               className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full" 
-                              onChange={(e) => {
+                              disabled={isUploading}
+                              onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  const url = URL.createObjectURL(file);
-                                  field.onChange(url);
+                                  try {
+                                    setIsUploading(true);
+                                    const url = await UploadService.uploadImage(file);
+                                    field.onChange(url);
+                                  } catch (error) {
+                                    console.error("Upload failed", error);
+                                    alert("Failed to upload image.");
+                                  } finally {
+                                    setIsUploading(false);
+                                  }
                                 }
                               }}
                             />
