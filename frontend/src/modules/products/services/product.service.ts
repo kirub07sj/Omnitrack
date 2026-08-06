@@ -14,6 +14,7 @@ export const ProductService = {
       ...prod,
       businessId: prod.business_id,
       categoryId: prod.category_id,
+      inventory_item_id: prod.inventory_item_id,
       trackInventory: prod.track_inventory,
       minStock: prod.min_stock,
       imageUrl: prod.image_url,
@@ -30,6 +31,7 @@ export const ProductService = {
         ...prod,
         businessId: prod.business_id,
         categoryId: prod.category_id,
+        inventory_item_id: prod.inventory_item_id,
         trackInventory: prod.track_inventory,
         minStock: prod.min_stock,
         imageUrl: prod.image_url,
@@ -49,6 +51,7 @@ export const ProductService = {
     const payload = { 
       business_id: businessId,
       category_id: data.categoryId,
+      inventory_item_id: data.inventory_item_id || null,
       name: data.name,
       sku: data.sku,
       barcode: data.barcode,
@@ -69,6 +72,7 @@ export const ProductService = {
   updateProduct: async (id: string, data: any): Promise<Product> => {
     const payload = {
       category_id: data.categoryId,
+      inventory_item_id: data.inventory_item_id || null,
       name: data.name,
       sku: data.sku,
       barcode: data.barcode,

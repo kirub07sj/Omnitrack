@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MoreHorizontal, Eye, Edit, Trash2, ArrowUpDown, Copy, Box } from "lucide-react";
+import { Package, Search, Plus, MoreHorizontal, ArrowUpDown, Edit, Trash, Box, Eye, Trash2, Copy } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface Product {
@@ -87,9 +87,14 @@ export function ProductTable({ data, onView, onEdit, onDuplicate, onDelete }: Pr
     {
       accessorKey: "trackInventory",
       header: "Tracking",
-      cell: ({ row }) => (
-        <div>{row.getValue("trackInventory") ? <span className="text-emerald-500 font-medium">Yes</span> : <span className="text-muted-foreground">No</span>}</div>
-      ),
+      cell: ({ row }) => {
+        const isLinked = !!row.original.inventory_item_id;
+        const trackMenu = row.getValue("trackInventory");
+        if (isLinked) {
+          return <span className="text-blue-500 font-medium flex items-center"><Package className="w-3 h-3 mr-1"/> Linked</span>;
+        }
+        return trackMenu ? <span className="text-emerald-500 font-medium">Yes</span> : <span className="text-muted-foreground">No</span>;
+      },
     },
     {
       accessorKey: "status",

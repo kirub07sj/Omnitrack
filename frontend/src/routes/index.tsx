@@ -14,6 +14,12 @@ import ProductListPage from '../modules/products/pages/ProductListPage';
 import ProductDetailsPage from '../modules/products/pages/ProductDetailsPage';
 import AddEditProductPage from '../modules/products/pages/AddEditProductPage';
 
+import InventoryListPage from '../modules/inventory/pages/InventoryListPage';
+import AddEditInventoryPage from '../modules/inventory/pages/AddEditInventoryPage';
+
+import SupplierListPage from '../modules/suppliers/pages/SupplierListPage';
+import AddEditSupplierPage from '../modules/suppliers/pages/AddEditSupplierPage';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -72,6 +78,30 @@ export const router = createBrowserRouter([
       {
         path: 'products/:id/edit',
         element: <AddEditProductPage />
+      },
+      {
+        path: 'inventory',
+        element: <InventoryListPage />
+      },
+      {
+        path: 'inventory/new',
+        element: <AddEditInventoryPage />
+      },
+      {
+        path: 'inventory/:id/edit',
+        element: <AddEditInventoryPage />
+      },
+      {
+        path: 'suppliers',
+        element: <SupplierListPage />
+      },
+      {
+        path: 'suppliers/new',
+        element: <AddEditSupplierPage />
+      },
+      {
+        path: 'suppliers/:id/edit',
+        element: <AddEditSupplierPage />
       }
     ]
   },
@@ -114,6 +144,30 @@ export const router = createBrowserRouter([
       {
         path: 'products/:id/edit',
         element: <AddEditProductPage />
+      },
+      {
+        path: 'inventory',
+        element: <InventoryListPage />
+      },
+      {
+        path: 'inventory/new',
+        element: <AddEditInventoryPage />
+      },
+      {
+        path: 'inventory/:id/edit',
+        element: <AddEditInventoryPage />
+      },
+      {
+        path: 'suppliers',
+        element: <SupplierListPage />
+      },
+      {
+        path: 'suppliers/new',
+        element: <AddEditSupplierPage />
+      },
+      {
+        path: 'suppliers/:id/edit',
+        element: <AddEditSupplierPage />
       }
     ]
   }

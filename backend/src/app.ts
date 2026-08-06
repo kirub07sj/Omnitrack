@@ -9,6 +9,8 @@ import employeeRoutes from './modules/employees/employee.routes';
 import categoryRoutes from './modules/products/category.routes';
 import productRoutes from './modules/products/product.routes';
 import uploadRoutes from './modules/upload/upload.routes';
+import inventoryRoutes from './modules/inventory/inventory.routes';
+import supplierRoutes from './modules/inventory/supplier.routes';
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/suppliers', supplierRoutes);
 app.use('/api/upload', uploadRoutes);
 
 // Serve static uploaded files

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { ProductService } from "../services/product.service";
-// import { DeleteProductDialog } from "../components/DeleteProductDialog";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 
 export default function ProductListPage() {
   const navigate = useNavigate();
@@ -16,6 +16,9 @@ export default function ProductListPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<any>(null);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -50,8 +53,17 @@ export default function ProductListPage() {
     console.log("Duplicate", prod);
   };
 
-  const handleDelete = (prod: any) => {
-    console.log("Delete", prod);
+  const handleDeleteClick = (prod: any) => {
+    setProductToDelete(prod);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+    await ProductService.deleteProduct(productToDelete.id);
+    await fetchProducts();
+    setDeleteDialogOpen(false);
+    setProductToDelete(null);
   };
 
   const handleExport = () => {
@@ -103,14 +115,22 @@ export default function ProductListPage() {
           </div>
         ) : (
           <ProductTable 
-            data={products} 
-            onView={handleView}
-            onEdit={handleEdit}
-            onDuplicate={handleDuplicate}
-            onDelete={handleDelete}
-          />
-        )}
-      </div>
+          data={products} 
+          onView={handleView}
+          onEdit={handleEdit}
+          onDuplicate={handleDuplicate}
+          onDelete={handleDeleteClick}
+        />
+      )}
+
+      <ConfirmDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        itemType="product"
+        itemName={productToDelete?.name}
+      />
+    </div>
     </div>
   );
 }

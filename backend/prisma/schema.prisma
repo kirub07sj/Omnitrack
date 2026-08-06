@@ -23,9 +23,9 @@ model Business {
   users      User[]
   tables     RestaurantTable[]
   categories Category[]
-  products   Product[]
-  inventory  Inventory[]
-  movements  InventoryMovement[]
+  products        Product[]
+  inventory_items InventoryItem[]
+  movements       InventoryMovement[]
   suppliers  Supplier[]
   purchases  Purchase[]
   orders     Order[]
@@ -119,9 +119,10 @@ model Category {
 
 model Product {
   id              String   @id @default(uuid())
-  business_id     String
-  category_id     String
-  name            String
+  business_id       String
+  category_id       String
+  inventory_item_id String?
+  name              String
   sku             String?  @unique
   barcode         String?
   description     String?
@@ -135,41 +136,47 @@ model Product {
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
-  business  Business            @relation(fields: [business_id], references: [id])
-  category  Category            @relation(fields: [category_id], references: [id])
-  inventory Inventory[]
-  movements InventoryMovement[]
-  purchases PurchaseItem[]
-  orders    OrderItem[]
+  business       Business       @relation(fields: [business_id], references: [id])
+  category       Category       @relation(fields: [category_id], references: [id])
+  inventory_item InventoryItem? @relation(fields: [inventory_item_id], references: [id])
+  orders         OrderItem[]
 
   @@map("products")
 }
 
-model Inventory {
+model InventoryItem {
   id               String   @id @default(uuid())
   business_id      String
-  product_id       String
-  quantity         Decimal
-  minimum_quantity Decimal?
+  name             String
+  sku              String?  @unique
+  unit             String
+  quantity         Decimal  @default(0)
+  minimum_quantity Decimal  @default(0)
+  cost_per_unit    Decimal?
+  supplier_id      String?
+  status           String   @default("Active")
 
-  business Business @relation(fields: [business_id], references: [id])
-  product  Product  @relation(fields: [product_id], references: [id])
+  business  Business            @relation(fields: [business_id], references: [id])
+  supplier  Supplier?           @relation(fields: [supplier_id], references: [id])
+  products  Product[]
+  movements InventoryMovement[]
+  purchases PurchaseItem[]
 
-  @@map("inventory")
+  @@map("inventory_items")
 }
 
 model InventoryMovement {
-  id             String   @id @default(uuid())
-  business_id    String
-  product_id     String
-  type           String
-  quantity       Decimal
-  reference_type String?
-  reference_id   String?
-  created_at     DateTime @default(now())
+  id                String   @id @default(uuid())
+  business_id       String
+  inventory_item_id String
+  type              String
+  quantity          Decimal
+  reference_type    String?
+  reference_id      String?
+  created_at        DateTime @default(now())
 
-  business Business @relation(fields: [business_id], references: [id])
-  product  Product  @relation(fields: [product_id], references: [id])
+  business       Business      @relation(fields: [business_id], references: [id])
+  inventory_item InventoryItem @relation(fields: [inventory_item_id], references: [id])
 
   @@map("inventory_movements")
 }
@@ -184,6 +191,7 @@ model Supplier {
 
   business  Business   @relation(fields: [business_id], references: [id])
   purchases Purchase[]
+  inventory_items InventoryItem[]
 
   @@map("suppliers")
 }
@@ -204,14 +212,14 @@ model Purchase {
 }
 
 model PurchaseItem {
-  id          String  @id @default(uuid())
-  purchase_id String
-  product_id  String
-  quantity    Decimal
-  cost        Decimal
+  id                String  @id @default(uuid())
+  purchase_id       String
+  inventory_item_id String
+  quantity          Decimal
+  cost              Decimal
 
-  purchase Purchase @relation(fields: [purchase_id], references: [id])
-  product  Product  @relation(fields: [product_id], references: [id])
+  purchase       Purchase      @relation(fields: [purchase_id], references: [id])
+  inventory_item InventoryItem @relation(fields: [inventory_item_id], references: [id])
 
   @@map("purchase_items")
 }

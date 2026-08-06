@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ProductForm } from "../components/ProductForm";
 import { ProductService } from "../services/product.service";
 import { CategoryService } from "../services/category.service";
+import axios from 'axios';
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +15,7 @@ export default function AddEditProductPage() {
 
   const [initialData, setInitialData] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
+  const [inventoryItems, setInventoryItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +26,12 @@ export default function AddEditProductPage() {
         // Fetch categories first
         const cats = await CategoryService.getCategories();
         setCategories(cats);
+        
+        // Fetch inventory items
+        try {
+          const invRes = await axios.get('/api/inventory', { params: { business_id: "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6" }});
+          setInventoryItems(invRes.data);
+        } catch(e) { console.error(e) }
 
         if (isEdit) {
           const prod = await ProductService.getProductById(id!);
@@ -94,6 +102,7 @@ export default function AddEditProductPage() {
         isLoading={submitting}
         onCancel={() => navigate(-1)}
         categories={categories}
+        inventoryItems={inventoryItems}
       />
     </div>
   );

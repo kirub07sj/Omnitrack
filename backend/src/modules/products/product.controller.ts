@@ -47,6 +47,7 @@ export const createProduct = async (req: Request, res: Response) => {
     const {
       business_id,
       category_id,
+      inventory_item_id,
       name,
       sku,
       barcode,
@@ -64,6 +65,7 @@ export const createProduct = async (req: Request, res: Response) => {
       data: {
         business_id,
         category_id,
+        inventory_item_id,
         name,
         sku,
         barcode,

@@ -1,11 +1,11 @@
 import * as React from "react"
 import {
-  Box,
   LayoutDashboard,
   Settings,
   Users,
   Wallet,
   Building,
+  Package,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -73,13 +73,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       title: "Inventory & Products",
       url: "#",
-      icon: Box,
+      icon: Package,
       items: [
-        { title: "Inventory", url: "#" },
+        { title: "Inventory", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/inventory` },
         { title: "Products", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/products` },
-        ...(isManager ? [] : [{ title: "Categories", url: "#" }]),
-        { title: "Suppliers", url: "#" },
-        { title: "Purchases", url: "#" },
+        { title: "Suppliers", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/suppliers` },
       ],
     },
     {
