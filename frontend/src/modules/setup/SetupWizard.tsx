@@ -6,13 +6,11 @@ import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/useAppStore';
 
 export default function SetupWizard() {
-  const { currentSetupStep, setSetupStep, checkSetupStatus, markBusinessCreated, markOwnerCreated, markEmployeesDone, markProductsDone } = useAppStore();
+  const { currentSetupStep, setSetupStep, checkSetupStatus, markBusinessCreated, markOwnerCreated } = useAppStore();
   
   const [licenseKey, setLicenseKey] = useState('');
   const [businessData, setBusinessData] = useState({ name: '', email: '', phone: '', address: '' });
   const [ownerData, setOwnerData] = useState({ firstName: '', lastName: '', username: '', password: '' });
-  const [employeeData, setEmployeeData] = useState({ firstName: '', lastName: '', roleName: 'Waiter', username: '', password: '' });
-  const [productData, setProductData] = useState({ name: '', price: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -94,52 +92,6 @@ export default function SetupWizard() {
       }
     } catch (err) {
       setError('Connection failed to backend.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateEmployee = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/business/setup-employee', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(employeeData)
-      });
-      const data = await res.json();
-      if (data.success) {
-        markEmployeesDone();
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError('Connection failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/business/setup-product', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
-      });
-      const data = await res.json();
-      if (data.success) {
-        markProductsDone();
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError('Connection failed.');
     } finally {
       setLoading(false);
     }
@@ -308,137 +260,6 @@ export default function SetupWizard() {
       )}
 
       {currentSetupStep === 4 && (
-        <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl shadow-yellow-900/20 animate-in fade-in slide-in-from-right-8 duration-500">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold tracking-tight text-foreground">Staff & Employees</CardTitle>
-            <CardDescription className="text-gray-400">Add your first employee to the system. You can skip and do this later.</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleCreateEmployee}>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="empFirstName" className="text-gray-300">First Name</Label>
-                  <Input 
-                    id="empFirstName" 
-                    value={employeeData.firstName}
-                    onChange={(e) => setEmployeeData({ ...employeeData, firstName: e.target.value })}
-                    placeholder="Jane" 
-                    required
-                    className="bg-card/80 border-border text-foreground backdrop-blur-xl placeholder:text-gray-600 focus-visible:ring-yellow-500"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="empLastName" className="text-gray-300">Last Name</Label>
-                  <Input 
-                    id="empLastName" 
-                    value={employeeData.lastName}
-                    onChange={(e) => setEmployeeData({ ...employeeData, lastName: e.target.value })}
-                    placeholder="Smith" 
-                    required
-                    className="bg-card/80 border-border text-foreground backdrop-blur-xl placeholder:text-gray-600 focus-visible:ring-yellow-500"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="empRole" className="text-gray-300">Staff Role</Label>
-                <select
-                  id="empRole"
-                  value={employeeData.roleName}
-                  onChange={(e) => setEmployeeData({ ...employeeData, roleName: e.target.value })}
-                  className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500"
-                >
-                  <option value="Waiter" className="bg-black text-foreground">Waiter</option>
-                  <option value="Chef" className="bg-black text-foreground">Chef</option>
-                  <option value="Cashier" className="bg-black text-foreground">Cashier</option>
-                  <option value="Manager" className="bg-black text-foreground">Manager</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="empUsername" className="text-gray-300">Username</Label>
-                  <Input 
-                    id="empUsername" 
-                    value={employeeData.username}
-                    onChange={(e) => setEmployeeData({ ...employeeData, username: e.target.value })}
-                    placeholder="jane.s" 
-                    required
-                    className="bg-card/80 border-border text-foreground backdrop-blur-xl placeholder:text-gray-600 focus-visible:ring-yellow-500"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="empPassword" className="text-gray-300">Password</Label>
-                  <Input 
-                    id="empPassword" 
-                    type="password"
-                    value={employeeData.password}
-                    onChange={(e) => setEmployeeData({ ...employeeData, password: e.target.value })}
-                    placeholder="••••••••" 
-                    required
-                    className="bg-card/80 border-border text-foreground backdrop-blur-xl placeholder:text-gray-600 focus-visible:ring-yellow-500"
-                  />
-                </div>
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-            </CardContent>
-            <CardFooter className="flex gap-4">
-              <Button type="button" variant="outline" onClick={() => markEmployeesDone()} className="w-1/3 bg-transparent text-gray-300 border-white/20 hover:bg-white/10">
-                Skip
-              </Button>
-              <Button type="submit" className="w-2/3 bg-yellow-600 hover:bg-yellow-700 text-foreground border-0" disabled={loading}>
-                {loading ? 'Adding...' : 'Add Employee'}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      )}
-
-      {currentSetupStep === 5 && (
-        <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl shadow-orange-900/20 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold tracking-tight text-foreground">Initial Inventory</CardTitle>
-            <CardDescription className="text-gray-400">Do you have inventory to add? Create your first product or skip for now.</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleCreateProduct}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="prodName" className="text-gray-300">Product Name</Label>
-                <Input 
-                  id="prodName" 
-                  value={productData.name}
-                  onChange={(e) => setProductData({ ...productData, name: e.target.value })}
-                  placeholder="e.g. Signature Burger" 
-                  required
-                  className="bg-card/80 border-border text-foreground backdrop-blur-xl placeholder:text-gray-600 focus-visible:ring-orange-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="prodPrice" className="text-gray-300">Price</Label>
-                <Input 
-                  id="prodPrice" 
-                  type="number"
-                  step="0.01"
-                  value={productData.price}
-                  onChange={(e) => setProductData({ ...productData, price: e.target.value })}
-                  placeholder="12.99" 
-                  required
-                  className="bg-card/80 border-border text-foreground backdrop-blur-xl placeholder:text-gray-600 focus-visible:ring-orange-500"
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-            </CardContent>
-            <CardFooter className="flex gap-4">
-              <Button type="button" variant="outline" onClick={() => markProductsDone()} className="w-1/3 bg-transparent text-gray-300 border-white/20 hover:bg-white/10">
-                Skip
-              </Button>
-              <Button type="submit" className="w-2/3 bg-orange-600 hover:bg-orange-700 text-foreground border-0" disabled={loading}>
-                {loading ? 'Adding...' : 'Add Product'}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      )}
-
-      {currentSetupStep === 6 && (
         <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl shadow-green-900/20 animate-in zoom-in duration-500">
           <CardContent className="pt-6 text-center space-y-4">
             <div className="w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-4">

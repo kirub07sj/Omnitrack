@@ -12,8 +12,6 @@ interface AppState {
   checkSetupStatus: () => Promise<void>;
   markBusinessCreated: () => void;
   markOwnerCreated: () => void;
-  markEmployeesDone: () => void;
-  markProductsDone: () => void;
   login: (user: any) => void;
   logout: () => void;
 }
@@ -30,11 +28,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   markBusinessCreated: () => set({ hasBusiness: true, currentSetupStep: 3 }),
   
-  markOwnerCreated: () => set({ hasOwner: true, currentSetupStep: 4 }),
-
-  markEmployeesDone: () => set({ currentSetupStep: 5 }),
-
-  markProductsDone: () => set({ isSetupComplete: true, currentSetupStep: 6 }),
+  markOwnerCreated: () => set({ hasOwner: true, isSetupComplete: true, currentSetupStep: 4 }),
 
   login: (user) => set({ currentUser: user }),
   
