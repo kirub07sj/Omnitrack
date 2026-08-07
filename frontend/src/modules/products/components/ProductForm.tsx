@@ -136,7 +136,7 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
                       </div>
                       <FormDescription>
                         {form.watch("inventory_item_id") 
-                          ? <span className="text-emerald-500 font-medium text-xs flex items-center gap-1 mt-1">✓ Linked to Inventory Item</span> 
+                          ? <span className="text-primary font-medium text-xs flex items-center gap-1 mt-1">✓ Linked to Inventory Item</span> 
                           : "Type to search inventory, or add a custom menu item."}
                       </FormDescription>
                       <FormMessage />
@@ -214,7 +214,7 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
                         </div>
                       ) : (
                         <div className="text-center space-y-4 py-8">
-                          <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                          <div className="w-14 h-14 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto shadow-sm">
                             {isUploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Upload className="h-6 w-6" />}
                           </div>
                           <div>
@@ -387,7 +387,7 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
           <Button type="button" variant="outline" onClick={onCancel} className="border-border">
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[120px]">
+          <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]">
             {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </div>

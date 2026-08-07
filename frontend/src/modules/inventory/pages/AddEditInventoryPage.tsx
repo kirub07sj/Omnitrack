@@ -41,7 +41,7 @@ export default function AddEditInventoryPage() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-6">
+    <div className="p-6 max-w-3xl mx-auto space-y-6 omni-animate-in">
       <div className="flex items-center space-x-4">
         <Button variant="ghost" size="icon" onClick={() => navigate("/owner/inventory")}>
           <ArrowLeft className="h-5 w-5" />

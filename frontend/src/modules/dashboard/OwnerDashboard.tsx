@@ -49,32 +49,32 @@ const categorySalesData = [
   { name: "Appetizers", value: 15 },
   { name: "Desserts", value: 15 },
 ];
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+const COLORS = ['#10b981', '#14b8a6', '#06b6d4', '#8b5cf6'];
 
 export default function OwnerDashboard() {
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
-      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto">
+      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto omni-animate-in">
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 omni-stagger-1">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Omnitrack Dashboard</h1>
             <p className="text-muted-foreground mt-1">Enterprise Overview & Business Intelligence</p>
           </div>
           
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" className="bg-muted border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:text-foreground"><Plus className="w-4 h-4 mr-2" /> New Product</Button>
-            <Button variant="outline" className="bg-muted border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:text-foreground"><Plus className="w-4 h-4 mr-2" /> New Purchase</Button>
-            <Button variant="outline" className="bg-muted border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:text-foreground"><Plus className="w-4 h-4 mr-2" /> Add Expense</Button>
-            <Button variant="outline" className="bg-muted border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:text-foreground"><Users className="w-4 h-4 mr-2" /> Add Employee</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-foreground"><FileText className="w-4 h-4 mr-2" /> View Reports</Button>
+            <Button variant="outline" className="bg-muted border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200"><Plus className="w-4 h-4 mr-2" /> New Product</Button>
+            <Button variant="outline" className="bg-muted border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200"><Plus className="w-4 h-4 mr-2" /> New Purchase</Button>
+            <Button variant="outline" className="bg-muted border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200"><Plus className="w-4 h-4 mr-2" /> Add Expense</Button>
+            <Button variant="outline" className="bg-muted border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200"><Users className="w-4 h-4 mr-2" /> Add Employee</Button>
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200"><FileText className="w-4 h-4 mr-2" /> View Reports</Button>
           </div>
         </div>
 
         {/* System Notifications */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="flex items-center gap-3 bg-red-950/40 border border-red-900/50 rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 omni-stagger-2">
+          <div className="flex items-center gap-3 bg-red-950/40 border border-red-900/50 rounded-xl p-4 omni-notification">
             <ShieldAlert className="w-5 h-5 text-red-500" />
             <div className="flex-1">
               <p className="text-sm font-medium text-red-200">License Expiration</p>
@@ -82,7 +82,7 @@ export default function OwnerDashboard() {
             </div>
             <Button size="sm" variant="outline" className="h-7 text-xs border-red-900/50 hover:bg-red-900/50">Renew</Button>
           </div>
-          <div className="flex items-center gap-3 bg-amber-950/40 border border-amber-900/50 rounded-lg p-4">
+          <div className="flex items-center gap-3 bg-amber-950/40 border border-amber-900/50 rounded-xl p-4 omni-notification">
             <AlertCircle className="w-5 h-5 text-amber-500" />
             <div className="flex-1">
               <p className="text-sm font-medium text-amber-200">Low Inventory</p>
@@ -90,7 +90,7 @@ export default function OwnerDashboard() {
             </div>
             <Button size="sm" variant="outline" className="h-7 text-xs border-amber-900/50 hover:bg-amber-900/50">Restock</Button>
           </div>
-          <div className="flex items-center gap-3 bg-blue-950/40 border border-blue-900/50 rounded-lg p-4">
+          <div className="flex items-center gap-3 bg-blue-950/40 border border-blue-900/50 rounded-xl p-4 omni-notification">
             <RefreshCw className="w-5 h-5 text-blue-500" />
             <div className="flex-1">
               <p className="text-sm font-medium text-blue-200">Pending Sync</p>
@@ -98,7 +98,7 @@ export default function OwnerDashboard() {
             </div>
             <Button size="sm" variant="outline" className="h-7 text-xs border-blue-900/50 hover:bg-blue-900/50">Sync Now</Button>
           </div>
-          <div className="flex items-center gap-3 bg-red-950/40 border border-red-900/50 rounded-lg p-4">
+          <div className="flex items-center gap-3 bg-red-950/40 border border-red-900/50 rounded-xl p-4 omni-notification">
             <ShieldAlert className="w-5 h-5 text-red-500" />
             <div className="flex-1">
               <p className="text-sm font-medium text-red-200">Failed Backups</p>
@@ -109,8 +109,8 @@ export default function OwnerDashboard() {
         </div>
 
         {/* Top KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <Card className="bg-card border-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 omni-stagger-3">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-xs font-medium text-muted-foreground">Today's Revenue</CardTitle>
               <DollarSign className="w-4 h-4 text-muted-foreground" />
@@ -173,8 +173,8 @@ export default function OwnerDashboard() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-card border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 omni-stagger-4">
+          <Card className="bg-card border-border omni-chart-card">
             <CardHeader>
               <CardTitle className="text-base text-card-foreground">Monthly Revenue vs Expenses (6 Mos)</CardTitle>
             </CardHeader>
@@ -182,22 +182,22 @@ export default function OwnerDashboard() {
               <div className="h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyFinanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                    <XAxis dataKey="month" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} />
+                    <XAxis dataKey="month" stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`} />
                     <Tooltip 
-                      cursor={{fill: '#27272a', opacity: 0.4}}
-                      contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '6px' }}
+                      cursor={{fill: 'hsl(153, 40%, 12%)', opacity: 0.6}}
+                      contentStyle={{ backgroundColor: 'hsl(153, 50%, 6%)', border: '1px solid hsl(153, 40%, 15%)', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }}
                     />
-                    <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Revenue" />
-                    <Bar dataKey="expenses" fill="#ef4444" radius={[4, 4, 0, 0]} name="Expenses" />
+                    <Bar dataKey="revenue" fill="hsl(153, 60%, 45%)" radius={[4, 4, 0, 0]} name="Revenue" />
+                    <Bar dataKey="expenses" fill="hsl(0, 60%, 50%)" radius={[4, 4, 0, 0]} name="Expenses" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-chart-card">
             <CardHeader>
               <CardTitle className="text-base text-card-foreground">Daily Revenue (Last 7 Days)</CardTitle>
             </CardHeader>
@@ -205,13 +205,13 @@ export default function OwnerDashboard() {
               <div className="h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={dailyRevenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                    <XAxis dataKey="day" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} />
+                    <XAxis dataKey="day" stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '6px' }}
+                      contentStyle={{ backgroundColor: 'hsl(153, 50%, 6%)', border: '1px solid hsl(153, 40%, 15%)', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }}
                     />
-                    <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: "#10b981", strokeWidth: 2, stroke: "#09090b" }} activeDot={{ r: 6 }} name="Revenue" />
+                    <Line type="monotone" dataKey="revenue" stroke="hsl(153, 60%, 50%)" strokeWidth={3} dot={{ r: 4, fill: "hsl(153, 60%, 50%)", strokeWidth: 2, stroke: "hsl(153, 50%, 4%)" }} activeDot={{ r: 6 }} name="Revenue" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -220,12 +220,12 @@ export default function OwnerDashboard() {
         </div>
 
         {/* Dense Data Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="bg-card border-border lg:col-span-2 flex flex-col">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 omni-stagger-5">
+          <Card className="bg-card border-border lg:col-span-2 flex flex-col omni-card-hover">
             <CardHeader className="pb-3 border-b border-border">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base text-card-foreground">Recent Sales Activity</CardTitle>
-                <Button variant="link" className="text-blue-500 h-auto p-0">View All</Button>
+                <Button variant="link" className="text-primary h-auto p-0">View All</Button>
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1">
@@ -258,7 +258,7 @@ export default function OwnerDashboard() {
             </CardContent>
           </Card>
           
-          <Card className="bg-card border-border flex flex-col">
+          <Card className="bg-card border-border flex flex-col omni-card-hover">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-base text-card-foreground">Low Stock Alerts</CardTitle>
             </CardHeader>
@@ -290,8 +290,8 @@ export default function OwnerDashboard() {
         </div>
 
         {/* Lower Widgets Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
-          <Card className="bg-card border-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 omni-stagger-6">
+          <Card className="bg-card border-border omni-chart-card">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-base text-card-foreground">Sales by Category</CardTitle>
             </CardHeader>
@@ -313,7 +313,7 @@ export default function OwnerDashboard() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '6px' }} />
+                    <Tooltip contentStyle={{ backgroundColor: 'hsl(153, 50%, 6%)', border: '1px solid hsl(153, 40%, 15%)', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }} />
                   </PieChart>
                 </ResponsiveContainer>
                 {/* Custom Legend */}
@@ -335,7 +335,7 @@ export default function OwnerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-card-hover">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-base text-card-foreground">Recent Expenses</CardTitle>
             </CardHeader>
@@ -357,17 +357,17 @@ export default function OwnerDashboard() {
                 </TableBody>
               </Table>
               <div className="p-3 text-center border-t border-border">
-                <Button variant="link" className="text-blue-500 text-xs h-auto p-0">View All Expenses</Button>
+                <Button variant="link" className="text-primary text-xs h-auto p-0">View All Expenses</Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-card-hover">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-base text-card-foreground">Pending Supplier Purchases</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="divide-y divide-zinc-800">
+              <div className="divide-y divide-border">
                 {[
                   { po: "PO-8902", supplier: "Fresh Farms", items: 24, status: "Pending Delivery", date: "Today" },
                   { po: "PO-8903", supplier: "Global Meats", items: 12, status: "Awaiting Approval", date: "Tomorrow" },
@@ -382,7 +382,7 @@ export default function OwnerDashboard() {
                       <p className="text-xs text-muted-foreground">{po.items} items ordered</p>
                     </div>
                     <div className="text-right space-y-1">
-                      <Badge variant="outline" className="text-xs bg-muted border-zinc-700 text-muted-foreground font-normal">
+                      <Badge variant="outline" className="text-xs bg-muted border-border text-muted-foreground font-normal">
                         {po.status}
                       </Badge>
                       <p className="text-[10px] text-muted-foreground">{po.date}</p>

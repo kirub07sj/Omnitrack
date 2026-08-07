@@ -78,7 +78,7 @@ export function ProductTable({ data, onView, onEdit, onDuplicate, onDelete }: Pr
     {
       accessorKey: "price",
       header: "Price",
-      cell: ({ row }) => <div className="font-semibold text-emerald-600">{row.getValue("price")} ETB</div>,
+      cell: ({ row }) => <div className="font-semibold text-primary">{row.getValue("price")} ETB</div>,
     },
     {
       accessorKey: "unit",
@@ -93,7 +93,7 @@ export function ProductTable({ data, onView, onEdit, onDuplicate, onDelete }: Pr
         if (isLinked) {
           return <span className="text-blue-500 font-medium flex items-center"><Package className="w-3 h-3 mr-1"/> Linked</span>;
         }
-        return trackMenu ? <span className="text-emerald-500 font-medium">Yes</span> : <span className="text-muted-foreground">No</span>;
+        return trackMenu ? <span className="text-primary font-medium">Yes</span> : <span className="text-muted-foreground">No</span>;
       },
     },
     {
@@ -101,7 +101,7 @@ export function ProductTable({ data, onView, onEdit, onDuplicate, onDelete }: Pr
       header: "Status",
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
-        const color = status === "Active" ? "bg-emerald-100 text-emerald-800" : "bg-gray-100 text-gray-800";
+        const color = status === "Active" ? "bg-primary/20 text-emerald-800" : "bg-gray-100 text-gray-800";
         return <span className={`px-2 py-1 rounded-full text-xs font-medium ${color}`}>{status}</span>;
       },
     },

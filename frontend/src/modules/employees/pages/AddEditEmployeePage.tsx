@@ -78,7 +78,7 @@ export default function AddEditEmployeePage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full">
+    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full omni-animate-in">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"

@@ -109,7 +109,7 @@ export default function EmployeeListPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full">
+    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full omni-animate-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>

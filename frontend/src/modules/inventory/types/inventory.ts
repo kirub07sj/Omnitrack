@@ -9,4 +9,5 @@ export interface InventoryItem {
   minimum_quantity: number;
   cost_per_unit: number;
   status: InventoryStatus;
+  supplier_id?: string;
 }

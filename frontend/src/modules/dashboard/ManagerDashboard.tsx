@@ -39,15 +39,15 @@ const productSalesData = [
   { name: "Salads", value: 15 },
   { name: "Drinks", value: 10 },
 ];
-const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'];
+const COLORS = ['#10b981', '#14b8a6', '#06b6d4', '#8b5cf6'];
 
 export default function ManagerDashboard() {
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
-      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto">
+      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto omni-animate-in">
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 omni-stagger-1">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Operations Dashboard</h1>
             <p className="text-muted-foreground mt-1">Daily Operations & Shift Management</p>
@@ -63,8 +63,8 @@ export default function ManagerDashboard() {
         </div>
 
         {/* System Notifications */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="flex items-center gap-3 bg-red-950/40 border border-red-900/50 rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 omni-stagger-2">
+          <div className="flex items-center gap-3 bg-red-950/40 border border-red-900/50 rounded-xl p-4 omni-notification">
             <Timer className="w-5 h-5 text-red-500" />
             <div className="flex-1">
               <p className="text-sm font-medium text-red-200">Delayed Orders</p>
@@ -72,7 +72,7 @@ export default function ManagerDashboard() {
             </div>
             <Button size="sm" variant="outline" className="h-7 text-xs border-red-900/50 hover:bg-red-900/50 text-red-200">View</Button>
           </div>
-          <div className="flex items-center gap-3 bg-amber-950/40 border border-amber-900/50 rounded-lg p-4">
+          <div className="flex items-center gap-3 bg-amber-950/40 border border-amber-900/50 rounded-xl p-4 omni-notification">
             <AlertCircle className="w-5 h-5 text-amber-500" />
             <div className="flex-1">
               <p className="text-sm font-medium text-amber-200">Low Stock</p>
@@ -80,7 +80,7 @@ export default function ManagerDashboard() {
             </div>
             <Button size="sm" variant="outline" className="h-7 text-xs border-amber-900/50 hover:bg-amber-900/50 text-amber-200">Restock</Button>
           </div>
-          <div className="flex items-center gap-3 bg-blue-950/40 border border-blue-900/50 rounded-lg p-4">
+          <div className="flex items-center gap-3 bg-blue-950/40 border border-blue-900/50 rounded-xl p-4 omni-notification">
             <ShoppingCart className="w-5 h-5 text-blue-500" />
             <div className="flex-1">
               <p className="text-sm font-medium text-blue-200">New Orders</p>
@@ -88,7 +88,7 @@ export default function ManagerDashboard() {
             </div>
             <Button size="sm" variant="outline" className="h-7 text-xs border-blue-900/50 hover:bg-blue-900/50 text-blue-200">Review</Button>
           </div>
-          <div className="flex items-center gap-3 bg-amber-950/40 border border-amber-900/50 rounded-lg p-4">
+          <div className="flex items-center gap-3 bg-amber-950/40 border border-amber-900/50 rounded-xl p-4 omni-notification">
             <Users className="w-5 h-5 text-amber-500" />
             <div className="flex-1">
               <p className="text-sm font-medium text-amber-200">Staff Alerts</p>
@@ -99,8 +99,8 @@ export default function ManagerDashboard() {
         </div>
 
         {/* Top KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <Card className="bg-card border-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 omni-stagger-3">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-xs font-medium text-muted-foreground">Active Orders</CardTitle>
               <Activity className="w-4 h-4 text-muted-foreground" />
@@ -110,7 +110,7 @@ export default function ManagerDashboard() {
               <p className="text-xs text-muted-foreground mt-1">4 delivery, 14 dine-in</p>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-xs font-medium text-muted-foreground">Occupied Tables</CardTitle>
               <Coffee className="w-4 h-4 text-muted-foreground" />
@@ -120,7 +120,7 @@ export default function ManagerDashboard() {
               <p className="text-xs text-emerald-500 flex items-center mt-1">46% occupancy rate</p>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-xs font-medium text-muted-foreground">Today's Sales</CardTitle>
               <DollarSign className="w-4 h-4 text-muted-foreground" />
@@ -130,7 +130,7 @@ export default function ManagerDashboard() {
               <p className="text-xs text-muted-foreground mt-1">From 86 transactions</p>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-xs font-medium text-muted-foreground">Low Stock Items</CardTitle>
               <Package className="w-4 h-4 text-muted-foreground" />
@@ -140,7 +140,7 @@ export default function ManagerDashboard() {
               <p className="text-xs text-muted-foreground mt-1">Require urgent attention</p>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-xs font-medium text-muted-foreground">Employees on Shift</CardTitle>
               <Users className="w-4 h-4 text-muted-foreground" />
@@ -150,7 +150,7 @@ export default function ManagerDashboard() {
               <p className="text-xs text-muted-foreground mt-1">3 FOH, 7 BOH, 2 Managers</p>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-xs font-medium text-muted-foreground">Kitchen Queue</CardTitle>
               <ChefHat className="w-4 h-4 text-muted-foreground" />
@@ -163,8 +163,8 @@ export default function ManagerDashboard() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-card border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 omni-stagger-4">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader>
               <CardTitle className="text-base text-foreground">Orders by Hour</CardTitle>
             </CardHeader>
@@ -172,12 +172,12 @@ export default function ManagerDashboard() {
               <div className="h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={hourlyOrdersData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                    <XAxis dataKey="hour" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} />
+                    <XAxis dataKey="hour" stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip 
-                      cursor={{fill: '#27272a', opacity: 0.4}}
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '6px', color: 'hsl(var(--foreground))' }}
+                      cursor={{fill: 'hsl(153, 40%, 12%)', opacity: 0.6}}
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }}
                     />
                     <Bar dataKey="orders" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Orders" />
                   </BarChart>
@@ -186,7 +186,7 @@ export default function ManagerDashboard() {
             </CardContent>
           </Card>
           
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader>
               <CardTitle className="text-base text-foreground">Table Utilization</CardTitle>
             </CardHeader>
@@ -194,13 +194,13 @@ export default function ManagerDashboard() {
               <div className="h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={hourlyOrdersData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                    <XAxis dataKey="hour" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} />
+                    <XAxis dataKey="hour" stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '6px', color: 'hsl(var(--foreground))' }}
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }}
                     />
-                    <Line type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#09090b" }} activeDot={{ r: 6 }} name="Guests Seated" />
+                    <Line type="monotone" dataKey="orders" stroke="hsl(153, 60%, 50%)" strokeWidth={3} dot={{ r: 4, fill: "hsl(153, 60%, 50%)", strokeWidth: 2, stroke: "hsl(153, 50%, 4%)" }} activeDot={{ r: 6 }} name="Guests Seated" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -209,8 +209,8 @@ export default function ManagerDashboard() {
         </div>
 
         {/* Dense Data Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="bg-card border-border lg:col-span-2 flex flex-col">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 omni-stagger-5">
+          <Card className="bg-card border-border lg:col-span-2 flex flex-col omni-card-hover">
             <CardHeader className="pb-3 border-b border-border">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base text-foreground">Live Order Queue</CardTitle>
@@ -291,8 +291,8 @@ export default function ManagerDashboard() {
         </div>
 
         {/* Lower Widgets Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
-          <Card className="bg-card border-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 omni-stagger-6">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-base text-foreground">Product Sales Today</CardTitle>
             </CardHeader>
@@ -314,7 +314,7 @@ export default function ManagerDashboard() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '6px', color: 'hsl(var(--foreground))' }} />
+                    <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }} />
                   </PieChart>
                 </ResponsiveContainer>
                 {/* Custom Legend */}
@@ -336,7 +336,7 @@ export default function ManagerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-base text-foreground">Inventory Alerts</CardTitle>
             </CardHeader>
@@ -363,7 +363,7 @@ export default function ManagerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-base text-foreground">Recent Activities</CardTitle>
             </CardHeader>

@@ -62,10 +62,10 @@ export default function AddProperty() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6 md:p-8 items-center justify-center">
-      <Card className="w-full max-w-2xl bg-white/5 border-white/10 text-white backdrop-blur-md">
+      <Card className="w-full max-w-2xl bg-card border-border text-foreground backdrop-blur-md">
         <CardHeader>
           <CardTitle className="text-2xl">Add New Property</CardTitle>
-          <CardDescription className="text-white/60">
+          <CardDescription className="text-muted-foreground">
             Create a new property under your ownership. Fill in the details below.
           </CardDescription>
         </CardHeader>
@@ -81,12 +81,12 @@ export default function AddProperty() {
                     <FormItem>
                       <FormLabel>Property Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Grand Hotel" className="bg-black/50 border-white/20" {...field} />
+                        <Input placeholder="e.g. Grand Hotel" className="bg-background border-border" {...field} />
                       </FormControl>
-                      <FormDescription className="text-white/40">
+                      <FormDescription className="text-muted-foreground/70">
                         The public name of your property.
                       </FormDescription>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-destructive" />
                     </FormItem>
                   )}
                 />
@@ -98,12 +98,12 @@ export default function AddProperty() {
                     <FormItem>
                       <FormLabel>Location</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. 123 Beach Ave, Miami, FL" className="bg-black/50 border-white/20" {...field} />
+                        <Input placeholder="e.g. 123 Beach Ave, Miami, FL" className="bg-background border-border" {...field} />
                       </FormControl>
-                      <FormDescription className="text-white/40">
+                      <FormDescription className="text-muted-foreground/70">
                         Full physical address.
                       </FormDescription>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-destructive" />
                     </FormItem>
                   )}
                 />
@@ -115,12 +115,12 @@ export default function AddProperty() {
                     <FormItem>
                       <FormLabel>Tax ID</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. 123456789" className="bg-black/50 border-white/20" {...field} />
+                        <Input placeholder="e.g. 123456789" className="bg-background border-border" {...field} />
                       </FormControl>
-                      <FormDescription className="text-white/40">
+                      <FormDescription className="text-muted-foreground/70">
                         Business tax identification number.
                       </FormDescription>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-destructive" />
                     </FormItem>
                   )}
                 />
@@ -132,12 +132,12 @@ export default function AddProperty() {
                     <FormItem>
                       <FormLabel>Capacity (Rooms/Tables)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g. 150" className="bg-black/50 border-white/20" {...field} />
+                        <Input type="number" placeholder="e.g. 150" className="bg-background border-border" {...field} />
                       </FormControl>
-                      <FormDescription className="text-white/40">
+                      <FormDescription className="text-muted-foreground/70">
                         Total capacity of the property.
                       </FormDescription>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-destructive" />
                     </FormItem>
                   )}
                 />

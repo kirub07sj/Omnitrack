@@ -19,6 +19,7 @@ import AddEditInventoryPage from '../modules/inventory/pages/AddEditInventoryPag
 
 import SupplierListPage from '../modules/suppliers/pages/SupplierListPage';
 import AddEditSupplierPage from '../modules/suppliers/pages/AddEditSupplierPage';
+import SupplierDetailsPage from '../modules/suppliers/pages/SupplierDetailsPage';
 
 export const router = createBrowserRouter([
   {
@@ -100,6 +101,10 @@ export const router = createBrowserRouter([
         element: <AddEditSupplierPage />
       },
       {
+        path: 'suppliers/:id',
+        element: <SupplierDetailsPage />
+      },
+      {
         path: 'suppliers/:id/edit',
         element: <AddEditSupplierPage />
       }
@@ -164,6 +169,10 @@ export const router = createBrowserRouter([
       {
         path: 'suppliers/new',
         element: <AddEditSupplierPage />
+      },
+      {
+        path: 'suppliers/:id',
+        element: <SupplierDetailsPage />
       },
       {
         path: 'suppliers/:id/edit',

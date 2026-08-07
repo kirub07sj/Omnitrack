@@ -61,6 +61,7 @@ export default function SupplierListPage() {
       ) : (
         <SupplierTable 
           data={data} 
+          onView={(id) => navigate(`/owner/suppliers/${id}`)}
           onEdit={(id) => navigate(`/owner/suppliers/${id}/edit`)}
           onDelete={handleDeleteClick}
         />

@@ -71,7 +71,7 @@ export default function ProductListPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full">
+    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full omni-animate-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -93,7 +93,7 @@ export default function ProductListPage() {
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button onClick={handleAddNew} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button onClick={handleAddNew} size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="mr-2 h-4 w-4" />
             Add Product
           </Button>
@@ -110,7 +110,7 @@ export default function ProductListPage() {
           </div>
         ) : loading ? (
           <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             <p className="text-muted-foreground animate-pulse">Loading products...</p>
           </div>
         ) : (

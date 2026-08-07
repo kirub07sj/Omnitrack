@@ -50,13 +50,15 @@ export function ConfirmDeleteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
+      <DialogContent className="bg-card border-border text-foreground sm:max-w-md backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle className="text-foreground flex items-center gap-2">
-            <Trash2 className="h-5 w-5 text-destructive" />
-            {title || `Delete ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`}
+          <DialogTitle className="text-foreground flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0">
+              <Trash2 className="h-5 w-5 text-destructive" />
+            </div>
+            <span>{title || `Delete ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`}</span>
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground pt-2">
+          <DialogDescription className="text-muted-foreground pt-3 pl-[52px]">
             {description ? (
               description
             ) : (
@@ -68,13 +70,13 @@ export function ConfirmDeleteDialog({
         </DialogHeader>
 
         {error && (
-          <div className="bg-red-50 text-red-600 border border-red-200 rounded-md p-3 text-sm flex items-start gap-2">
+          <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-3 text-sm flex items-start gap-2 ml-[52px]">
             <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-border">
+        <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-border/60">
           <Button
             variant="outline"
             onClick={() => {
@@ -82,7 +84,7 @@ export function ConfirmDeleteDialog({
               onOpenChange(false);
             }}
             disabled={loading}
-            className="border-border text-foreground hover:bg-muted"
+            className="border-border text-foreground hover:bg-muted transition-all duration-200"
           >
             Cancel
           </Button>
@@ -90,6 +92,7 @@ export function ConfirmDeleteDialog({
             variant="destructive"
             onClick={handleConfirm}
             disabled={loading}
+            className="transition-all duration-200 hover:-translate-y-0.5"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Delete

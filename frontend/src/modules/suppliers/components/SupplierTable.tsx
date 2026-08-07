@@ -7,16 +7,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
 import { Supplier } from "../types/supplier";
 
 interface SupplierTableProps {
   data: Supplier[];
+  onView?: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-export function SupplierTable({ data, onEdit, onDelete }: SupplierTableProps) {
+export function SupplierTable({ data, onView, onEdit, onDelete }: SupplierTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -42,6 +43,11 @@ export function SupplierTable({ data, onEdit, onDelete }: SupplierTableProps) {
                 <TableCell>{item.email}</TableCell>
                 <TableCell>{item.address}</TableCell>
                 <TableCell className="text-right">
+                  {onView && (
+                    <Button variant="ghost" size="icon" onClick={() => onView(item.id)}>
+                      <Eye className="h-4 w-4 text-primary" />
+                    </Button>
+                  )}
                   <Button variant="ghost" size="icon" onClick={() => onEdit(item.id)}>
                     <Edit className="h-4 w-4" />
                   </Button>

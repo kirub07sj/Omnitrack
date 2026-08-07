@@ -28,7 +28,7 @@ export default function ProductDetailsPage() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="p-8 max-w-[1200px] mx-auto w-full">
+    <div className="p-8 max-w-[1200px] mx-auto w-full omni-animate-in">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
@@ -36,7 +36,7 @@ export default function ProductDetailsPage() {
           </Button>
           <h1 className="text-3xl font-bold tracking-tight">Product Details</h1>
         </div>
-        <Button onClick={() => navigate(`edit`)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+        <Button onClick={() => navigate(`edit`)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Edit className="mr-2 h-4 w-4" /> Edit Product
         </Button>
       </div>

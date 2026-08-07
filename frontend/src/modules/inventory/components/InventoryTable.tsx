@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { AlertTriangle, Edit, Trash2 } from "lucide-react";
 import { InventoryItem } from "../types/inventory";
 
 interface InventoryTableProps {
@@ -44,7 +44,20 @@ export function InventoryTable({ data, onEdit, onDelete }: InventoryTableProps) 
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell>{item.sku}</TableCell>
                 <TableCell>{item.unit}</TableCell>
-                <TableCell>{item.quantity}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {item.quantity}
+                    {Number(item.quantity) <= Number(item.minimum_quantity) ? (
+                      <Badge variant="destructive" className="flex items-center gap-1 h-5 px-1.5 text-[10px] bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20">
+                        <AlertTriangle className="w-3 h-3" /> Critical
+                      </Badge>
+                    ) : Number(item.quantity) <= Number(item.minimum_quantity) * 1.25 + 5 ? (
+                      <Badge variant="outline" className="flex items-center gap-1 h-5 px-1.5 text-[10px] bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20">
+                        <AlertTriangle className="w-3 h-3" /> Low Stock
+                      </Badge>
+                    ) : null}
+                  </div>
+                </TableCell>
                 <TableCell>{item.minimum_quantity}</TableCell>
                 <TableCell>${Number(item.cost_per_unit).toFixed(2)}</TableCell>
                 <TableCell>
