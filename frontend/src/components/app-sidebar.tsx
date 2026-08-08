@@ -52,7 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       isActive: true,
       items: [
         { title: "Dashboard", url: `/${currentUser?.role?.toLowerCase() || 'owner'}` },
-        { title: "Orders", url: "#" },
+        { title: "Orders (POS)", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/pos` },
         { title: "Tables", url: "#" },
         { title: "Kitchen", url: "#" },
       ],

@@ -227,15 +227,15 @@ model PurchaseItem {
 model Order {
   id          String   @id @default(uuid())
   business_id String
-  table_id    String
-  waiter_id   String
+  table_id    String?
+  waiter_id   String?
   status      String?
   notes       String?
   created_at  DateTime @default(now())
 
   business Business        @relation(fields: [business_id], references: [id])
-  table    RestaurantTable @relation(fields: [table_id], references: [id])
-  waiter   Employee        @relation(fields: [waiter_id], references: [id])
+  table    RestaurantTable? @relation(fields: [table_id], references: [id])
+  waiter   Employee?       @relation(fields: [waiter_id], references: [id])
   items    OrderItem[]
   payments Payment[]
   sales    Sale[]

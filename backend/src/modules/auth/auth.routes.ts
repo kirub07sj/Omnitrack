@@ -90,7 +90,9 @@ router.post('/login', async (req, res) => {
         username: user.username,
         firstName: user.employee.first_name,
         lastName: user.employee.last_name,
-        role: user.role.name
+        role: user.role.name,
+        business_id: user.employee.business_id,
+        employee_id: user.employee.id
       }
     });
 

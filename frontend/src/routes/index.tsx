@@ -21,10 +21,17 @@ import SupplierListPage from '../modules/suppliers/pages/SupplierListPage';
 import AddEditSupplierPage from '../modules/suppliers/pages/AddEditSupplierPage';
 import SupplierDetailsPage from '../modules/suppliers/pages/SupplierDetailsPage';
 
+import POSPage from '../modules/orders/pages/POSPage';
+import WaiterAppPage from '../modules/orders/pages/WaiterAppPage';
+
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />, // We'll update this later to Dashboard/Auth based on state
+  },
+  {
+    path: '/waiter',
+    element: <WaiterAppPage />
   },
   {
     path: '/setup',
@@ -107,6 +114,10 @@ export const router = createBrowserRouter([
       {
         path: 'suppliers/:id/edit',
         element: <AddEditSupplierPage />
+      },
+      {
+        path: 'pos',
+        element: <POSPage />
       }
     ]
   },
@@ -177,6 +188,10 @@ export const router = createBrowserRouter([
       {
         path: 'suppliers/:id/edit',
         element: <AddEditSupplierPage />
+      },
+      {
+        path: 'pos',
+        element: <POSPage />
       }
     ]
   }

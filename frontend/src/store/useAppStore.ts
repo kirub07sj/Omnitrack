@@ -6,7 +6,7 @@ interface AppState {
   hasOwner: boolean;
   currentSetupStep: number;
   isLoadingStatus: boolean;
-  currentUser: { id: string; username: string; firstName: string; lastName: string; role: string } | null;
+  currentUser: { id: string; username: string; firstName: string; lastName: string; role: string; business_id: string; employee_id: string } | null;
   
   setSetupStep: (step: number) => void;
   checkSetupStatus: () => Promise<void>;
