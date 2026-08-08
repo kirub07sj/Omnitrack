@@ -18,6 +18,7 @@ export default function POSPage() {
   const [selectedTable, setSelectedTable] = useState<string>('');
   const [activeTab, setActiveTab] = useState('menu');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [qrOpen, setQrOpen] = useState(false);
 
   useSSE(); // Initialize SSE
 
@@ -51,7 +52,34 @@ export default function POSPage() {
     }
   }, [currentUser, fetchOrders, fetchTables]);
 
-  const qrUrl = `${window.location.origin}/waiter?business_id=${currentUser?.business_id}`;
+  // Build a LAN-accessible URL for the QR code (phones can't reach localhost)
+  const qrUrl = (() => {
+    const loc = window.location;
+    const host = loc.hostname === 'localhost' || loc.hostname === '127.0.0.1'
+      ? loc.hostname // will be replaced below
+      : loc.hostname;
+    return `${loc.protocol}//${host}:${loc.port}/waiter?business_id=${currentUser?.business_id}`;
+  })();
+
+  // Detect the LAN IP from the Vite network URL (shown in terminal)
+  const [lanUrl, setLanUrl] = useState(qrUrl);
+  useEffect(() => {
+    // Try to get the actual network IP by checking what Vite exposes
+    const loc = window.location;
+    if (loc.hostname !== 'localhost' && loc.hostname !== '127.0.0.1') {
+      setLanUrl(`${loc.protocol}//${loc.hostname}:${loc.port}/waiter?business_id=${currentUser?.business_id}`);
+    } else {
+      // Fallback: fetch a special endpoint or use the known IP
+      fetch('/api/network-info').then(r => r.json()).then(data => {
+        if (data.ip) {
+          setLanUrl(`${loc.protocol}//${data.ip}:${loc.port}/waiter?business_id=${currentUser?.business_id}`);
+        }
+      }).catch(() => {
+        // Last resort: keep localhost URL
+        setLanUrl(`${loc.protocol}//${loc.hostname}:${loc.port}/waiter?business_id=${currentUser?.business_id}`);
+      });
+    }
+  }, [currentUser?.business_id]);
 
   const addToCart = (product: any) => {
     setCart(prev => {
@@ -136,6 +164,7 @@ export default function POSPage() {
   };
 
   return (
+    <>
     <div className="flex h-[calc(100vh-4rem)] gap-4 p-4 bg-background text-foreground">
       {/* Left Area: Menu / Active Orders */}
       <Card className="flex-1 flex flex-col bg-card/50 backdrop-blur-xl border-border/50 shadow-sm overflow-hidden omni-animate-in">
@@ -154,28 +183,10 @@ export default function POSPage() {
             </TabsList>
           </Tabs>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 transition-colors">
+              <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 transition-colors" onClick={() => setQrOpen(true)}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
                 Waiter QR Code
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md bg-card border-border text-foreground shadow-2xl">
-              <DialogHeader>
-                <DialogTitle className="text-center text-xl font-bold text-foreground">Waiter Ordering System</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col items-center justify-center p-6 space-y-4">
-                <div className="bg-white p-4 rounded-xl shadow-lg ring-1 ring-border/50">
-                  <QRCode value={qrUrl} size={256} />
-                </div>
-                <p className="text-sm text-muted-foreground text-center">
-                  Waiters can scan this QR code to access the mobile ordering system directly on their phones. Must be on the same local network.
-                </p>
-                <code className="text-xs bg-muted text-muted-foreground p-3 rounded-lg w-full text-center truncate border border-border/50">{qrUrl}</code>
-              </div>
-            </DialogContent>
-          </Dialog>
         </CardHeader>
         
         <CardContent className="flex-1 overflow-hidden p-0 pt-4">
@@ -391,5 +402,24 @@ export default function POSPage() {
         </div>
       </Card>
     </div>
+
+    {/* QR Code Dialog — rendered outside the layout so it centers properly */}
+    <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+      <DialogContent className="sm:max-w-md bg-card border-border text-foreground shadow-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-center text-xl font-bold text-foreground">Waiter Ordering System</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col items-center justify-center p-6 space-y-4">
+          <div className="bg-white p-4 rounded-xl shadow-lg ring-1 ring-border/50">
+            <QRCode value={lanUrl} size={256} />
+          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Waiters can scan this QR code to access the mobile ordering system directly on their phones. Must be on the same local network.
+          </p>
+          <code className="text-xs bg-muted text-muted-foreground p-3 rounded-lg w-full text-center break-all border border-border/50">{lanUrl}</code>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

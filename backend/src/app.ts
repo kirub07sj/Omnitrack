@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import os from 'os';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import licenseRoutes from './modules/license/license.routes';
@@ -40,6 +41,22 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // Basic health check route to verify connection
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend is running and connected successfully!' });
+});
+
+// Return machine's LAN IP so the QR code can point to it instead of localhost
+app.get('/api/network-info', (req, res) => {
+  const interfaces = os.networkInterfaces();
+  let ip = '127.0.0.1';
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name] || []) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        ip = iface.address;
+        break;
+      }
+    }
+    if (ip !== '127.0.0.1') break;
+  }
+  res.json({ ip });
 });
 
 export default app;
