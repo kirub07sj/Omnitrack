@@ -1,281 +1,770 @@
-The goal is to create a reusable, production-ready Products module.
+Build a complete production-ready SALES module for our offline-first Restaurant ERP.
+
+The application is a restaurant management system where Orders, Tables, Kitchen, Products, Inventory, Employees, and Sales are separate feature modules.
+
+IMPORTANT:
+Do not redesign or replace the existing Orders, Tables, Kitchen, Products, or Inventory modules.
+Integrate with their existing data structures and components.
+
+==================================================
+BUSINESS WORKFLOWS
+==================================================
+
+The restaurant supports TWO ways of handling sales.
+
+WORKFLOW 1 — DIGITAL WAITER ORDER
+
+1. Waiter uses the mobile Waiter App over the restaurant's local Wi-Fi.
+2. Waiter selects a table and creates an order.
+3. Order is sent to the system.
+4. If the kitchen uses the Kitchen module, the order goes through the existing order workflow:
+   Pending → In Progress → Ready/Completed.
+5. Customer finishes their meal.
+6. Waiter tells the cashier which table/order is ready for payment.
+7. Cashier finds the order in the Sales module.
+8. Cashier reviews the order.
+9. Cashier collects payment.
+10. Payment is completed.
+11. The order becomes financially completed/paid.
+12. Sale record is created.
+13. Receipt can be printed.
+14. Table/session becomes available according to the existing table workflow.
+
+WORKFLOW 2 — MANUAL / OFF-SYSTEM ORDER
+
+Some restaurants may not use the Kitchen Display or Waiter App.
+
+Example:
+
+1. Waiter takes the customer's order verbally.
+2. Waiter tells the kitchen verbally what to prepare.
+3. No order is entered into the system while the food is being prepared.
+4. When the customer wants to pay, the waiter tells the cashier:
+   - Table number
+   - Ordered products
+   - Quantities
+5. Cashier creates the order directly from the desktop.
+6. Because the food has already been served, this order MUST NOT go through Pending/In Progress/Kitchen workflow.
+7. The cashier creates it as an already-completed/served order.
+8. Cashier immediately proceeds to payment.
+9. Payment is recorded.
+10. Sale is created.
+11. Receipt can be printed.
+12. Table/session is closed according to the existing table workflow.
+
+The Sales module must support both workflows naturally.
+
+==================================================
+SALES MODULE RESPONSIBILITY
+==================================================
+
+Sales is responsible for:
+
+- Finding completed/unpaid orders
+- Collecting payments
+- Creating sales records
+- Cashier checkout
+- Manual completed-sale entry
+- Payment methods
+- Discounts where permitted
+- Service charges/taxes if enabled
+- Receipts
+- Sales history
+- Refunds
+- Voids/cancellations where permitted
+- Payment records
+- Cashier accountability
+- Daily sales information
+
+Do NOT duplicate order-management functionality unnecessarily.
+
+Orders remain responsible for:
+- Creating normal orders
+- Order items
+- Order status
+- Kitchen workflow
+- Order modifications
+
+Sales is responsible for:
+- Money
+- Payment
+- Receipt
+- Financial transaction history
+
+==================================================
+SALES PAGE STRUCTURE
+==================================================
+
+Create the following pages/views:
+
+1. PAYMENT QUEUE
+2. NEW MANUAL SALE
+3. CHECKOUT
+4. SALES HISTORY
+5. SALE DETAILS
+6. REFUNDS
+7. PAYMENT DETAILS
+
+==================================================
+1. PAYMENT QUEUE
+==================================================
+
+This is the main Sales screen.
+
+Show completed/served orders that have not yet been paid.
+
+Example:
+
+Order #BF4C2D50
+Table 4
+3 items
+835 ETB
+
+Order Status: Completed
+Payment Status: Unpaid
+
+[ Collect Payment ]
 
 --------------------------------------------------
 
-MODULE FEATURES
+Allow searching by:
 
-The module should contain:
+- Order number
+- Table number
+- Customer
+- Waiter
 
-1. Products List
-2. Product Details
-3. Add Product
-4. Edit Product
-5. Delete Product
-6. Categories Management
-7. Product Import (CSV)
-8. Product Export (CSV)
+Filters:
+
+- Unpaid
+- Partially Paid
+- Paid
+- Date
+- Waiter
+- Table
+
+Display useful information:
+
+- Order number
+- Table
+- Waiter
+- Number of items
+- Total
+- Order status
+- Payment status
+- Time
+- Actions
+
+==================================================
+2. NEW MANUAL SALE
+==================================================
+
+This is REQUIRED.
+
+It allows a cashier to enter an order that happened outside the digital ordering workflow.
+
+Use this when:
+
+- Waiter took the order verbally
+- Kitchen does not use the system
+- Waiter App was not used
+- The food has already been served
+
+The cashier selects:
+
+Table:
+[ Select Table ]
+
+Optional:
+
+Waiter:
+[ Select Waiter ]
+
+Then add products.
+
+Product search:
+
+[ Search products / scan barcode ]
+
+Product list/cart:
+
+Product        Qty       Price       Total
+
+Burger          2        300          600
+Coke            2        125          250
+
+Subtotal: 850 ETB
+
+Because this is a manual completed order:
+
+Order Status:
+COMPLETED
+
+Do NOT send this order to the Kitchen.
+
+Do NOT show "Send to Kitchen".
+
+Do NOT make the cashier wait for kitchen status.
+
+After entering the products:
+
+[ Continue to Payment ]
+
+The system should create the completed order and immediately open checkout.
+
+==================================================
+3. CHECKOUT
+==================================================
+
+Checkout must work for BOTH:
+
+A. Existing completed order
+B. Newly created manual completed order
+
+Display:
+
+Order number
+Table
+Waiter
+Items
+Quantities
+Unit prices
+Subtotal
+
+Optional:
+
+Discount
+Service charge
+Tax
+
+Grand Total
 
 --------------------------------------------------
 
-PRODUCT LIST
+PAYMENT METHODS
 
-Display products in a professional data table.
+Support configurable payment methods.
 
-Columns
+Initial methods:
 
-- Product Image
-- SKU
-- Product Name
-- Category
-- Selling Price
-- Purchase Price
-- Unit
-- Inventory Tracking
-- Status
-- Last Updated
+- Cash
+- Mobile Banking
+- Card
+- Bank Transfer
 
-Table Features
+Only enabled payment methods from Settings should appear.
+
+--------------------------------------------------
+
+CASH PAYMENT
+
+If Cash is selected:
+
+Amount Due
+850 ETB
+
+Amount Received
+[ 1000 ]
+
+Change
+150 ETB
+
+[ COMPLETE PAYMENT ]
+
+Do not allow completion if received amount is less than the amount due unless partial payments are explicitly supported.
+
+--------------------------------------------------
+
+MOBILE BANKING
+
+If Mobile Banking is selected:
+
+Payment Reference
+[ __________ ]
+
+Optional:
+
+Upload Payment Screenshot
+
+[ Upload Image ]
+
+[ COMPLETE PAYMENT ]
+
+The screenshot must work offline and be stored locally until cloud synchronization is available.
+
+--------------------------------------------------
+
+CARD
+
+Show:
+
+Amount
+Payment Reference (optional)
+
+[ COMPLETE PAYMENT ]
+
+--------------------------------------------------
+
+BANK TRANSFER
+
+Show:
+
+Amount
+Reference Number
+
+[ COMPLETE PAYMENT ]
+
+==================================================
+PAYMENT STATUS
+==================================================
+
+Use a separate payment status from order status.
+
+Order status:
+
+- Pending
+- In Progress
+- Ready
+- Completed
+- Cancelled
+
+Payment status:
+
+- Unpaid
+- Partially Paid
+- Paid
+- Refunded
+- Partially Refunded
+
+Do NOT mix order status and payment status.
+
+Example:
+
+Order:
+COMPLETED
+
+Payment:
+UNPAID
+
+After payment:
+
+Order:
+COMPLETED
+
+Payment:
+PAID
+
+==================================================
+4. SALES HISTORY
+==================================================
+
+Display completed financial transactions.
+
+Columns:
+
+- Sale Number
+- Order Number
+- Table
+- Waiter
+- Cashier
+- Total
+- Payment Method
+- Payment Status
+- Date
+- Time
+
+Features:
 
 - Search
-- Category Filter
-- Status Filter
-- Sort
+- Date range
+- Payment method filter
+- Cashier filter
+- Waiter filter
+- Table filter
+- Status filter
+- Sorting
 - Pagination
-- Column Visibility
 - Export CSV
 
-Top Actions
-
-- Add Product
-- Import CSV
-- Export CSV
-- Refresh
-
-Row Actions
+Actions:
 
 - View
-- Edit
-- Duplicate
-- Archive
-- Delete
+- Print Receipt
+- Reprint Receipt
+- Refund
+
+==================================================
+5. SALE DETAILS
+==================================================
+
+Display a complete financial record.
+
+Example:
+
+Sale #00091
+
+Order:
+#BF4C2D50
+
+Table:
+4
+
+Waiter:
+Abebe
+
+Cashier:
+Hana
+
+Date:
+August 9, 2026
 
 --------------------------------------------------
 
-ADD / EDIT PRODUCT
+ITEMS
 
-Product Information
-
-- Product Name
-- SKU (auto-generate with manual override)
-- Barcode (optional)
-- Category
-- (+ Create Category)
-- Description
-
-Pricing
-
-- Purchase Price
-- Selling Price
-
-Unit
-
-Dropdown
-
-Examples
-
-- Piece
-- Bottle
-- Kg
-- Gram
-- Liter
-- Box
-- Packet
-
-Inventory
-
-Checkbox
-
-Track Inventory
-
-If enabled
-
-- Minimum Stock Level
-- Opening Stock
-- Opening Stock Date
-
-If disabled
-
-Hide inventory-related fields.
-
-Media
-
-- Product Image Upload
-
-Status
-
-- Active
-- Inactive
+2 × Special Asa Combo
+1 × Nigus
+1 × Sofy Buna
 
 --------------------------------------------------
 
-CATEGORY MANAGEMENT
+Subtotal:
+835 ETB
 
-Manage categories without leaving the Products module.
+Discount:
+0 ETB
 
-Features
+Service Charge:
+0 ETB
 
-- Category List
-- Create Category
-- Edit Category
-- Delete Category
-- Search Categories
+Tax:
+0 ETB
 
-Category Fields
-
-- Category Name
-- Description
-- Active
-
-Categories should also be creatable directly from the Product Form using a modal dialog.
+TOTAL:
+835 ETB
 
 --------------------------------------------------
 
-PRODUCT DETAILS
+PAYMENT
 
-Display
+Method:
+Cash
 
-- Image
-- Name
-- SKU
-- Barcode
-- Category
-- Description
-- Purchase Price
-- Selling Price
-- Unit
-- Inventory Tracking
-- Minimum Stock
-- Current Stock (placeholder)
-- Created Date
-- Updated Date
+Amount Received:
+1,000 ETB
 
-Tabs
+Change:
+165 ETB
 
-Overview
-
-Inventory (placeholder)
-
-Sales History (placeholder)
-
-Purchase History (placeholder)
+Payment Status:
+PAID
 
 --------------------------------------------------
 
-CSV IMPORT
+Actions:
 
-Allow importing products using CSV.
+[ Print Receipt ]
+[ Reprint Receipt ]
+[ Refund ]
 
-Supported Columns
+==================================================
+6. REFUNDS
+==================================================
 
-Name
+Do NOT delete sales.
 
-SKU
+A refund must create a financial record.
 
-Category
+Example:
 
-Purchase Price
+Sale #00091
+835 ETB
+PAID
 
-Selling Price
+↓
 
-Unit
+Refund #00012
+-835 ETB
 
-Track Inventory
+Sale status:
+REFUNDED
 
-Minimum Stock
+Require:
 
-Provide:
+- Refund reason
+- Refund amount
+- Authorized user
 
-- Download Sample CSV
-- Validation
-- Import Summary
-- Error Report
+For partial refunds, allow selecting individual items or entering a partial amount.
 
---------------------------------------------------
+Permissions:
 
-CSV EXPORT
+Cashier:
+Cannot refund unless explicitly permitted.
 
-Export
+Manager:
+Can refund.
 
-- All Products
-- Filtered Products
-- Selected Products
+Owner:
+Can refund.
 
---------------------------------------------------
+Use the existing permission system.
 
-VALIDATION
+==================================================
+7. PAYMENT DETAILS
+==================================================
 
-Use React Hook Form.
+Every payment must record:
 
-Use Zod.
+- Payment ID
+- Sale ID
+- Amount
+- Payment Method
+- Reference Number
+- Cashier
+- Date
+- Time
+- Payment Status
+- Notes
+- Payment screenshot if applicable
 
-Validate
+==================================================
+CASHIER WORKFLOW
+==================================================
 
-- Required Product Name
-- Positive Prices
-- Unique SKU
-- Category Required
-- Unit Required
-- Minimum Stock >= 0
+The cashier should have two obvious actions:
 
---------------------------------------------------
+[ Pending Payments ]
 
-REUSABLE COMPONENTS
+[ New Manual Sale ]
 
-ProductTable
+Pending Payments:
 
-ProductForm
+Completed orders waiting for payment.
 
-ProductCard
+New Manual Sale:
 
-ProductImage
+Create a completed order directly from the cashier desk.
 
-CategoryDialog
+This distinction is very important.
 
-CategoryTable
+==================================================
+RECEIPTS
+==================================================
 
-ProductStatusBadge
+After successful payment show:
 
-ImportDialog
+Payment Successful
 
-ExportDialog
+Sale #00091
 
-DeleteProductDialog
+Total:
+835 ETB
 
---------------------------------------------------
+Payment:
+Cash
 
-DESIGN
+[ Print Receipt ]
 
-Professional ERP design.
+[ New Payment ]
 
-Desktop-first.
+Receipt should contain:
 
-Minimal animations.
+- Restaurant name
+- Restaurant information
+- Sale number
+- Order number
+- Table
+- Date/time
+- Cashier
+- Items
+- Quantity
+- Unit price
+- Total
+- Discount
+- Tax/service charge if enabled
+- Payment method
+- Amount received
+- Change
+- Thank-you message
 
-Consistent spacing.
+==================================================
+TABLE INTEGRATION
+==================================================
 
-Large data tables.
+Integrate with the existing Tables module.
 
-Keyboard friendly.
+Sales must know which table the order belongs to.
 
-Accessible.
+When payment is successfully completed:
 
-Use shadcn/ui only.
+- Mark the order as paid.
+- Close the relevant dining session/order.
+- Release the table according to the existing table/session logic.
 
---------------------------------------------------
+Do NOT permanently delete the table.
 
-FOLDER STRUCTURE
+If multiple tables are part of the same dining session, release all tables belonging to that session after successful settlement.
 
-src/modules/products
+==================================================
+WAITER INFORMATION
+==================================================
+
+Keep waiter information for reporting.
+
+For normal digital orders:
+
+created_by = waiter
+
+For manual sales:
+
+cashier creates the order, but allow selecting the waiter who served the table.
+
+This allows reports such as:
+
+- Sales by waiter
+- Orders by waiter
+- Cashier transactions
+- Manual sales vs digital sales
+
+Also record:
+
+- created_by
+- completed_by
+- paid_by
+
+where appropriate.
+
+==================================================
+AUDIT LOG
+==================================================
+
+Important financial actions must be recorded.
+
+Record:
+
+- Sale created
+- Payment created
+- Payment edited
+- Sale refunded
+- Sale voided
+- Discount applied
+- Manual sale created
+- Receipt printed/reprinted
+
+Store:
+
+- User
+- Action
+- Date/time
+- Related record
+- Reason where applicable
+
+==================================================
+OFFLINE-FIRST REQUIREMENTS
+==================================================
+
+The restaurant must be able to perform sales without internet.
+
+Payment records must be saved to the local database first.
+
+Internet is NOT required for:
+
+- Creating manual sales
+- Finding existing orders
+- Processing cash payments
+- Recording mobile banking payments
+- Printing receipts
+- Viewing sales history
+
+Cloud synchronization happens separately when internet becomes available.
+
+Do not make the payment workflow dependent on an external API.
+
+==================================================
+INVENTORY INTEGRATION
+==================================================
+
+When a sale is completed:
+
+Decrease inventory according to the existing Inventory module.
+
+Do not duplicate inventory calculations inside Sales.
+
+Use the existing inventory service.
+
+For products where inventory tracking is disabled:
+
+Do not modify stock.
+
+For tracked products:
+
+Sale completion should create the appropriate inventory movement.
+
+IMPORTANT:
+
+Inventory should only be changed when the sale/payment workflow reaches the appropriate final state according to the existing business rules.
+
+Do not decrease inventory multiple times if a sale is reopened or the receipt is reprinted.
+
+==================================================
+DASHBOARD SUMMARY
+==================================================
+
+At the top of Sales provide:
+
+Today's Sales
+Today's Transactions
+Cash Sales
+Mobile Banking Sales
+Card Sales
+Unpaid Orders
+Refunds
+
+These numbers should come from actual sales/payment data.
+
+==================================================
+PERMISSIONS
+==================================================
+
+Use existing role/permission system.
+
+Cashier:
+
+- View payment queue
+- Create manual sales
+- Process payments
+- Print receipts
+- View permitted sales
+
+Manager:
+
+- All cashier permissions
+- Refunds
+- Voids
+- Discounts
+- View broader sales reports
+
+Owner:
+
+- Full access
+- Financial settings
+- Refunds
+- Voids
+- Reports
+- Payment method configuration
+
+Do not hard-code permissions inside components.
+
+Use the existing authorization system.
+
+==================================================
+COMPONENT STRUCTURE
+==================================================
+
+Use feature-based architecture:
+
+src/modules/sales/
 
 components/
 pages/
@@ -284,18 +773,126 @@ services/
 schemas/
 types/
 utils/
-index.ts
 
---------------------------------------------------
+Reusable components:
 
-IMPORTANT
+PaymentQueue
+PaymentQueueCard
+ManualSaleForm
+SaleCart
+Checkout
+PaymentMethodSelector
+CashPaymentForm
+MobilePaymentForm
+CardPaymentForm
+SaleTable
+SaleDetails
+RefundDialog
+PaymentDetails
+ReceiptPreview
+PaymentSuccessDialog
+SalesSummary
+SalesFilters
 
-Products are the foundation for Orders, Purchases, Inventory, and Reports.
+==================================================
+DATA / SERVICE LAYER
+==================================================
 
-Design the module to be reusable.
+Do not put business logic directly inside UI components.
 
-Do not implement inventory logic yet.
+Create services for:
 
-Current Stock, Purchase History, and Sales History should use placeholder components that can later be connected to Inventory and Orders modules.
+- Get unpaid orders
+- Create manual completed order
+- Create sale
+- Process payment
+- Get sales
+- Get sale details
+- Refund sale
+- Print/reprint receipt
+- Record payment
+- Record audit event
 
-Generate clean, modular, production-quality React + TypeScript code.
+Use the existing API/database architecture.
+
+Do not create a second database or separate order model.
+
+==================================================
+IMPORTANT EDGE CASES
+==================================================
+
+Handle:
+
+1. Two cashiers attempting to pay the same order.
+2. Order already paid.
+3. Order cancelled.
+4. Partial payment if supported.
+5. Refund after payment.
+6. Manual sale with zero items — prevent it.
+7. Negative quantities — prevent them.
+8. Invalid payment amount.
+9. Duplicate payment submission.
+10. User refreshing checkout after payment.
+11. Network unavailable.
+12. Mobile banking screenshot stored offline.
+13. Receipt reprinted multiple times.
+14. Cashier attempting an unauthorized refund.
+15. Inventory being deducted twice.
+
+Payment completion must be idempotent.
+
+==================================================
+DESIGN
+==================================================
+
+Use the existing RestaurantOS design system.
+
+Use:
+
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- React Hook Form
+- Zod
+- TanStack Table
+- TanStack Query where appropriate
+
+Desktop-first for cashier.
+
+Clean, fast, professional ERP interface.
+
+Large touch-friendly buttons for payment actions.
+
+Clear visual distinction between:
+
+UNPAID
+PAID
+REFUNDED
+CANCELLED
+
+Avoid unnecessary animations.
+
+Do not redesign existing modules.
+
+==================================================
+FINAL REQUIREMENT
+==================================================
+
+Before finishing:
+
+1. Inspect the existing Orders module.
+2. Inspect the existing Tables module.
+3. Inspect the existing Products module.
+4. Inspect the existing Inventory module.
+5. Reuse their existing types, services, APIs, components, and database relationships where possible.
+6. Do not duplicate existing business logic.
+7. Do not create mock data as the final implementation.
+8. Do not break existing functionality.
+9. Ensure both workflows work:
+
+   A. Waiter App → Order → Completed → Cashier Payment → Sale
+
+   B. Verbal Order → Cashier creates completed order → Payment → Sale
+
+10. Make the Sales module fully functional end-to-end.

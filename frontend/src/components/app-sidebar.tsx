@@ -63,10 +63,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "#",
       icon: Wallet,
       items: isManager ? [
-        { title: "Sales", url: "#" },
+        { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Expenses", url: "#" },
       ] : [
-        { title: "Sales", url: "#" },
+        { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Payments", url: "#" },
         { title: "Expenses", url: "#" },
       ],

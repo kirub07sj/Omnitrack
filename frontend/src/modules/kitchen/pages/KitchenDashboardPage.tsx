@@ -223,11 +223,11 @@ export default function KitchenDashboardPage() {
                               )}
                             </div>
                             <div>
-                              <span className="font-black text-foreground text-xl block leading-tight">{item.product?.name || 'Unknown Product'}</span>
-                              <span className="text-sm font-bold text-primary block mt-1.5 uppercase tracking-wide">Qty: {item.quantity}</span>
+                              <span className="font-bold text-foreground text-base block">{item.product?.name || 'Unknown Product'}</span>
+                              <span className="text-xs font-semibold text-primary block mt-0.5">Qty: {item.quantity}</span>
                             </div>
                           </div>
-                          <span className="font-black text-4xl w-12 text-center flex-shrink-0 text-primary">{item.quantity}</span>
+                          <span className="font-black text-2xl w-8 text-center flex-shrink-0 text-foreground/80">{item.quantity}</span>
                         </li>
                       );
                     })}

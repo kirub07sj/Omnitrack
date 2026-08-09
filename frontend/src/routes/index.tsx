@@ -27,6 +27,10 @@ import TableManagementPage from '../modules/tables/pages/TableManagementPage';
 import SettingsPage from '../modules/settings/pages/SettingsPage';
 import KitchenAppPage from '../modules/kitchen/pages/KitchenAppPage';
 import KitchenDashboardPage from '../modules/kitchen/pages/KitchenDashboardPage';
+import SalesLayout from '../modules/sales/SalesLayout';
+import PaymentQueue from '../modules/sales/pages/PaymentQueue';
+import ManualSalePage from '../modules/sales/pages/ManualSalePage';
+import SalesHistoryPage from '../modules/sales/pages/SalesHistoryPage';
 
 export const router = createBrowserRouter([
   {
@@ -138,6 +142,15 @@ export const router = createBrowserRouter([
       {
         path: 'kitchen',
         element: <KitchenDashboardPage />
+      },
+      {
+        path: 'sales',
+        element: <SalesLayout />,
+        children: [
+          { index: true, element: <PaymentQueue /> },
+          { path: 'manual', element: <ManualSalePage /> },
+          { path: 'history', element: <SalesHistoryPage /> }
+        ]
       }
     ]
   },
@@ -224,6 +237,15 @@ export const router = createBrowserRouter([
       {
         path: 'kitchen',
         element: <KitchenDashboardPage />
+      },
+      {
+        path: 'sales',
+        element: <SalesLayout />,
+        children: [
+          { index: true, element: <PaymentQueue /> },
+          { path: 'manual', element: <ManualSalePage /> },
+          { path: 'history', element: <SalesHistoryPage /> }
+        ]
       }
     ]
   }
