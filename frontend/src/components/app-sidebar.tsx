@@ -34,7 +34,8 @@ const teams = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { currentUser } = useAppStore();
+  const { currentUser, businessSettings } = useAppStore();
+  const isKitchenActive = businessSettings?.is_kitchen_active ?? true;
 
   const user = {
     name: currentUser?.firstName + " " + currentUser?.lastName,
@@ -54,7 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Dashboard", url: `/${currentUser?.role?.toLowerCase() || 'owner'}` },
         { title: "Orders (POS)", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/pos` },
         { title: "Tables", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/tables` },
-        { title: "Kitchen", url: "#" },
+        ...(isKitchenActive ? [{ title: "Kitchen", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/kitchen` }] : []),
       ],
     },
     {
@@ -99,7 +100,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Settings,
       items: [
         { title: "Synchronization", url: "#" },
-        { title: "Settings", url: "#" },
+        { title: "Settings", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/settings` },
         { title: "License & Subscription", url: "#" },
       ],
     }]),

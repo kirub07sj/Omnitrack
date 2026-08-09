@@ -24,6 +24,9 @@ import SupplierDetailsPage from '../modules/suppliers/pages/SupplierDetailsPage'
 import POSPage from '../modules/orders/pages/POSPage';
 import WaiterAppPage from '../modules/orders/pages/WaiterAppPage';
 import TableManagementPage from '../modules/tables/pages/TableManagementPage';
+import SettingsPage from '../modules/settings/pages/SettingsPage';
+import KitchenAppPage from '../modules/kitchen/pages/KitchenAppPage';
+import KitchenDashboardPage from '../modules/kitchen/pages/KitchenDashboardPage';
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +36,10 @@ export const router = createBrowserRouter([
   {
     path: '/waiter',
     element: <WaiterAppPage />
+  },
+  {
+    path: '/kitchen',
+    element: <KitchenAppPage />
   },
   {
     path: '/setup',
@@ -123,6 +130,14 @@ export const router = createBrowserRouter([
       {
         path: 'tables',
         element: <TableManagementPage />
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />
+      },
+      {
+        path: 'kitchen',
+        element: <KitchenDashboardPage />
       }
     ]
   },
@@ -201,6 +216,14 @@ export const router = createBrowserRouter([
       {
         path: 'tables',
         element: <TableManagementPage />
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />
+      },
+      {
+        path: 'kitchen',
+        element: <KitchenDashboardPage />
       }
     ]
   }

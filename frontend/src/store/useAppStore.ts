@@ -7,6 +7,7 @@ interface AppState {
   currentSetupStep: number;
   isLoadingStatus: boolean;
   currentUser: { id: string; username: string; firstName: string; lastName: string; role: string; business_id: string; employee_id: string } | null;
+  businessSettings: any | null;
   
   setSetupStep: (step: number) => void;
   checkSetupStatus: () => Promise<void>;
@@ -14,6 +15,7 @@ interface AppState {
   markOwnerCreated: () => void;
   login: (user: any) => void;
   logout: () => void;
+  updateBusinessSettings: (settings: any) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -23,6 +25,7 @@ export const useAppStore = create<AppState>((set) => ({
   currentSetupStep: 1,
   isLoadingStatus: true,
   currentUser: null,
+  businessSettings: null,
 
   setSetupStep: (step) => set({ currentSetupStep: step }),
 
@@ -33,6 +36,8 @@ export const useAppStore = create<AppState>((set) => ({
   login: (user) => set({ currentUser: user }),
   
   logout: () => set({ currentUser: null }),
+  
+  updateBusinessSettings: (settings) => set({ businessSettings: settings }),
 
   checkSetupStatus: async () => {
     set({ isLoadingStatus: true });
@@ -50,7 +55,8 @@ export const useAppStore = create<AppState>((set) => ({
           hasBusiness: data.hasBusiness,
           hasOwner: data.hasOwner,
           currentSetupStep: step,
-          isLoadingStatus: false
+          isLoadingStatus: false,
+          businessSettings: data.business || null
         });
       } else {
         set({ isLoadingStatus: false });

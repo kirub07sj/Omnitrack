@@ -12,7 +12,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image as ImageIcon, CheckCircle2, XCircle } from 'lucide-react';
 
 export default function POSPage() {
-  const { currentUser } = useAppStore();
+  const { currentUser, businessSettings } = useAppStore();
+  const isKitchenActive = businessSettings?.is_kitchen_active ?? true;
   const { orders, tables, fetchOrders, fetchTables, createOrder, updateOrder } = useOrderStore();
   const { products: allProducts, fetchProducts } = useProductStore();
   
@@ -116,6 +117,7 @@ export default function POSPage() {
       business_id: currentUser?.business_id,
       waiter_id: currentUser?.employee_id, // Cashier is acting as waiter here
       table_id: selectedTable || null,
+      status: isKitchenActive ? 'Pending' : 'Completed',
       items: cart.map(item => ({
         product_id: item.product.id,
         quantity: item.quantity,
@@ -126,7 +128,8 @@ export default function POSPage() {
     try {
       await createOrder(orderData);
       setCart([]);
-      setSuccess("Order placed successfully!");
+      setSelectedTable('');
+      setSuccess(isKitchenActive ? "Order sent to kitchen!" : "Checkout completed!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (e: any) {
       setError("Failed to create order: " + e.message);
@@ -416,12 +419,12 @@ export default function POSPage() {
           
           <Button 
             className="w-full py-6 text-lg font-bold text-primary-foreground shadow-lg shadow-primary/25 bg-primary hover:bg-primary/90 border-0"
-            onClick={handleCreateOrder}
+            onClick={() => handleCreateOrder()}
             disabled={cart.length === 0 || !selectedTable}
           >
             <span className="relative z-10 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-              Place Order
+              {isKitchenActive ? 'Send to Kitchen' : 'Checkout & Complete'}
             </span>
           </Button>
         </div>

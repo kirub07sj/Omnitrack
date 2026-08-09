@@ -75,10 +75,10 @@ export const getOrders = async (req: Request, res: Response) => {
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { business_id, table_id, waiter_id, notes, items } = req.body;
+    const { business_id, table_id, waiter_id, notes, items, status } = req.body;
 
     // Check if there is an existing Open or Pending order for this table
-    if (table_id) {
+    if (table_id && (!status || status === 'Pending' || status === 'Open')) {
       const existingOrder = await prisma.order.findFirst({
         where: {
           business_id,
@@ -130,7 +130,7 @@ export const createOrder = async (req: Request, res: Response) => {
         table_id,
         waiter_id,
         notes,
-        status: 'Pending',
+        status: status || 'Pending',
         items: {
           create: items.map((item: any) => ({
             product_id: item.product_id,
