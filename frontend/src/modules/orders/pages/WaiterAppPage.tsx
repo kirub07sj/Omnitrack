@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useProductStore } from '@/store/useProductStore';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Loader2, ShoppingCart, CheckCircle2, ChevronDown, Plus, Minus, X, Image as ImageIcon } from 'lucide-react';
+import { Loader2, ShoppingCart, CheckCircle2, Plus, Minus, X, Image as ImageIcon } from 'lucide-react';
 
 export default function WaiterAppPage() {
   const [searchParams] = useSearchParams();
@@ -18,7 +18,6 @@ export default function WaiterAppPage() {
   const [tables, setTables] = useState<any[]>([]);
   const [cart, setCart] = useState<{product: any, quantity: number}[]>([]);
   const [selectedTable, setSelectedTable] = useState<string>('');
-  const [waiterName, setWaiterName] = useState<string>('Waiter 1');
   const [ordersList, setOrdersList] = useState<any[]>([]);
   const [isOrdersListOpen, setIsOrdersListOpen] = useState(false);
 
@@ -51,6 +50,12 @@ export default function WaiterAppPage() {
         else if (tabs && Array.isArray(tabs.tables)) tItems = tabs.tables;
         else if (tabs && Array.isArray(tabs.data)) tItems = tabs.data;
 
+        tItems.sort((a: any, b: any) => {
+          const numA = parseInt(String(a.table_number || '').replace(/\D/g, '')) || 0;
+          const numB = parseInt(String(b.table_number || '').replace(/\D/g, '')) || 0;
+          return numA - numB;
+        });
+
         let oItems = [];
         if (Array.isArray(ords)) oItems = ords;
         else if (ords && Array.isArray(ords.data)) oItems = ords.data;
@@ -67,6 +72,15 @@ export default function WaiterAppPage() {
       setError("Invalid QR Code. Missing business ID.");
       setLoading(false);
     }
+  }, [businessId, fetchProducts]);
+
+  // Polling for products auto-update without refresh
+  useEffect(() => {
+    if (!businessId) return;
+    const intervalId = setInterval(() => {
+      fetchProducts(businessId, true); // true = silent
+    }, 5000);
+    return () => clearInterval(intervalId);
   }, [businessId, fetchProducts]);
 
   const activeProducts = products; // Already filtered in useMemo
@@ -117,7 +131,7 @@ export default function WaiterAppPage() {
     const orderData = {
       business_id: businessId,
       table_id: selectedTable || null,
-      notes: `Waiter: ${waiterName}`,
+      notes: "",
       items: cart.map(item => ({
         product_id: item.product.id,
         quantity: item.quantity,
@@ -201,20 +215,13 @@ export default function WaiterAppPage() {
           <select
             value={selectedTable}
             onChange={(e) => setSelectedTable(e.target.value)}
-            className="w-1/2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all text-slate-800"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all text-slate-800"
           >
-            <option value="">No Table</option>
+            <option value="" disabled>Select Table</option>
             {tables.map(t => (
               <option key={t.id} value={t.id}>{t.table_number}</option>
             ))}
           </select>
-          <input 
-            type="text" 
-            value={waiterName}
-            onChange={(e) => setWaiterName(e.target.value)}
-            placeholder="Your Name"
-            className="w-1/2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all text-slate-800"
-          />
         </div>
       </header>
 
@@ -368,7 +375,7 @@ export default function WaiterAppPage() {
             
             <Button 
               onClick={submitOrder}
-              disabled={submitLoading || cart.length === 0}
+              disabled={submitLoading || cart.length === 0 || !selectedTable}
               className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg bg-emerald-600 hover:bg-emerald-700 text-white"
               size="lg"
             >
@@ -416,7 +423,7 @@ export default function WaiterAppPage() {
                 ordersList.map(order => (
                   <div key={order.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                     <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
-                      <span className="font-bold text-lg text-emerald-600">{order.table?.table_number || 'No Table'}</span>
+                      <span className="font-bold text-lg text-emerald-600">{order.table?.table_number ? `Table ${order.table.table_number}` : 'No Table'} - #{order.id.split('-')[0].toUpperCase()}</span>
                       <span className="text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">{order.status}</span>
                     </div>
                     <div className="space-y-3">

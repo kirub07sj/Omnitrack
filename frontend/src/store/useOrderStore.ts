@@ -41,7 +41,12 @@ export const useOrderStore = create<OrderState>((set) => ({
       const res = await fetch(`/api/tables?business_id=${businessId}`);
       if (!res.ok) throw new Error('Failed to fetch tables');
       const data = await res.json();
-      set({ tables: data, isLoading: false });
+      const sortedTables = Array.isArray(data) ? [...data].sort((a, b) => {
+        const numA = parseInt(String(a.table_number || '').replace(/\D/g, '')) || 0;
+        const numB = parseInt(String(b.table_number || '').replace(/\D/g, '')) || 0;
+        return numA - numB;
+      }) : data;
+      set({ tables: sortedTables, isLoading: false });
     } catch (error: any) {
       set({ error: error.message, isLoading: false });
     }

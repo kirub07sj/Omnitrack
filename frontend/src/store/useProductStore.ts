@@ -5,7 +5,7 @@ interface ProductState {
   isLoading: boolean;
   error: string | null;
   
-  fetchProducts: (businessId: string) => Promise<void>;
+  fetchProducts: (businessId: string, silent?: boolean) => Promise<void>;
   updateProductLocally: (id: string, updates: any) => void;
 }
 
@@ -14,8 +14,8 @@ export const useProductStore = create<ProductState>((set) => ({
   isLoading: false,
   error: null,
 
-  fetchProducts: async (businessId: string) => {
-    set({ isLoading: true, error: null });
+  fetchProducts: async (businessId: string, silent = false) => {
+    if (!silent) set({ isLoading: true, error: null });
     try {
       const res = await fetch(`/api/products?business_id=${businessId}&t=${Date.now()}`);
       if (!res.ok) throw new Error('Failed to fetch products');

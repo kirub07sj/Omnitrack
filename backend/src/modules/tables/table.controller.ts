@@ -90,16 +90,24 @@ export const setupTables = async (req: Request, res: Response) => {
     const tableCount = parseInt(count);
 
     const currentTables = await prisma.restaurantTable.findMany({
-      where: { business_id: String(business_id) },
-      orderBy: { table_number: 'asc' }
+      where: { business_id: String(business_id) }
+    });
+
+    currentTables.sort((a, b) => {
+      const numA = parseInt(a.table_number.replace(/\D/g, '')) || 0;
+      const numB = parseInt(b.table_number.replace(/\D/g, '')) || 0;
+      return numA - numB;
     });
 
     if (currentTables.length < tableCount) {
        const tablesToCreate = [];
-       for (let i = currentTables.length + 1; i <= tableCount; i++) {
+       const maxNum = currentTables.length > 0 ? 
+         Math.max(...currentTables.map(t => parseInt(t.table_number.replace(/\D/g, '')) || 0)) : 0;
+         
+       for (let i = 1; i <= tableCount - currentTables.length; i++) {
          tablesToCreate.push({
            business_id: String(business_id),
-           table_number: `Table ${i}`,
+           table_number: `Table ${maxNum + i}`,
            status: 'Available'
          });
        }
@@ -115,7 +123,6 @@ export const setupTables = async (req: Request, res: Response) => {
 
     const updatedTables = await prisma.restaurantTable.findMany({
       where: { business_id: String(business_id) },
-      orderBy: { table_number: 'asc' },
       include: { waiter: true }
     });
 

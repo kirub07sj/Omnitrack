@@ -6,7 +6,7 @@ import { useSSE } from '@/hooks/useSSE';
 import QRCode from 'react-qr-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image as ImageIcon } from 'lucide-react';
@@ -248,7 +248,7 @@ export default function POSPage() {
                     <div className="flex justify-between items-center border-b border-border/50 pb-3">
                       <div>
                         <span className="font-bold text-lg text-foreground">
-                          {order.table?.table_number ? `Table ${order.table.table_number}` : `Order #${order.id.split('-')[0].toUpperCase()}`}
+                          {order.table?.table_number ? `Table ${order.table.table_number} - #${order.id.split('-')[0].toUpperCase()}` : `Order #${order.id.split('-')[0].toUpperCase()}`}
                         </span>
                         <span className="text-xs text-muted-foreground ml-3 font-medium bg-muted px-2 py-1 rounded-md">Wait: {order.waiter?.first_name || 'Staff'}</span>
                       </div>
@@ -309,7 +309,7 @@ export default function POSPage() {
               onChange={(e) => setSelectedTable(e.target.value)}
               className="text-sm bg-background border border-border text-foreground rounded-md px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none max-w-[130px]"
             >
-              <option value="">No Table</option>
+              <option value="" disabled>Select Table</option>
               {tables.map((t: any) => (
                 <option key={t.id} value={t.id}>{t.table_number}</option>
               ))}
@@ -390,7 +390,7 @@ export default function POSPage() {
           <Button 
             className="w-full py-6 text-lg font-bold text-primary-foreground shadow-lg shadow-primary/25 bg-primary hover:bg-primary/90 border-0"
             onClick={handleCreateOrder}
-            disabled={cart.length === 0}
+            disabled={cart.length === 0 || !selectedTable}
           >
             <span className="relative z-10 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
