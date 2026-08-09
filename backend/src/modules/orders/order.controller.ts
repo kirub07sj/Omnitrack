@@ -77,6 +77,52 @@ export const createOrder = async (req: Request, res: Response) => {
   try {
     const { business_id, table_id, waiter_id, notes, items } = req.body;
 
+    // Check if there is an existing Open or Pending order for this table
+    if (table_id) {
+      const existingOrder = await prisma.order.findFirst({
+        where: {
+          business_id,
+          table_id,
+          status: {
+            in: ['Pending', 'Open']
+          }
+        }
+      });
+
+      if (existingOrder) {
+        // Append new items
+        await prisma.orderItem.createMany({
+          data: items.map((item: any) => ({
+            order_id: existingOrder.id,
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        });
+
+        // Optionally update notes if provided
+        const updatedNotes = notes 
+          ? (existingOrder.notes ? `${existingOrder.notes}\n${notes}` : notes)
+          : existingOrder.notes;
+
+        const updatedOrder = await prisma.order.update({
+          where: { id: existingOrder.id },
+          data: { notes: updatedNotes },
+          include: {
+            table: true,
+            waiter: true,
+            items: {
+              include: { product: true }
+            }
+          }
+        });
+
+        notifyClients(business_id, 'UPDATE_ORDER', updatedOrder);
+        res.status(200).json(updatedOrder);
+        return;
+      }
+    }
+
     // items should be an array of { product_id, quantity, price }
     const order = await prisma.order.create({
       data: {

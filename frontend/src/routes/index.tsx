@@ -23,6 +23,7 @@ import SupplierDetailsPage from '../modules/suppliers/pages/SupplierDetailsPage'
 
 import POSPage from '../modules/orders/pages/POSPage';
 import WaiterAppPage from '../modules/orders/pages/WaiterAppPage';
+import TableManagementPage from '../modules/tables/pages/TableManagementPage';
 
 export const router = createBrowserRouter([
   {
@@ -118,6 +119,10 @@ export const router = createBrowserRouter([
       {
         path: 'pos',
         element: <POSPage />
+      },
+      {
+        path: 'tables',
+        element: <TableManagementPage />
       }
     ]
   },
@@ -192,6 +197,10 @@ export const router = createBrowserRouter([
       {
         path: 'pos',
         element: <POSPage />
+      },
+      {
+        path: 'tables',
+        element: <TableManagementPage />
       }
     ]
   }

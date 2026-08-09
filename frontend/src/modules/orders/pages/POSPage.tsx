@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { useOrderStore } from '@/store/useOrderStore';
+import { useProductStore } from '@/store/useProductStore';
 import { useSSE } from '@/hooks/useSSE';
 import QRCode from 'react-qr-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,12 @@ import { Image as ImageIcon } from 'lucide-react';
 export default function POSPage() {
   const { currentUser } = useAppStore();
   const { orders, tables, fetchOrders, fetchTables, createOrder, updateOrder } = useOrderStore();
-  const [products, setProducts] = useState<any[]>([]);
+  const { products: allProducts, fetchProducts } = useProductStore();
+  
+  const products = useMemo(() => {
+    return allProducts.filter(p => !p.status || String(p.status).toLowerCase() === 'active');
+  }, [allProducts]);
+
   const [cart, setCart] = useState<{product: any, quantity: number}[]>([]);
   const [selectedTable, setSelectedTable] = useState<string>('');
   const [activeTab, setActiveTab] = useState('menu');
@@ -26,31 +32,9 @@ export default function POSPage() {
     if (currentUser?.business_id) {
       fetchOrders(currentUser.business_id);
       fetchTables(currentUser.business_id);
-      
-      // Fetch Products and safely filter Active only (with cache busting)
-      fetch(`/api/products?business_id=${currentUser.business_id}&t=${Date.now()}`)
-        .then(async (res) => {
-          if (!res.ok && res.status !== 304) throw new Error(`HTTP error! status: ${res.status}`);
-          const text = await res.text();
-          return text ? JSON.parse(text) : [];
-        })
-        .then(data => {
-          let items = [];
-          if (Array.isArray(data)) items = data;
-          else if (data && Array.isArray(data.products)) items = data.products;
-          else if (data && Array.isArray(data.data)) items = data.data;
-          else if (typeof data === 'object' && data !== null) items = [data];
-
-          const activeProducts = items.filter((p: any) => 
-            p && typeof p === 'object' && (!p.status || String(p.status).toLowerCase() === 'active')
-          );
-          setProducts(activeProducts);
-        })
-        .catch(err => {
-          console.error("Failed to fetch products:", err);
-        });
+      fetchProducts(currentUser.business_id);
     }
-  }, [currentUser, fetchOrders, fetchTables]);
+  }, [currentUser, fetchOrders, fetchTables, fetchProducts]);
 
   // Build a LAN-accessible URL for the QR code (phones can't reach localhost)
   const qrUrl = (() => {
@@ -127,6 +111,7 @@ export default function POSPage() {
     const orderData = {
       business_id: currentUser?.business_id,
       waiter_id: currentUser?.employee_id, // Cashier is acting as waiter here
+      table_id: selectedTable || null,
       items: cart.map(item => ({
         product_id: item.product.id,
         quantity: item.quantity,
@@ -311,11 +296,24 @@ export default function POSPage() {
       <Card className="w-96 flex flex-col bg-card border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] omni-animate-in omni-stagger-2 rounded-2xl overflow-hidden relative">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/40 via-primary to-primary/40"></div>
         <CardHeader className="border-b border-border/30 pb-5 bg-card/80 backdrop-blur-md relative z-10">
-          <CardTitle className="text-xl font-bold flex items-center gap-2 text-foreground tracking-tight">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          <CardTitle className="text-xl font-bold flex items-center justify-between text-foreground tracking-tight w-full">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+              </div>
+              Current Order
             </div>
-            Current Order
+            
+            <select
+              value={selectedTable}
+              onChange={(e) => setSelectedTable(e.target.value)}
+              className="text-sm bg-background border border-border text-foreground rounded-md px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none max-w-[130px]"
+            >
+              <option value="">No Table</option>
+              {tables.map((t: any) => (
+                <option key={t.id} value={t.id}>{t.table_number}</option>
+              ))}
+            </select>
           </CardTitle>
         </CardHeader>
         

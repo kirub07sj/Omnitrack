@@ -70,6 +70,7 @@ model Employee {
   users    User[]
   orders   Order[]
   sales    Sale[]
+  assigned_tables RestaurantTable[] @relation("AssignedTables")
 
   @@map("employees")
 }
@@ -97,8 +98,10 @@ model RestaurantTable {
   table_number String
   capacity     Int?
   status       String?
+  waiter_id    String?
 
-  business Business @relation(fields: [business_id], references: [id])
+  business Business  @relation(fields: [business_id], references: [id])
+  waiter   Employee? @relation("AssignedTables", fields: [waiter_id], references: [id])
   orders   Order[]
 
   @@map("restaurant_tables")

@@ -53,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       items: [
         { title: "Dashboard", url: `/${currentUser?.role?.toLowerCase() || 'owner'}` },
         { title: "Orders (POS)", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/pos` },
-        { title: "Tables", url: "#" },
+        { title: "Tables", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/tables` },
         { title: "Kitchen", url: "#" },
       ],
     },

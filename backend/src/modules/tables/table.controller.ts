@@ -13,7 +13,9 @@ export const getTables = async (req: Request, res: Response) => {
     }
 
     const tables = await prisma.restaurantTable.findMany({
-      where: { business_id: String(business_id) }
+      where: { business_id: String(business_id) },
+      orderBy: { table_number: 'asc' },
+      include: { waiter: true }
     });
     
     res.json(tables);
@@ -73,5 +75,52 @@ export const deleteTable = async (req: Request, res: Response) => {
     res.json({ message: 'Table deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Failed to delete table', error });
+  }
+};
+
+export const setupTables = async (req: Request, res: Response) => {
+  try {
+    const { business_id, count } = req.body;
+    
+    if (!business_id || !count) {
+       res.status(400).json({ message: 'business_id and count are required' });
+       return;
+    }
+
+    const tableCount = parseInt(count);
+
+    const currentTables = await prisma.restaurantTable.findMany({
+      where: { business_id: String(business_id) },
+      orderBy: { table_number: 'asc' }
+    });
+
+    if (currentTables.length < tableCount) {
+       const tablesToCreate = [];
+       for (let i = currentTables.length + 1; i <= tableCount; i++) {
+         tablesToCreate.push({
+           business_id: String(business_id),
+           table_number: `Table ${i}`,
+           status: 'Available'
+         });
+       }
+       await prisma.restaurantTable.createMany({
+         data: tablesToCreate
+       });
+    } else if (currentTables.length > tableCount) {
+       const tablesToDelete = currentTables.slice(tableCount).map(t => t.id);
+       await prisma.restaurantTable.deleteMany({
+         where: { id: { in: tablesToDelete } }
+       });
+    }
+
+    const updatedTables = await prisma.restaurantTable.findMany({
+      where: { business_id: String(business_id) },
+      orderBy: { table_number: 'asc' },
+      include: { waiter: true }
+    });
+
+    res.json(updatedTables);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to setup tables', error });
   }
 };
