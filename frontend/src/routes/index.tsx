@@ -1,0 +1,207 @@
+import { createBrowserRouter } from 'react-router-dom';
+import SetupLayout from '../layouts/SetupLayout';
+import SetupWizard from '../modules/setup/SetupWizard';
+import App from '../App';
+import DashboardLayout from '../layouts/DashboardLayout';
+import OwnerDashboard from '../modules/dashboard/OwnerDashboard';
+import ManagerDashboard from '../modules/dashboard/ManagerDashboard';
+import AddProperty from '../modules/dashboard/AddProperty';
+import EmployeeListPage from '../modules/employees/pages/EmployeeListPage';
+import EmployeeDetailsPage from '../modules/employees/pages/EmployeeDetailsPage';
+import AddEditEmployeePage from '../modules/employees/pages/AddEditEmployeePage';
+
+import ProductListPage from '../modules/products/pages/ProductListPage';
+import ProductDetailsPage from '../modules/products/pages/ProductDetailsPage';
+import AddEditProductPage from '../modules/products/pages/AddEditProductPage';
+
+import InventoryListPage from '../modules/inventory/pages/InventoryListPage';
+import AddEditInventoryPage from '../modules/inventory/pages/AddEditInventoryPage';
+
+import SupplierListPage from '../modules/suppliers/pages/SupplierListPage';
+import AddEditSupplierPage from '../modules/suppliers/pages/AddEditSupplierPage';
+import SupplierDetailsPage from '../modules/suppliers/pages/SupplierDetailsPage';
+
+import POSPage from '../modules/orders/pages/POSPage';
+import WaiterAppPage from '../modules/orders/pages/WaiterAppPage';
+import TableManagementPage from '../modules/tables/pages/TableManagementPage';
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />, // We'll update this later to Dashboard/Auth based on state
+  },
+  {
+    path: '/waiter',
+    element: <WaiterAppPage />
+  },
+  {
+    path: '/setup',
+    element: <SetupLayout />,
+    children: [
+      {
+        path: '',
+        element: <SetupWizard />,
+      }
+    ]
+  },
+  {
+    path: '/owner',
+    element: <DashboardLayout />,
+    children: [
+      {
+        path: '',
+        element: <OwnerDashboard />
+      },
+      {
+        path: 'add-property',
+        element: <AddProperty />
+      },
+      {
+        path: 'employees',
+        element: <EmployeeListPage />
+      },
+      {
+        path: 'employees/new',
+        element: <AddEditEmployeePage />
+      },
+      {
+        path: 'employees/:id',
+        element: <EmployeeDetailsPage />
+      },
+      {
+        path: 'employees/:id/edit',
+        element: <AddEditEmployeePage />
+      },
+      {
+        path: 'products',
+        element: <ProductListPage />
+      },
+      {
+        path: 'products/new',
+        element: <AddEditProductPage />
+      },
+      {
+        path: 'products/:id',
+        element: <ProductDetailsPage />
+      },
+      {
+        path: 'products/:id/edit',
+        element: <AddEditProductPage />
+      },
+      {
+        path: 'inventory',
+        element: <InventoryListPage />
+      },
+      {
+        path: 'inventory/new',
+        element: <AddEditInventoryPage />
+      },
+      {
+        path: 'inventory/:id/edit',
+        element: <AddEditInventoryPage />
+      },
+      {
+        path: 'suppliers',
+        element: <SupplierListPage />
+      },
+      {
+        path: 'suppliers/new',
+        element: <AddEditSupplierPage />
+      },
+      {
+        path: 'suppliers/:id',
+        element: <SupplierDetailsPage />
+      },
+      {
+        path: 'suppliers/:id/edit',
+        element: <AddEditSupplierPage />
+      },
+      {
+        path: 'pos',
+        element: <POSPage />
+      },
+      {
+        path: 'tables',
+        element: <TableManagementPage />
+      }
+    ]
+  },
+  {
+    path: '/manager',
+    element: <DashboardLayout />,
+    children: [
+      {
+        path: '',
+        element: <ManagerDashboard />
+      },
+      {
+        path: 'employees',
+        element: <EmployeeListPage />
+      },
+      {
+        path: 'employees/new',
+        element: <AddEditEmployeePage />
+      },
+      {
+        path: 'employees/:id',
+        element: <EmployeeDetailsPage />
+      },
+      {
+        path: 'employees/:id/edit',
+        element: <AddEditEmployeePage />
+      },
+      {
+        path: 'products',
+        element: <ProductListPage />
+      },
+      {
+        path: 'products/new',
+        element: <AddEditProductPage />
+      },
+      {
+        path: 'products/:id',
+        element: <ProductDetailsPage />
+      },
+      {
+        path: 'products/:id/edit',
+        element: <AddEditProductPage />
+      },
+      {
+        path: 'inventory',
+        element: <InventoryListPage />
+      },
+      {
+        path: 'inventory/new',
+        element: <AddEditInventoryPage />
+      },
+      {
+        path: 'inventory/:id/edit',
+        element: <AddEditInventoryPage />
+      },
+      {
+        path: 'suppliers',
+        element: <SupplierListPage />
+      },
+      {
+        path: 'suppliers/new',
+        element: <AddEditSupplierPage />
+      },
+      {
+        path: 'suppliers/:id',
+        element: <SupplierDetailsPage />
+      },
+      {
+        path: 'suppliers/:id/edit',
+        element: <AddEditSupplierPage />
+      },
+      {
+        path: 'pos',
+        element: <POSPage />
+      },
+      {
+        path: 'tables',
+        element: <TableManagementPage />
+      }
+    ]
+  }
+]);

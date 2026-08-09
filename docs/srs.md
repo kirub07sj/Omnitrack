@@ -339,3 +339,305 @@ Ref: sales.cashier_id > employees.id
 Ref: expenses.business_id > businesses.id
 
 Ref: sync_queue.business_id > businesses.id
+
+
+# RestaurantOS Application Workflow
+
+## 1. Application Startup
+
+When the application launches, it performs a series of checks to determine the next screen.
+
+```text
+Launch RestaurantOS
+        │
+        ▼
+Is License Activated?
+        │
+   ┌────┴────┐
+   │         │
+  No        Yes
+   │         │
+License     Does Business Exist?
+Activation         │
+                   ▼
+             ┌─────┴─────┐
+             │           │
+            No          Yes
+             │           │
+      Business Setup    Login
+```
+
+> **Note:** During development (v1), the License Activation step may be temporarily bypassed until the licensing server is implemented.
+
+---
+
+# 2. License Activation
+
+The user enters the product key received after purchasing RestaurantOS.
+
+### Process
+
+1. User enters the Product Key.
+2. RestaurantOS sends the key and device information to the License Server.
+3. The License Server verifies:
+
+   * Product key exists.
+   * Product key is active.
+   * Product key has not expired.
+   * Device activation rules.
+4. If valid:
+
+   * The license is activated.
+   * License information is stored locally.
+5. The application proceeds to Business Setup.
+
+If invalid, the user is notified and activation is denied.
+
+---
+
+# 3. Business Setup Wizard
+
+This process is executed only once during the first installation.
+
+## Step 1 – Business Information
+
+The owner provides:
+
+* Business Name
+* Business Type
+* Phone Number
+* Email Address
+* Physical Address
+* Logo (Optional)
+* Currency
+* Time Zone
+
+Creates:
+
+* Business record
+
+---
+
+## Step 2 – Owner Account
+
+The first administrator account is created.
+
+Required information:
+
+* Full Name
+* Username or Email
+* Password
+* Confirm Password
+
+Creates:
+
+* Employee
+* User
+* Owner Role Assignment
+
+---
+
+## Step 3 – Restaurant Configuration
+
+Basic operational settings.
+
+Examples:
+
+* Number of Tables
+* Tax Percentage
+* Inventory Enabled
+* Receipt Settings
+
+The user may skip optional configuration and complete it later.
+
+---
+
+## Step 4 – Initial Data (Optional)
+
+Optional setup includes:
+
+* Product Categories
+* Products
+* Employees
+* Suppliers
+
+The application should allow the owner to skip this step and configure everything later.
+
+---
+
+## Step 5 – Setup Completion
+
+After successful setup:
+
+* Business is created.
+* Owner account is created.
+* Initial configuration is saved.
+
+The application redirects to the Login screen.
+
+---
+
+# 4. Authentication
+
+Returning users must log in.
+
+Process:
+
+1. Enter username/email.
+2. Enter password.
+3. Credentials are verified.
+4. User session is created.
+5. User is redirected according to their role.
+
+---
+
+# 5. Role-Based Home Page
+
+Each role lands on the page that best matches their daily workflow.
+
+### Owner
+
+Dashboard
+
+### Manager
+
+Dashboard
+
+### Cashier
+
+Orders / POS
+
+### Waiter
+
+Tables
+
+### Kitchen Staff
+
+Kitchen Queue
+
+---
+
+# 6. Daily Operational Workflow
+
+Once logged in, RestaurantOS supports the following business process.
+
+```text
+Customer Arrives
+        │
+        ▼
+Assign Table
+        │
+        ▼
+Waiter Creates Order
+        │
+        ▼
+Kitchen Receives Order
+        │
+        ▼
+Kitchen Marks Order Ready
+        │
+        ▼
+Food Served
+        │
+        ▼
+Customer Pays
+        │
+        ▼
+Payment Recorded
+        │
+        ▼
+Sale Completed
+        │
+        ▼
+Inventory Updated
+        │
+        ▼
+Reports Updated
+```
+
+---
+
+# 7. Offline Architecture
+
+RestaurantOS is designed as an offline-first application.
+
+* All business operations are performed using the local SQLite database.
+* No internet connection is required for daily operations.
+* The application remains fully functional during internet outages.
+
+---
+
+# 8. Synchronization
+
+When an internet connection becomes available, the owner or manager may manually synchronize data.
+
+Synchronization process:
+
+```text
+Local Database
+        │
+        ▼
+Sync Queue
+        │
+        ▼
+Cloud Server
+        │
+        ▼
+Cloud Database
+```
+
+Synchronization uploads:
+
+* Sales
+* Expenses
+* Inventory Changes
+* Employees
+* Products
+* Business Data
+
+The cloud database serves as a backup and enables future features such as analytics, remote management, and multi-device access.
+
+---
+
+# 9. Password Recovery
+
+## Owner
+
+Preferred method:
+
+* Password reset through the License Server using the registered email.
+
+Alternative offline method:
+
+* Recovery Code generated during setup.
+
+## Employees
+
+Employees do not reset their own passwords.
+
+Managers or Owners may reset employee passwords from the Employee Management module.
+
+---
+
+# 10. Future Licensing Workflow
+
+RestaurantOS licensing will be managed through a separate License Management System.
+
+Responsibilities include:
+
+* Customer registration
+* Product key generation
+* License activation
+* Device management
+* Subscription renewal
+* License suspension
+* Usage monitoring
+
+RestaurantOS communicates with the License Server only when:
+
+* Activating a license
+* Verifying license status
+* Renewing subscriptions
+* Synchronizing business data
+
+The restaurant can continue operating offline between successful license verifications.
