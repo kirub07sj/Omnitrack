@@ -49,8 +49,14 @@ export default function ProductListPage() {
     navigate(`${roleBase}/products/new`);
   };
 
-  const handleDuplicate = (prod: any) => {
-    console.log("Duplicate", prod);
+  const handleToggleStatus = async (prod: any) => {
+    try {
+      const newStatus = prod.status === 'Active' ? 'Inactive' : 'Active';
+      await ProductService.updateProduct(prod.id, { ...prod, status: newStatus });
+      await fetchProducts();
+    } catch (err) {
+      console.error("Failed to toggle status", err);
+    }
   };
 
   const handleDeleteClick = (prod: any) => {
@@ -118,7 +124,7 @@ export default function ProductListPage() {
           data={products} 
           onView={handleView}
           onEdit={handleEdit}
-          onDuplicate={handleDuplicate}
+          onToggleStatus={handleToggleStatus}
           onDelete={handleDeleteClick}
         />
       )}

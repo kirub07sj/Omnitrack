@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, CheckCircle2, XCircle } from 'lucide-react';
 
 export default function POSPage() {
   const { currentUser } = useAppStore();
@@ -22,6 +22,9 @@ export default function POSPage() {
 
   const [cart, setCart] = useState<{product: any, quantity: number}[]>([]);
   const [selectedTable, setSelectedTable] = useState<string>('');
+  
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
   const [activeCategory, setActiveCategory] = useState('All');
   const [qrOpen, setQrOpen] = useState(false);
@@ -104,7 +107,8 @@ export default function POSPage() {
 
   const handleCreateOrder = async () => {
     if (cart.length === 0) {
-      alert("Cart is empty");
+      setError("Cart is empty");
+      setTimeout(() => setError(null), 3000);
       return;
     }
 
@@ -122,17 +126,22 @@ export default function POSPage() {
     try {
       await createOrder(orderData);
       setCart([]);
-      alert("Order created successfully!");
+      setSuccess("Order placed successfully!");
+      setTimeout(() => setSuccess(null), 3000);
     } catch (e: any) {
-      alert("Failed to create order: " + e.message);
+      setError("Failed to create order: " + e.message);
+      setTimeout(() => setError(null), 3000);
     }
   };
 
   const handleUpdateStatus = async (orderId: string, status: string) => {
     try {
       await updateOrder(orderId, { status });
+      setSuccess(`Order marked as ${status}`);
+      setTimeout(() => setSuccess(null), 3000);
     } catch (e) {
-      alert("Failed to update status");
+      setError("Failed to update status");
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -150,6 +159,24 @@ export default function POSPage() {
 
   return (
     <>
+      {/* Toast Notifications */}
+      {(error || success) && (
+        <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
+          {error && (
+            <div className="bg-destructive text-destructive-foreground px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center">
+              <XCircle className="w-5 h-5 mr-2" />
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center">
+              <CheckCircle2 className="w-5 h-5 mr-2" />
+              {success}
+            </div>
+          )}
+        </div>
+      )}
+      
     <div className="flex h-[calc(100vh-4rem)] gap-4 p-4 bg-background text-foreground">
       {/* Left Area: Menu / Active Orders */}
       <Card className="flex-1 flex flex-col bg-card/50 backdrop-blur-xl border-border/50 shadow-sm overflow-hidden omni-animate-in">
@@ -212,15 +239,15 @@ export default function POSPage() {
                           onClick={() => addToCart(product)}
                           className={`cursor-pointer bg-card/50 hover:bg-card border border-border/50 rounded-xl transition-all duration-300 omni-card-hover omni-animate-in-scale ${staggerClass} flex flex-col overflow-hidden group`}
                         >
-                          <div className="relative h-32 w-full bg-secondary/30 flex items-center justify-center overflow-hidden border-b border-border/30">
+                          <div className="relative h-32 w-full bg-muted/30 flex flex-col items-center justify-center">
                             {catName && (
                               <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold z-10 shadow-sm border border-border/50">
                                 {catName}
                               </div>
                             )}
                             
-                            {product.image_url ? (
-                              <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" />
+                            {(product.image_url || product.imageUrl) ? (
+                              <img src={(product.image_url || product.imageUrl)?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" />
                             ) : (
                               <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/40 group-hover:text-primary/40 group-hover:scale-110 transition-all duration-500">
                                 <ImageIcon size={32} />
@@ -248,7 +275,7 @@ export default function POSPage() {
                     <div className="flex justify-between items-center border-b border-border/50 pb-3">
                       <div>
                         <span className="font-bold text-lg text-foreground">
-                          {order.table?.table_number ? `Table ${order.table.table_number} - #${order.id.split('-')[0].toUpperCase()}` : `Order #${order.id.split('-')[0].toUpperCase()}`}
+                          {order.table?.table_number ? `${order.table.table_number} - #${order.id.split('-')[0].toUpperCase()}` : `Order #${order.id.split('-')[0].toUpperCase()}`}
                         </span>
                         <span className="text-xs text-muted-foreground ml-3 font-medium bg-muted px-2 py-1 rounded-md">Wait: {order.waiter?.first_name || 'Staff'}</span>
                       </div>

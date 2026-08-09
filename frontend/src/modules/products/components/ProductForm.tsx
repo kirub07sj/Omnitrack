@@ -54,7 +54,6 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
   });
 
   const [isUploading, setIsUploading] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const trackInventory = form.watch("trackInventory");
 
@@ -89,60 +88,22 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
               <FormField
                 control={form.control as any}
                 name="name"
-                render={({ field }) => {
-                  const filteredItems = inventoryItems.filter(i => 
-                    i.name.toLowerCase().includes(field.value?.toLowerCase() || "")
-                  );
-                  return (
-                    <FormItem>
-                      <FormLabel>Product Name *</FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Input 
-                            placeholder="e.g. Avocado Toast" 
-                            {...field} 
-                            className="bg-background border-border" 
-                            onFocus={() => setSearchOpen(true)}
-                            onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              // If they change the text, unlink the inventory item
-                              form.setValue("inventory_item_id", null);
-                            }}
-                          />
-                        </FormControl>
-                        {searchOpen && filteredItems.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto">
-                            <div className="px-3 py-2 text-xs font-semibold text-muted-foreground bg-muted/50">
-                              Inventory Matches
-                            </div>
-                            {filteredItems.map(item => (
-                              <div 
-                                key={item.id} 
-                                className="px-4 py-2 text-sm hover:bg-muted cursor-pointer transition-colors"
-                                onClick={() => {
-                                   form.setValue("name", item.name);
-                                   form.setValue("inventory_item_id", item.id);
-                                   form.setValue("trackInventory", false); // Hide tracking since inventory handles it
-                                   if (item.unit) form.setValue("unit", item.unit);
-                                   setSearchOpen(false);
-                                }}
-                              >
-                                {item.name} <span className="text-muted-foreground ml-2 text-xs">({item.quantity} {item.unit} in stock)</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <FormDescription>
-                        {form.watch("inventory_item_id") 
-                          ? <span className="text-primary font-medium text-xs flex items-center gap-1 mt-1">✓ Linked to Inventory Item</span> 
-                          : "Type to search inventory, or add a custom menu item."}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )
-                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Name *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="e.g. Avocado Toast" 
+                        {...field} 
+                        className="bg-background border-border" 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      The name that will appear on the POS and receipts.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               <FormField
                 control={form.control as any}
@@ -198,7 +159,7 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
                       {field.value ? (
                         <div className="relative w-full h-full flex flex-col items-center justify-center">
                           <img 
-                            src={field.value.startsWith('/') ? `http://localhost:5000${field.value}` : field.value} 
+                            src={field.value?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} 
                             alt="Preview" 
                             className="max-h-[200px] w-auto max-w-full object-contain rounded-md shadow-sm mb-4"
                           />
@@ -313,48 +274,44 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
             <CardTitle className="text-lg">Inventory & Status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!form.watch("inventory_item_id") && (
-              <>
-                <FormField
-                  control={form.control as any}
-                  name="trackInventory"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-border rounded-md bg-background">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Track Inventory</FormLabel>
-                        <FormDescription>
-                          Enable tracking to monitor stock levels and get low stock alerts.
-                        </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control as any}
+              name="inventory_item_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Link to Inventory (Optional)</FormLabel>
+                  <Select 
+                    onValueChange={(val) => {
+                      field.onChange(val === "none" ? null : val);
+                      if (val !== "none") {
+                        form.setValue("trackInventory", true);
+                      }
+                    }} 
+                    value={field.value || "none"}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-background border-border">
+                        <SelectValue placeholder="Select inventory item..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">No Inventory Link</SelectItem>
+                      {inventoryItems.map(item => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {item.name} ({item.quantity} {item.unit} in stock)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Link this product to an inventory item (e.g. "Coca Cola 300ml Glass") to automatically deduct stock.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                {trackInventory && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    <FormField
-                      control={form.control as any}
-                      name="minStock"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Minimum Stock Level</FormLabel>
-                          <FormControl>
-                            <Input type="number" {...field} className="bg-background border-border" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
-              </>
-            )}
+            {/* The Track Inventory checkbox has been completely removed as tracking is now purely determined by whether an inventory item is linked. */}
 
             <div className="pt-4 max-w-sm">
               <FormField

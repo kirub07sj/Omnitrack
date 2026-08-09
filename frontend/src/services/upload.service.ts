@@ -12,6 +12,6 @@ export const UploadService = {
     });
 
     // Prepend the backend URL to bypass Vite proxy and support Electron desktop environment
-    return `http://localhost:5000${response.data.url}`;
+    return response.data.url;
   }
 };

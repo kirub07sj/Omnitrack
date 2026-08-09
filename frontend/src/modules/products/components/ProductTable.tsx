@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Search, Plus, MoreHorizontal, ArrowUpDown, Edit, Trash, Box, Eye, Trash2, Copy } from "lucide-react";
+import { Package, Search, Plus, MoreHorizontal, ArrowUpDown, Edit, Trash, Box, Eye, Trash2, Copy, CheckCircle2, XCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface Product {
@@ -34,11 +34,11 @@ interface Props {
   data: Product[];
   onView: (prod: Product) => void;
   onEdit: (prod: Product) => void;
-  onDuplicate: (prod: Product) => void;
+  onToggleStatus: (prod: Product) => void;
   onDelete: (prod: Product) => void;
 }
 
-export function ProductTable({ data, onView, onEdit, onDuplicate, onDelete }: Props) {
+export function ProductTable({ data, onView, onEdit, onToggleStatus, onDelete }: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -49,7 +49,7 @@ export function ProductTable({ data, onView, onEdit, onDuplicate, onDelete }: Pr
       cell: ({ row }) => {
         const val = row.getValue("imageUrl") as string;
         return val ? (
-          <img src={val.startsWith('/') ? `http://localhost:5000${val}` : val} alt="Product" className="w-10 h-10 rounded-md object-cover border border-border" />
+          <img src={val?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt="Product" className="w-10 h-10 rounded-md object-cover border border-border" />
         ) : (
           <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center border border-border">
             <Box className="w-5 h-5 text-muted-foreground" />
@@ -121,7 +121,10 @@ export function ProductTable({ data, onView, onEdit, onDuplicate, onDelete }: Pr
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => onView(prod)}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
               <DropdownMenuItem onClick={() => onEdit(prod)}><Edit className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDuplicate(prod)}><Copy className="mr-2 h-4 w-4" /> Duplicate</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onToggleStatus(prod)}>
+                {prod.status === 'Active' ? <XCircle className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                {prod.status === 'Active' ? 'Set Inactive' : 'Set Active'}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onDelete(prod)} className="text-red-600 focus:text-red-600 focus:bg-red-50">
                 <Trash2 className="mr-2 h-4 w-4" /> Delete

@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useProductStore } from '@/store/useProductStore';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Loader2, ShoppingCart, CheckCircle2, Plus, Minus, X, Image as ImageIcon } from 'lucide-react';
+import { Loader2, ShoppingCart, CheckCircle2, Plus, Minus, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
 
 export default function WaiterAppPage() {
   const [searchParams] = useSearchParams();
@@ -27,6 +27,7 @@ export default function WaiterAppPage() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [showTableAlert, setShowTableAlert] = useState(false);
 
   useEffect(() => {
     if (businessId) {
@@ -40,7 +41,7 @@ export default function WaiterAppPage() {
           const text = await r.text();
           return text ? JSON.parse(text) : [];
         }),
-        fetch(`/api/orders?business_id=${businessId}&status=Pending`).then(async r => {
+        fetch(`/api/orders?business_id=${businessId}`).then(async r => {
           const text = await r.text();
           return text ? JSON.parse(text) : [];
         })
@@ -60,8 +61,10 @@ export default function WaiterAppPage() {
         if (Array.isArray(ords)) oItems = ords;
         else if (ords && Array.isArray(ords.data)) oItems = ords.data;
 
+        const activeOrders = oItems.filter((o: any) => o.status !== 'Completed' && o.status !== 'Cancelled');
+
         setTables(tItems);
-        setOrdersList(oItems);
+        setOrdersList(activeOrders);
         setLoading(false);
       }).catch(err => {
         console.error("Failed to load data", err);
@@ -74,11 +77,24 @@ export default function WaiterAppPage() {
     }
   }, [businessId, fetchProducts]);
 
-  // Polling for products auto-update without refresh
+  // Polling for products and orders auto-update without refresh
   useEffect(() => {
     if (!businessId) return;
     const intervalId = setInterval(() => {
       fetchProducts(businessId, true); // true = silent
+      
+      // Poll active orders
+      fetch(`/api/orders?business_id=${businessId}`)
+        .then(r => r.json())
+        .then(data => {
+          let oItems = [];
+          if (Array.isArray(data)) oItems = data;
+          else if (data && Array.isArray(data.data)) oItems = data.data;
+          
+          const activeOrders = oItems.filter((o: any) => o.status !== 'Completed' && o.status !== 'Cancelled');
+          setOrdersList(activeOrders);
+        })
+        .catch(err => console.error("Failed to poll orders", err));
     }, 5000);
     return () => clearInterval(intervalId);
   }, [businessId, fetchProducts]);
@@ -124,6 +140,10 @@ export default function WaiterAppPage() {
 
   const submitOrder = async () => {
     if (cart.length === 0) return;
+    if (!selectedTable) {
+      setShowTableAlert(true);
+      return;
+    }
 
     setSubmitLoading(true);
     setError(null);
@@ -150,11 +170,14 @@ export default function WaiterAppPage() {
         setOrderSuccess(true);
         setIsCartOpen(false);
         // Refresh orders list
-        fetch(`/api/orders?business_id=${businessId}&status=Pending`)
+        fetch(`/api/orders?business_id=${businessId}`)
           .then(r => r.json())
           .then(data => {
-            if (Array.isArray(data)) setOrdersList(data);
-            else if (data && Array.isArray(data.data)) setOrdersList(data.data);
+            let oItems = [];
+            if (Array.isArray(data)) oItems = data;
+            else if (data && Array.isArray(data.data)) oItems = data.data;
+            const activeOrders = oItems.filter((o: any) => o.status !== 'Completed' && o.status !== 'Cancelled');
+            setOrdersList(activeOrders);
           })
           .catch(err => console.error(err));
           
@@ -270,8 +293,8 @@ export default function WaiterAppPage() {
                     </div>
                   )}
                   <div className="relative h-24 w-full bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100">
-                    {product.image_url ? (
-                      <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-active:scale-110 transition-transform duration-500 ease-out" />
+                    {(product.image_url || product.imageUrl) ? (
+                      <img src={(product.image_url || product.imageUrl)?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt={product.name} className="w-full h-full object-cover group-active:scale-110 transition-transform duration-500 ease-out" />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 group-active:text-emerald-400 group-active:scale-110 transition-all duration-500">
                         <ImageIcon size={24} />
@@ -335,8 +358,8 @@ export default function WaiterAppPage() {
               {cart.map(item => (
                 <div key={item.product.id} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4">
                   <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
-                    {item.product.image_url ? (
-                      <img src={item.product.image_url} alt={item.product.name} className="w-full h-full object-cover" />
+                    {(item.product.image_url || item.product.imageUrl) ? (
+                      <img src={(item.product.image_url || item.product.imageUrl)?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt={item.product.name} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-emerald-600 font-bold text-xl">{item.product.name[0]}</span>
                     )}
@@ -375,7 +398,7 @@ export default function WaiterAppPage() {
             
             <Button 
               onClick={submitOrder}
-              disabled={submitLoading || cart.length === 0 || !selectedTable}
+              disabled={submitLoading || cart.length === 0}
               className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg bg-emerald-600 hover:bg-emerald-700 text-white"
               size="lg"
             >
@@ -384,6 +407,29 @@ export default function WaiterAppPage() {
               ) : (
                 'Place Order'
               )}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Table Required Alert Overlay */}
+      {showTableAlert && (
+        <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in duration-200">
+          <div className="bg-white border border-slate-200 p-8 rounded-3xl flex flex-col items-center max-w-sm w-full shadow-2xl text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+              <AlertCircle className="w-10 h-10 text-red-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Table Required</h2>
+            <p className="text-slate-500 mb-8">Please select a table before placing this order.</p>
+            <Button 
+              onClick={() => {
+                setShowTableAlert(false);
+                setIsCartOpen(false);
+              }}
+              className="w-full h-14 rounded-2xl text-lg font-bold shadow-sm bg-slate-900 hover:bg-slate-800 text-white"
+            >
+              Go Select Table
             </Button>
           </div>
         </div>
@@ -423,7 +469,7 @@ export default function WaiterAppPage() {
                 ordersList.map(order => (
                   <div key={order.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                     <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
-                      <span className="font-bold text-lg text-emerald-600">{order.table?.table_number ? `Table ${order.table.table_number}` : 'No Table'} - #{order.id.split('-')[0].toUpperCase()}</span>
+                      <span className="font-bold text-lg text-emerald-600">{order.table?.table_number ? `${order.table.table_number}` : 'No Table'} - #{order.id.split('-')[0].toUpperCase()}</span>
                       <span className="text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">{order.status}</span>
                     </div>
                     <div className="space-y-3">
