@@ -93,8 +93,8 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-2xl p-6 sm:p-8">
+        <DialogHeader className="mb-4">
           <DialogTitle className="text-2xl font-bold flex justify-between items-center">
             <span>{isManual ? 'Complete Manual Sale' : `Checkout Order #${order.id?.split('-')[0]}`}</span>
             <span className="text-primary">{total.toFixed(2)} ETB</span>
@@ -165,7 +165,7 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
                     placeholder="e.g. 1000" 
                     value={received}
                     onChange={(e) => setReceived(e.target.value)}
-                    className="text-lg"
+                    className="text-lg h-12 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                 </div>
                 {received && parseFloat(received) >= total && (
@@ -191,10 +191,10 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
               </div>
             )}
 
-            {error && <p className="text-sm text-destructive font-medium">{error}</p>}
+            {error && <p className="text-sm text-destructive font-medium bg-destructive/10 p-3 rounded-md">{error}</p>}
 
             <Button 
-              className="w-full h-12 text-lg font-bold mt-4" 
+              className="w-full h-14 text-lg font-bold mt-6 shadow-md" 
               onClick={handleCheckout}
               disabled={loading}
             >

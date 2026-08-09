@@ -187,6 +187,29 @@ export const createManualSale = async (req: Request, res: Response) => {
         }
       });
 
+      // Decrement Inventory
+      if (fullSale?.order?.items) {
+        for (const item of fullSale.order.items) {
+          if (item.product?.track_inventory && item.product?.inventory_item_id) {
+            await tx.inventoryItem.update({
+              where: { id: item.product.inventory_item_id },
+              data: { quantity: { decrement: item.quantity } }
+            });
+            
+            await tx.inventoryMovement.create({
+              data: {
+                business_id,
+                inventory_item_id: item.product.inventory_item_id,
+                type: 'OUT',
+                quantity: item.quantity,
+                reference_type: 'Sale',
+                reference_id: fullSale.id
+              }
+            });
+          }
+        }
+      }
+
       return fullSale;
     });
 

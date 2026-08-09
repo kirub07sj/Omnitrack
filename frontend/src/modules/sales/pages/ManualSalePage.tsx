@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Search, ArrowLeft, ShoppingCart, Minus, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import CheckoutDialog from '../components/CheckoutDialog';
 import ReceiptDialog from '../components/ReceiptDialog';
 
@@ -34,12 +41,16 @@ export default function ManualSalePage() {
         const pData = await prodRes.json();
         const tData = await tableRes.json();
         
-        if (pData.success) {
-          // Adjust based on your API structure (some APIs wrap array in `data`)
-          setProducts(Array.isArray(pData.data) ? pData.data : pData);
+        if (Array.isArray(pData)) {
+          setProducts(pData);
+        } else if (pData.success) {
+          setProducts(Array.isArray(pData.data) ? pData.data : []);
         }
-        if (tData.success) {
-          setTables(Array.isArray(tData.data) ? tData.data : tData);
+
+        if (Array.isArray(tData)) {
+          setTables(tData);
+        } else if (tData.success) {
+          setTables(Array.isArray(tData.data) ? tData.data : []);
         }
       } catch (e) {
         console.error(e);
@@ -92,7 +103,7 @@ export default function ManualSalePage() {
   };
 
   const manualOrderPayload = {
-    table_id: selectedTable || null,
+    table_id: (!selectedTable || selectedTable === 'walk_in') ? null : selectedTable,
     waiter_id: null,
     items: cart
   };
@@ -160,16 +171,17 @@ export default function ManualSalePage() {
             <CardContent className="flex flex-col h-[500px]">
               <div className="mb-4">
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">Assign Table (Optional)</label>
-                <select 
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                  value={selectedTable}
-                  onChange={(e) => setSelectedTable(e.target.value)}
-                >
-                  <option value="">-- Walk-in / No Table --</option>
-                  {tables.map(t => (
-                    <option key={t.id} value={t.id}>Table {t.table_number}</option>
-                  ))}
-                </select>
+                <Select value={selectedTable} onValueChange={setSelectedTable}>
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue placeholder="-- Walk-in / No Table --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="walk_in">-- Walk-in / No Table --</SelectItem>
+                    {tables.map(t => (
+                      <SelectItem key={t.id} value={t.id}>Table {t.table_number}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex-1 overflow-y-auto space-y-3 pr-2 border-y py-4">

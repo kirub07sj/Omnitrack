@@ -10,6 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image as ImageIcon, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function POSPage() {
   const { currentUser, businessSettings } = useAppStore();
@@ -286,16 +293,17 @@ export default function POSPage() {
                         <div className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${getStatusColor(order.status)}`}>
                           {order.status}
                         </div>
-                        <select 
-                          value={order.status} 
-                          onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
-                          className="bg-background border border-input text-foreground text-xs rounded-md p-1.5 focus:ring-1 focus:ring-primary outline-none cursor-pointer shadow-sm"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Completed">Completed</option>
-                          <option value="Cancelled">Cancelled</option>
-                        </select>
+                        <Select value={order.status} onValueChange={(val) => handleUpdateStatus(order.id, val)}>
+                          <SelectTrigger className="w-[110px] h-8 text-xs bg-background border-input shadow-sm">
+                            <SelectValue placeholder="Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="In Progress">In Progress</SelectItem>
+                            <SelectItem value="Completed">Completed</SelectItem>
+                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -334,16 +342,16 @@ export default function POSPage() {
               Current Order
             </div>
             
-            <select
-              value={selectedTable}
-              onChange={(e) => setSelectedTable(e.target.value)}
-              className="text-sm bg-background border border-border text-foreground rounded-md px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none max-w-[130px]"
-            >
-              <option value="" disabled>Select Table</option>
-              {tables.map((t: any) => (
-                <option key={t.id} value={t.id}>{t.table_number}</option>
-              ))}
-            </select>
+            <Select value={selectedTable} onValueChange={setSelectedTable}>
+              <SelectTrigger className="max-w-[130px] h-8 text-xs bg-background border-border">
+                <SelectValue placeholder="Select Table" />
+              </SelectTrigger>
+              <SelectContent>
+                {tables.map((t: any) => (
+                  <SelectItem key={t.id} value={t.id}>{t.table_number}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </CardTitle>
         </CardHeader>
         

@@ -35,9 +35,44 @@ export default function PaymentQueue() {
   };
 
   useEffect(() => {
-    if (currentUser?.business_id) {
-      fetchUnpaidOrders();
-    }
+    if (!currentUser?.business_id) return;
+    fetchUnpaidOrders();
+
+    const es = new EventSource(`/api/orders/stream?business_id=${currentUser.business_id}`);
+    
+    es.addEventListener('UPDATE_ORDER', (e) => {
+      try {
+        const updatedOrder = JSON.parse(e.data);
+        setOrders(prev => {
+          // If order is cancelled or no longer ready/completed, remove it
+          if (updatedOrder.status === 'Cancelled' || (updatedOrder.status !== 'Ready' && updatedOrder.status !== 'Completed')) {
+            return prev.filter(o => o.id !== updatedOrder.id);
+          }
+          
+          // Otherwise, update or add it
+          const exists = prev.find(o => o.id === updatedOrder.id);
+          if (exists) {
+            return prev.map(o => o.id === updatedOrder.id ? updatedOrder : o);
+          }
+          return [...prev, updatedOrder];
+        });
+      } catch (err) {
+        console.error('Error parsing SSE data', err);
+      }
+    });
+
+    es.addEventListener('DELETE_ORDER', (e) => {
+      try {
+        const deletedOrder = JSON.parse(e.data);
+        setOrders(prev => prev.filter(o => o.id !== deletedOrder.id));
+      } catch (err) {
+        console.error('Error parsing SSE data', err);
+      }
+    });
+
+    return () => {
+      es.close();
+    };
   }, [currentUser?.business_id]);
 
   const filteredOrders = orders.filter((o) => {
@@ -59,8 +94,7 @@ export default function PaymentQueue() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Payment Queue</h2>
-          <p className="text-muted-foreground">Orders ready for payment</p>
+          <p className="text-muted-foreground text-sm">Orders ready for payment</p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
@@ -103,7 +137,7 @@ export default function PaymentQueue() {
             const total = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * parseFloat(item.quantity)), 0);
             
             return (
-              <Card key={order.id} className="flex flex-col hover:border-primary/50 transition-colors">
+              <Card key={order.id} className="group relative flex flex-col hover:border-primary/50 transition-all min-h-[200px] overflow-hidden cursor-pointer shadow-sm hover:shadow-md">
                 <CardHeader className="pb-3 border-b bg-muted/20">
                   <div className="flex justify-between items-start">
                     <div>
@@ -115,7 +149,7 @@ export default function PaymentQueue() {
                     </span>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-4 flex-1 flex flex-col">
+                <CardContent className="pt-4 flex-1 flex flex-col relative pb-16">
                   <div className="text-sm space-y-2 flex-1 mb-4">
                     <div className="flex justify-between text-muted-foreground">
                       <span>Items:</span>
@@ -130,15 +164,19 @@ export default function PaymentQueue() {
                       <span className="text-primary">{total.toFixed(2)} ETB</span>
                     </div>
                   </div>
+                </CardContent>
+
+                {/* Hover Button Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-gradient-to-t from-background/90 via-background/80 to-transparent">
                   <Button 
-                    className="w-full gap-2 font-bold" 
+                    className="w-full gap-2 font-bold shadow-lg" 
                     size="lg"
                     onClick={() => handleCheckout(order.id)}
                   >
                     <Banknote className="w-5 h-5" />
                     Collect Payment
                   </Button>
-                </CardContent>
+                </div>
               </Card>
             );
           })}
