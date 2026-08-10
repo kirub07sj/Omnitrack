@@ -1,7 +1,7 @@
 "use client"
 
 import { ChevronRight, type LucideIcon } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 import {
   Collapsible,
@@ -33,15 +33,21 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const location = useLocation();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
+          const isTopExactMatch = location.pathname === item.url || location.pathname === item.url + '/';
+          const isTopRootPath = item.url.split('/').filter(Boolean).length <= 1;
+          const isTopActive = isTopExactMatch || (!isTopRootPath && item.url !== '#' && location.pathname.startsWith(item.url + '/'));
+          
           if (!item.items || item.items.length === 0) {
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton tooltip={item.title} asChild>
+                <SidebarMenuButton tooltip={item.title} isActive={isTopActive} asChild>
                   <Link to={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
@@ -68,15 +74,21 @@ export function NavMain({
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    {item.items?.map((subItem) => (
+                    {item.items?.map((subItem) => {
+                      const isExactMatch = location.pathname === subItem.url || location.pathname === subItem.url + '/';
+                      const isRootPath = subItem.url.split('/').filter(Boolean).length <= 1;
+                      const isActive = isExactMatch || (!isRootPath && subItem.url !== '#' && location.pathname.startsWith(subItem.url + '/'));
+                      
+                      return (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild>
+                        <SidebarMenuSubButton asChild isActive={isActive}>
                           <Link to={subItem.url}>
                             <span>{subItem.title}</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
-                    ))}
+                      )
+                    })}
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>

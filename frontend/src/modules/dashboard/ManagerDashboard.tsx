@@ -21,7 +21,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, Line, LineChart, PieChart, Pie, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell } from "recharts";
+import { useState, useEffect } from 'react';
+import { useAppStore } from '@/store/useAppStore';
+import { format } from 'date-fns';
 
 const hourlyOrdersData = [
   { hour: "10 AM", orders: 12 },
@@ -42,6 +45,29 @@ const productSalesData = [
 const COLORS = ['#10b981', '#14b8a6', '#06b6d4', '#8b5cf6'];
 
 export default function ManagerDashboard() {
+  const { currentUser } = useAppStore();
+  const [sales, setSales] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSales = async () => {
+      try {
+        const res = await fetch(`/api/sales/history?business_id=${currentUser?.business_id}`);
+        const data = await res.json();
+        if (data.success) {
+          setSales(data.data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch dashboard sales:", e);
+      }
+    };
+    if (currentUser?.business_id) fetchSales();
+  }, [currentUser?.business_id]);
+
+  // Compute live metrics
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const todaySales = sales.filter(s => format(new Date(s.created_at), 'yyyy-MM-dd') === today);
+  const totalAmountToday = todaySales.reduce((sum, s) => sum + parseFloat(s.total), 0);
+
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
       <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto omni-animate-in">
@@ -126,8 +152,10 @@ export default function ManagerDashboard() {
               <DollarSign className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">$1,842.50</div>
-              <p className="text-xs text-muted-foreground mt-1">From 86 transactions</p>
+              <div className="text-2xl font-bold text-foreground">
+                {totalAmountToday.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">ETB</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">From {todaySales.length} transactions</p>
             </CardContent>
           </Card>
           <Card className="bg-card border-border omni-kpi-card">

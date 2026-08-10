@@ -3,7 +3,7 @@
 > These are the instructions for the **OmniTrack side** (the separate AI/integration work). ProdKey's `/public/*` API is already built, tested, and running. OmniTrack only needs to call it.
 
 ### 8.0 — Get the ProdKey credentials (user does this once in the dashboard)
-- [ ] In ProdKey dashboard, create a product named `OmniTrack` → copy the **product API key** (`pk_j-eYHI1D_WNsXN9uuVO18fsirQJX42natZ78hOnC3KU`, shown once; regenerate it later if it leaks)
+- [ ] In ProdKey dashboard, create a product named `OmniTrack` → copy the **product API key** (`pk_1RucCUSbIe0gseqaw5nyZLwfRn2ppgB_dnA9N-LRuB8`, shown once; regenerate it later if it leaks)
 - [ ] Note the ProdKey server URL (dev: `http://localhost:4000`, prod: deployed URL) and the **public signing key** from ProdKey's `.env` → `SIGNING_PUBLIC_KEY` (this is needed for offline verification)
 
 ### 8.1 — ProdKey public API contract (implement against this)

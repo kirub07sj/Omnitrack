@@ -22,6 +22,9 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, Line, LineChart, PieChart, Pie, Cell } from "recharts";
+import { useState, useEffect } from 'react';
+import { useAppStore } from '@/store/useAppStore';
+import { format } from 'date-fns';
 
 
 const dailyRevenueData = [
@@ -52,6 +55,37 @@ const categorySalesData = [
 const COLORS = ['#10b981', '#14b8a6', '#06b6d4', '#8b5cf6'];
 
 export default function OwnerDashboard() {
+  const { currentUser } = useAppStore();
+  const [sales, setSales] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSales = async () => {
+      try {
+        const res = await fetch(`/api/sales/history?business_id=${currentUser?.business_id}`);
+        const data = await res.json();
+        if (data.success) {
+          setSales(data.data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch dashboard sales:", e);
+      }
+    };
+    if (currentUser?.business_id) fetchSales();
+  }, [currentUser?.business_id]);
+
+  // Compute live metrics
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const todaySales = sales.filter(s => format(new Date(s.created_at), 'yyyy-MM-dd') === today);
+  const totalAmountToday = todaySales.reduce((sum, s) => sum + parseFloat(s.total), 0);
+
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const monthSales = sales.filter(s => {
+    const d = new Date(s.created_at);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+  const totalAmountMonth = monthSales.reduce((sum, s) => sum + parseFloat(s.total), 0);
+
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
       <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto omni-animate-in">
@@ -116,8 +150,10 @@ export default function OwnerDashboard() {
               <DollarSign className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">$4,231.89</div>
-              <p className="text-xs text-emerald-500 flex items-center mt-1"><TrendingUp className="w-3 h-3 mr-1" /> +12.5% from yesterday</p>
+              <div className="text-2xl font-bold text-foreground">
+                {totalAmountToday.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">ETB</span>
+              </div>
+              <p className="text-xs text-emerald-500 flex items-center mt-1"><TrendingUp className="w-3 h-3 mr-1" /> Live today</p>
             </CardContent>
           </Card>
           <Card className="bg-card border-border">
@@ -126,8 +162,10 @@ export default function OwnerDashboard() {
               <DollarSign className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">$61,000.00</div>
-              <p className="text-xs text-emerald-500 flex items-center mt-1"><TrendingUp className="w-3 h-3 mr-1" /> +5.2% from last month</p>
+              <div className="text-2xl font-bold text-foreground">
+                {totalAmountMonth.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">ETB</span>
+              </div>
+              <p className="text-xs text-emerald-500 flex items-center mt-1"><TrendingUp className="w-3 h-3 mr-1" /> This month</p>
             </CardContent>
           </Card>
           <Card className="bg-card border-border">
@@ -152,12 +190,12 @@ export default function OwnerDashboard() {
           </Card>
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Active Orders</CardTitle>
+              <CardTitle className="text-xs font-medium text-muted-foreground">Today's Transactions</CardTitle>
               <ShoppingCart className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">42</div>
-              <p className="text-xs text-muted-foreground mt-1">Currently processing in kitchen</p>
+              <div className="text-2xl font-bold text-foreground">{todaySales.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Completed orders today</p>
             </CardContent>
           </Card>
           <Card className="bg-card border-border">
