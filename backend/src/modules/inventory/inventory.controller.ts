@@ -94,7 +94,33 @@ export const deleteInventoryItem = async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id);
 
-    // Delete linked products first (cascade)
+    // Find linked purchases to check later
+    const linkedPurchaseItems = await prisma.purchaseItem.findMany({
+      where: { inventory_item_id: id }
+    });
+    const purchaseIds = [...new Set(linkedPurchaseItems.map(pi => pi.purchase_id))];
+
+    // Delete linked purchase items first
+    await prisma.purchaseItem.deleteMany({
+      where: { inventory_item_id: id }
+    });
+
+    // Clean up empty purchases
+    for (const pId of purchaseIds) {
+      const remainingItems = await prisma.purchaseItem.count({
+        where: { purchase_id: pId }
+      });
+      if (remainingItems === 0) {
+        await prisma.purchase.delete({ where: { id: pId } });
+      }
+    }
+
+    // Delete linked inventory movements
+    await prisma.inventoryMovement.deleteMany({
+      where: { inventory_item_id: id }
+    });
+
+    // Delete linked products (cascade)
     await prisma.product.deleteMany({
       where: { inventory_item_id: id }
     });
@@ -106,5 +132,27 @@ export const deleteInventoryItem = async (req: Request, res: Response) => {
     res.json({ message: 'Inventory item deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Failed to delete inventory item', error });
+  }
+};
+
+export const getInventoryMovements = async (req: Request, res: Response) => {
+  try {
+    const { business_id } = req.query;
+    if (!business_id) {
+       res.status(400).json({ message: 'business_id is required' });
+       return;
+    }
+
+    const movements = await prisma.inventoryMovement.findMany({
+      where: { business_id: String(business_id) },
+      include: {
+        inventory_item: true
+      },
+      orderBy: { created_at: 'desc' }
+    });
+    
+    res.json(movements);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch inventory movements', error });
   }
 };

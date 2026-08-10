@@ -49,5 +49,47 @@ export const InventoryService = {
       method: "DELETE"
     });
     if (!response.ok) throw new Error("Failed to delete inventory item");
+  },
+
+  getPurchases: async (): Promise<any[]> => {
+    const appStorage = JSON.parse(localStorage.getItem('app-storage') || '{}');
+    const businessId = appStorage.state?.currentUser?.business_id || "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const response = await fetch(`/api/purchases?business_id=${businessId}`);
+    if (!response.ok) throw new Error("Failed to fetch purchases");
+    return response.json();
+  },
+
+  createPurchase: async (data: any): Promise<any> => {
+    const appStorage = JSON.parse(localStorage.getItem('app-storage') || '{}');
+    const businessId = appStorage.state?.currentUser?.business_id || "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const payload = { ...data, business_id: businessId };
+
+    const response = await fetch(`/api/purchases`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) throw new Error("Failed to create purchase");
+    return response.json();
+  },
+
+  updatePurchaseStatus: async (id: string, status: string): Promise<any> => {
+    const response = await fetch(`/api/purchases/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+    
+    if (!response.ok) throw new Error("Failed to update purchase status");
+    return response.json();
+  },
+
+  getMovements: async (): Promise<any[]> => {
+    const appStorage = JSON.parse(localStorage.getItem('app-storage') || '{}');
+    const businessId = appStorage.state?.currentUser?.business_id || "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const response = await fetch(`/api/inventory/movements?business_id=${businessId}`);
+    if (!response.ok) throw new Error("Failed to fetch movements");
+    return response.json();
   }
 };

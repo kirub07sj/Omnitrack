@@ -30,7 +30,11 @@ export default function EmployeeListPage() {
     setError(null);
     try {
       const data = await EmployeeService.getEmployees();
-      setEmployees(data);
+      const filteredData = data.filter((e: Employee) => 
+        e.position?.toLowerCase() !== 'system owner' && 
+        e.role?.toLowerCase() !== 'owner'
+      );
+      setEmployees(filteredData);
     } catch (err: any) {
       setError(err.message || "Failed to load employees");
       console.error(err);
