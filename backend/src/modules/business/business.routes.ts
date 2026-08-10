@@ -121,13 +121,36 @@ router.post('/setup-product', async (req, res) => {
 
 router.put('/settings', async (req, res) => {
   try {
-    const { is_kitchen_active } = req.body;
+    const { 
+      is_kitchen_active, 
+      name, 
+      owner_name, 
+      phone, 
+      email, 
+      address, 
+      logo, 
+      currency, 
+      tax_rate, 
+      settings 
+    } = req.body;
+    
     const existing = await prisma.business.findFirst();
     if (!existing) return res.status(404).json({ success: false, message: 'Business not found' });
     
     const updated = await prisma.business.update({
       where: { id: existing.id },
-      data: { is_kitchen_active }
+      data: { 
+        ...(is_kitchen_active !== undefined && { is_kitchen_active }),
+        ...(name !== undefined && { name }),
+        ...(owner_name !== undefined && { owner_name }),
+        ...(phone !== undefined && { phone }),
+        ...(email !== undefined && { email }),
+        ...(address !== undefined && { address }),
+        ...(logo !== undefined && { logo }),
+        ...(currency !== undefined && { currency }),
+        ...(tax_rate !== undefined && { tax_rate }),
+        ...(settings !== undefined && { settings })
+      }
     });
     res.json({ success: true, business: updated });
   } catch (error) {

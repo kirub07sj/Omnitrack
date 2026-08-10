@@ -1,13 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, ChefHat } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  BusinessSettingsTab, 
+  PaymentSettingsTab, 
+  OrderSettingsTab, 
+  InventorySettingsTab, 
+  TaxesSettingsTab, 
+  ReceiptSettingsTab, 
+  SystemSettingsTab 
+} from '../components/SettingsForms';
 
 export default function SettingsPage() {
   const { businessSettings, updateBusinessSettings } = useAppStore();
   
-  const [isKitchenActive, setIsKitchenActive] = useState(businessSettings?.is_kitchen_active ?? true);
+  // Parse existing JSON settings or use empty object
+  const initialSettings = businessSettings?.settings ? JSON.parse(businessSettings.settings) : {};
+
+  // Construct flat form data combining DB columns and JSON settings
+  const [formData, setFormData] = useState<any>({
+    is_kitchen_active: businessSettings?.is_kitchen_active ?? true,
+    name: businessSettings?.name || '',
+    owner_name: businessSettings?.owner_name || '',
+    phone: businessSettings?.phone || '',
+    email: businessSettings?.email || '',
+    address: businessSettings?.address || '',
+    logo: businessSettings?.logo || '',
+    currency: businessSettings?.currency || 'ETB',
+    tax_rate: businessSettings?.tax_rate || 15,
+    ...initialSettings
+  });
+
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
@@ -15,10 +40,22 @@ export default function SettingsPage() {
     setIsSaving(true);
     setMessage(null);
     try {
+      // Separate root columns from JSON settings
+      const { 
+        is_kitchen_active, name, owner_name, phone, email, address, logo, currency, tax_rate, 
+        ...otherSettings 
+      } = formData;
+
+      const payload = {
+        is_kitchen_active,
+        name, owner_name, phone, email, address, logo, currency, tax_rate,
+        settings: JSON.stringify(otherSettings)
+      };
+
       const res = await fetch('/api/business/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_kitchen_active: isKitchenActive })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       
@@ -37,9 +74,16 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
+    <div className="p-6 max-w-5xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
+          <p className="text-muted-foreground mt-1">Configure your business rules and workflows</p>
+        </div>
+        <Button onClick={handleSave} disabled={isSaving} size="lg" className="shadow-lg">
+          {isSaving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
+          Save All Changes
+        </Button>
       </div>
 
       {/* Fixed Toast Notifications */}
@@ -56,39 +100,39 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><ChefHat className="w-5 h-5 text-primary" /> Operational Modules</CardTitle>
-          <CardDescription>Configure which modules are active for your business workflow.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          
-          <div className="flex items-center justify-between p-4 border rounded-xl">
-            <div>
-              <h3 className="font-semibold text-lg">Kitchen Module</h3>
-              <p className="text-sm text-muted-foreground max-w-md">
-                Enable this if you have a kitchen display/printer and want orders to be sent to the kitchen as "Pending". Disable this if waiters tell the kitchen directly, and you only want to use the POS for direct checkouts.
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer" 
-                checked={isKitchenActive}
-                onChange={(e) => setIsKitchenActive(e.target.checked)}
-              />
-              <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
-            </label>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <Button onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
-              {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              Save Settings
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="business" className="w-full">
+        <TabsList className="w-full justify-start h-auto flex-wrap bg-transparent border-b p-0 rounded-none space-x-1 mb-6">
+          <TabsTrigger value="business" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Business</TabsTrigger>
+          <TabsTrigger value="payments" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Payments</TabsTrigger>
+          <TabsTrigger value="orders" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Orders</TabsTrigger>
+          <TabsTrigger value="inventory" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Inventory</TabsTrigger>
+          <TabsTrigger value="taxes" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Taxes & Charges</TabsTrigger>
+          <TabsTrigger value="receipts" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Receipts</TabsTrigger>
+          <TabsTrigger value="system" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">System</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="business" className="animate-in fade-in-50 duration-300">
+          <BusinessSettingsTab data={formData} onChange={setFormData} />
+        </TabsContent>
+        <TabsContent value="payments" className="animate-in fade-in-50 duration-300">
+          <PaymentSettingsTab data={formData} onChange={setFormData} />
+        </TabsContent>
+        <TabsContent value="orders" className="animate-in fade-in-50 duration-300">
+          <OrderSettingsTab data={formData} onChange={setFormData} />
+        </TabsContent>
+        <TabsContent value="inventory" className="animate-in fade-in-50 duration-300">
+          <InventorySettingsTab data={formData} onChange={setFormData} />
+        </TabsContent>
+        <TabsContent value="taxes" className="animate-in fade-in-50 duration-300">
+          <TaxesSettingsTab data={formData} onChange={setFormData} />
+        </TabsContent>
+        <TabsContent value="receipts" className="animate-in fade-in-50 duration-300">
+          <ReceiptSettingsTab data={formData} onChange={setFormData} />
+        </TabsContent>
+        <TabsContent value="system" className="animate-in fade-in-50 duration-300">
+          <SystemSettingsTab data={formData} onChange={setFormData} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

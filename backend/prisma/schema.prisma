@@ -17,6 +17,8 @@ model Business {
   currency   String?
   is_kitchen_active Boolean @default(true)
   tax_rate   Decimal?
+  owner_name String?
+  settings   String? // JSON string for all other settings
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

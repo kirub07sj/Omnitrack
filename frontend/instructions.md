@@ -1,765 +1,914 @@
-Build the complete Settings module for our offline-first Restaurant ERP.
+Build the complete Reports module for our existing offline-first Restaurant ERP.
 
 IMPORTANT:
-Before writing code, inspect the existing project and understand the current architecture, database schema, modules, shared components, authentication, authorization, and state management.
+Before writing code, inspect the existing project and understand:
 
-Existing modules include:
+- Database schema
+- API structure
+- Existing modules
+- Existing business logic
+- Existing authentication/authorization
+- Existing UI/design system
+- Existing state management
+- Existing chart/table components
+- Existing Sales, Expenses, Transactions, Inventory, Products, Employees, Orders, and Tables implementations
 
-- Dashboard
-- Employees
-- Products
-- Suppliers
-- Inventory
-- Orders
-- Tables
-- Kitchen
-- Sales
-- Expenses
-- Transactions
+DO NOT rewrite existing modules.
 
-Do NOT redesign or rewrite existing modules.
+DO NOT create duplicate data models for reports.
 
-The Settings module must configure existing system behavior through centralized settings. Every setting implemented must actually be consumed by the relevant module.
+Reports must read and aggregate data from the existing system.
 
 ==================================================
-SETTINGS STRUCTURE
+REPORTS MODULE
 ==================================================
 
 Create:
 
-Settings
-├── Business
-├── Payments
-├── Orders
+Reports
+├── Overview
+├── Sales
+├── Expenses
+├── Transactions
 ├── Inventory
-├── Taxes & Charges
-├── Receipts
-└── System
+├── Products
+├── Employees
+└── Financial Summary
 
-Do NOT implement Users & Roles inside this task.
-Roles and permissions will be implemented separately.
+The Reports module is primarily READ-ONLY.
+
+Users should not create, edit, or delete business records from Reports.
 
 ==================================================
-1. BUSINESS SETTINGS
+1. GLOBAL REPORT FILTERS
 ==================================================
 
-Create a Business Settings page.
+Every report should support a common date range filter.
 
-Fields:
+Provide:
 
-- Business name
-- Owner name
-- Phone
-- Email
-- Address
-- Logo
-- Currency
+- Today
+- Yesterday
+- This Week
+- This Month
+- Last Month
+- This Year
+- Custom Range
 
 Example:
 
-Business Information
+Date Range
+[ This Month ▼ ]
 
-Business Name
-[ Restaurant Name ]
+[ From ] [ To ]
 
-Owner Name
-[ Owner Name ]
+Reports should update automatically when filters change.
 
-Phone
-[ +251... ]
+Do not require users to click a separate "Generate Report" button unless the existing architecture requires it.
 
-Email
-[ email@example.com ]
-
-Address
-[ Address ]
-
-Currency
-[ ETB ]
-
-Logo
-[ Upload Logo ]
-
-[ Save Changes ]
-
-Requirements:
-
-- Business name is required.
-- Currency is required.
-- Validate email format.
-- Validate phone where appropriate.
-- Store uploaded logo according to the existing file/storage architecture.
-- Business information must be available to receipts and reports.
-- Do not hard-code business information anywhere else in the application.
+Add appropriate loading states while report data is being calculated.
 
 ==================================================
-2. PAYMENT SETTINGS
+2. REPORT OVERVIEW
 ==================================================
 
-Create configurable payment methods.
+Create a dashboard-style Overview report.
 
-Default methods:
+It should answer:
 
-- Cash
-- Mobile Banking
-- Card
-- Bank Transfer
+"How is the business doing?"
 
-Allow the owner to enable/disable payment methods.
+Display:
+
+- Total Sales
+- Total Expenses
+- Total Money In
+- Total Money Out
+- Net Cash Flow
+- Number of Orders
+- Number of Completed Sales
+- Average Sale Value
+- Top-Selling Product
+- Low-Stock Item Count
 
 Example:
+
+REPORTS
+
+[ This Month ▼ ]
+
+--------------------------------
+
+Total Sales
+450,000 ETB
+
+Total Expenses
+120,000 ETB
+
+Money In
+450,000 ETB
+
+Money Out
+270,000 ETB
+
+Net Cash Flow
+180,000 ETB
+
+Orders
+1,245
+
+Average Sale
+361 ETB
+
+--------------------------------
+
+Sales Trend
+[ Chart ]
 
 Payment Methods
+[ Chart ]
 
-☑ Cash
-☑ Mobile Banking
-☑ Card
-☐ Bank Transfer
+Top Products
+[ List ]
 
-[ + Add Payment Method ]
+Low Stock
+[ List ]
 
-Each payment method should support:
+==================================================
+3. SALES REPORT
+==================================================
 
-- Name
-- Status: enabled/disabled
-- Optional description
-- Optional provider
-- Optional account information
-- Display order
+Create a Sales report.
 
-Do NOT hard-code specific Ethiopian payment providers.
+It should answer:
 
-The system must support custom payment methods.
+"What did we sell?"
 
-Example:
+Display:
 
-Mobile Banking
-Provider: [ Telebirr ]
-Account Name: [ Restaurant ]
-Account Number: [ ... ]
+- Gross sales
+- Discounts
+- Taxes
+- Service charges
+- Net sales
+- Number of completed sales
+- Average sale value
+- Sales by date
+- Sales by payment method
+- Sales by product
+- Sales by category
+- Sales by waiter
+- Sales by cashier
+
+Use the actual stored values from historical sales.
 
 IMPORTANT:
 
-The Sales checkout must only display payment methods that are currently enabled.
+Do NOT calculate historical tax/service charges using the current Settings configuration.
 
-If a payment method is disabled:
+Historical sales must use the values stored when the sale occurred.
 
-- It must disappear from checkout.
-- Existing historical transactions using that method must remain unchanged.
+Provide:
 
-Do NOT delete historical payment methods or transaction records simply because a payment method was disabled.
+- Summary cards
+- Sales trend chart
+- Payment method breakdown
+- Product/category table
+- Optional employee performance table
+
+Example table:
+
+Date | Sales | Orders | Average Sale
+--------------------------------------
+Aug 1 | 25,000 | 72 | 347
+Aug 2 | 31,500 | 89 | 354
 
 ==================================================
-3. ORDER SETTINGS
+4. EXPENSE REPORT
 ==================================================
 
-Create Order Settings.
+Create an Expenses report.
 
-Settings:
+It should answer:
 
-- Order number format
-- Default order status
-- Allow order cancellation
-- Require cancellation reason
-- Allow order modification
-- Optional order notes
+"Where is the business spending money?"
+
+Display:
+
+- Total expenses
+- Paid expenses
+- Unpaid expenses
+- Expenses by category
+- Expenses by date
+- Top expense categories
+- Expense trend
 
 Example:
 
-Order Settings
+Category | Amount | Percentage
+--------------------------------
+Rent | 50,000 | 42%
+Utilities | 15,000 | 13%
+Maintenance | 8,000 | 7%
 
-Order Number Format
-[ ORD-{YYYY}-{####} ]
+Provide:
 
-Default Order Status
-[ Pending ]
+- Summary cards
+- Expense trend chart
+- Category breakdown
+- Expense history table
 
-☑ Allow Order Cancellation
+Respect the existing distinction between:
 
-☑ Require Cancellation Reason
+Expense record
+and
+actual cash transaction.
 
-☑ Allow Order Modification
+Do not treat unpaid expenses as money-out transactions until they are actually paid.
 
-[ Save Changes ]
+==================================================
+5. TRANSACTIONS REPORT
+==================================================
+
+Create a Transactions report.
+
+It should answer:
+
+"Where did the business's money move?"
+
+Display:
+
+- Total money in
+- Total money out
+- Net cash flow
+- Cash transactions
+- Mobile banking transactions
+- Card transactions
+- Bank transfer transactions
+
+Provide filters:
+
+- Date
+- Money In / Money Out
+- Transaction type
+- Payment method
+- User/cashier
+- Search
+
+Transaction types may include:
+
+- Sale
+- Inventory Purchase
+- Expense
+- Salary
+- Refund
+- Other
+
+Use the existing Transactions data.
+
+DO NOT create a second transaction system.
+
+==================================================
+6. INVENTORY REPORT
+==================================================
+
+Create an Inventory report.
+
+It should answer:
+
+"What is happening with our stock?"
+
+Display:
+
+- Total inventory items
+- Current stock value
+- Low-stock items
+- Out-of-stock items
+- Stock received
+- Stock adjustments
+- Purchase totals
+- Supplier purchase totals
+
+Provide:
+
+Low Stock table:
+
+Product | Current Stock | Threshold | Status
+
+Stock movement summary:
+
+Product | Received | Used/Sold | Adjusted | Current
+
+Purchase summary:
+
+Supplier | Purchases | Amount
 
 IMPORTANT:
 
-Do not bypass the existing Orders workflow.
-
-Settings should modify existing behavior rather than create a second order system.
-
-Cancellation reason should be required when enabled.
-
-==================================================
-4. INVENTORY SETTINGS
-==================================================
-
-Create Inventory Settings.
-
-Settings:
-
-- Low stock alerts
-- Default low stock threshold
-- Allow negative stock
-- Inventory costing method
-- Require supplier for purchases
-- Optional stock adjustment settings
-
-Example:
-
-Inventory Settings
-
-☑ Low Stock Alerts
-
-Default Low Stock Threshold
-[ 10 ]
-
-☐ Allow Negative Stock
-
-Costing Method
-[ Weighted Average ]
-
-☑ Require Supplier for Purchases
-
-[ Save Changes ]
-
-IMPORTANT:
-
-The costing method must integrate with the existing inventory implementation.
+Use the existing Inventory and stock movement logic.
 
 Do not create a second inventory calculation system.
 
-If the current application already implements weighted average costing, preserve it.
-
-If a setting is not currently supported by the existing inventory architecture, implement it cleanly rather than creating duplicated logic.
+If inventory costing already uses weighted average, use the existing calculated values.
 
 ==================================================
-5. TAXES & CHARGES
+7. PRODUCT REPORT
 ==================================================
 
-Create Taxes & Charges settings.
+Create a Products report.
 
-Support:
+It should answer:
 
-- Tax enabled/disabled
-- Tax name
-- Tax rate
-- Service charge enabled/disabled
-- Service charge rate
+"Which products are performing well?"
+
+Display:
+
+- Best-selling products
+- Lowest-selling products
+- Quantity sold
+- Revenue by product
+- Revenue by category
+- Product sales trend
 
 Example:
 
-Taxes & Charges
+Product | Qty Sold | Revenue
+--------------------------------
+Chicken Tibs | 820 | 164,000
+Burger | 610 | 122,000
+Pasta | 420 | 84,000
 
-☑ Enable Tax
+Allow sorting by:
 
-Tax Name
-[ VAT ]
+- Quantity sold
+- Revenue
+- Product name
 
-Tax Rate
-[ 15 ] %
+Add category filtering.
 
-☐ Enable Service Charge
+Do not modify product records from Reports.
 
-Service Charge Rate
-[ 10 ] %
+==================================================
+8. EMPLOYEE REPORT
+==================================================
 
-[ Save Changes ]
+Create an Employees report.
+
+It should answer:
+
+"How are employees contributing to operations?"
+
+Depending on existing data and permissions, display:
+
+- Sales handled by cashier
+- Orders handled by waiter
+- Number of orders
+- Sales amount
+- Cancellations
+- Discounts applied
+- Activity summary
+
+Example:
+
+Employee | Orders | Sales | Cancellations
+-------------------------------------------
+Hana | 120 | 45,000 | 2
+Dawit | 98 | 38,000 | 1
 
 IMPORTANT:
 
-Sales must automatically use these settings when calculating new sales.
+Only show metrics that can be accurately derived from existing records.
 
-Do not make cashiers manually calculate tax/service charges.
+Do not invent employee performance data.
 
-Historical sales must NOT change when the owner changes tax settings.
-
-Example:
-
-A sale created when VAT = 15% must continue showing 15% even if the owner later changes the setting to 10%.
-
-Store the applicable rates on the sale/order transaction itself.
-
-Prevent invalid values:
-
-- Tax rate cannot be negative.
-- Service charge cannot be negative.
-- Prevent unreasonable values according to existing validation rules.
+Do not create surveillance-style metrics that aren't useful to the business.
 
 ==================================================
-6. RECEIPT SETTINGS
+9. FINANCIAL SUMMARY
 ==================================================
 
-Create Receipt Settings.
-
-Allow configuration of:
-
-- Show business name
-- Show logo
-- Show address
-- Show phone
-- Show cashier
-- Show table number
-- Show order number
-- Footer message
-- Paper size
-
-Example:
-
-Receipt Settings
-
-☑ Show Business Name
-☑ Show Logo
-☑ Show Address
-☑ Show Phone
-☑ Show Cashier
-☑ Show Table Number
-☑ Show Order Number
-
-Footer Message
-[ Thank you for visiting us! ]
-
-Paper Size
-[ 80mm ]
-
-[ Preview Receipt ]
-
-[ Save Changes ]
-
-Requirements:
-
-- Create a receipt preview using current settings.
-- Sales receipt generation must consume these settings.
-- Do not duplicate receipt configuration inside Sales.
-- Historical receipts should preserve transaction data even if receipt settings later change.
-
-==================================================
-7. SYSTEM SETTINGS
-==================================================
-
-Create System Settings.
-
-Settings:
-
-- Language
-- Date format
-- Time zone
-- Auto backup
-- Backup frequency
-- Sync status
-- License status
-
-Example:
-
-System
-
-Language
-[ English ]
-
-Date Format
-[ DD/MM/YYYY ]
-
-Time Zone
-[ Africa/Addis_Ababa ]
-
-☑ Auto Backup
-
-Backup Frequency
-[ Daily ]
-
---------------------------------
-
-Synchronization
-
-Status:
-● Online
-
-Last Sync:
-10:42 PM
-
-Pending Sync:
-12 records
-
---------------------------------
-
-License
-
-Status:
-● Active
-
-Valid Until:
-August 10, 2027
+Create a Financial Summary report.
 
 IMPORTANT:
 
-System settings must work with the existing offline-first architecture.
+This is NOT a full accounting system.
 
-Do not create a fake sync system.
+Clearly distinguish between:
 
-If sync functionality already exists, display its actual status.
+- Revenue/Sales
+- Expenses
+- Inventory Purchases
+- Money In
+- Money Out
+- Net Cash Flow
 
-If sync functionality is not yet implemented, create the settings structure and UI without pretending that synchronization is working.
+Example:
 
-Do NOT allow ordinary users to modify database internals or dangerous system configuration.
+Financial Summary
 
-==================================================
-8. CENTRALIZED SETTINGS ARCHITECTURE
-==================================================
+Sales
++450,000 ETB
 
-Settings must have a centralized source of truth.
+Expenses Paid
+-120,000 ETB
 
-Do NOT scatter settings across individual components.
+Inventory Purchases Paid
+-150,000 ETB
 
-Create an appropriate settings service/repository/API.
+Other Money Out
+-0 ETB
 
-Example conceptual structure:
+--------------------------------
 
-settings
-├── business
-├── payments
-├── orders
-├── inventory
-├── taxes
-├── receipts
-└── system
+Net Cash Flow
+180,000 ETB
 
-Use the existing project architecture and naming conventions.
+IMPORTANT:
 
-If the project uses:
+Do not incorrectly label cash flow as accounting profit.
 
-- React Query
-- Context
-- Zustand
-- Redux
-- API services
+If the system does not have enough accounting data to calculate true profit, label the metric as:
 
-follow the existing pattern instead of introducing another state-management system.
+"Net Cash Flow"
 
-==================================================
-9. SETTINGS DATABASE
-==================================================
+not:
 
-Inspect the existing database architecture first.
-
-Do not create duplicate settings tables/models if one already exists.
-
-Settings should support:
-
-- Business-specific configuration
-- Persistence
-- Updates
-- Validation
-- Defaults
-
-Use sensible defaults so the system works immediately after installation.
-
-Example defaults:
-
-Currency:
-ETB
-
-Tax:
-Disabled unless configured
-
-Service Charge:
-Disabled
-
-Cash:
-Enabled
-
-Mobile Banking:
-Enabled
-
-Card:
-Enabled
-
-Bank Transfer:
-Disabled
-
-Low Stock Alerts:
-Enabled
-
-Allow Negative Stock:
-Disabled
-
-Use the existing database technology and migration strategy.
+"Net Profit"
 
 ==================================================
-10. SETTINGS CONSUMERS
+10. CHARTS
 ==================================================
 
-Make sure settings actually affect the application.
+Use charts only where they improve understanding.
 
-Business settings
-→ Receipts
-→ Reports
-→ Business identity
+Recommended charts:
 
-Payment settings
-→ Sales checkout
-→ Payment forms
+Overview:
+- Sales trend
+- Money in vs money out
+- Payment methods
 
-Order settings
-→ Orders module
+Sales:
+- Sales over time
+- Sales by payment method
+- Sales by category
 
-Inventory settings
-→ Inventory module
+Expenses:
+- Expenses over time
+- Expenses by category
 
-Tax settings
-→ Sales calculations
-→ Receipts
-→ Reports
+Inventory:
+- Stock status
+- Purchase trends
 
-Receipt settings
-→ Receipt preview
-→ Printed receipts
+Products:
+- Top products
 
-System settings
-→ System UI
-→ Backup/sync/license areas where supported
+Do not create charts just for decoration.
 
-Do not simply build forms that save values without connecting them to their consumers.
+Charts must use real backend data.
 
-==================================================
-11. VALIDATION
-==================================================
+Use the existing chart library if one already exists.
 
-Use the existing validation library.
-
-Validate:
-
-- Required fields
-- Numeric rates
-- Currency
-- Payment method names
-- Duplicate payment methods
-- Invalid order formats
-- Invalid thresholds
-- Invalid time zones
-- Invalid dates/configuration
-
-Show clear validation errors.
-
-Do not allow invalid settings to break other modules.
+Do not introduce another charting library unnecessarily.
 
 ==================================================
-12. UNSAVED CHANGES
+11. TABLES
 ==================================================
 
-If a user changes settings and navigates away without saving:
+All report tables should support where appropriate:
+
+- Sorting
+- Search
+- Filtering
+- Pagination
+- Empty state
+- Loading state
+
+Use the existing table component/design system.
+
+Do not create a new table component if one already exists.
+
+==================================================
+12. EXPORT
+==================================================
+
+Reports should support:
+
+- CSV export
+- Print-friendly view
+
+CSV exports must contain the actual filtered report data.
+
+Example:
+
+User selects:
+
+August 1 → August 10
+Category: Food
+
+Export CSV
+
+→ Only export the filtered report data.
+
+Do not generate fake or hard-coded export data.
+
+If PDF generation already exists in the project, integrate with it.
+
+Otherwise, do not introduce a large PDF system unless necessary.
+
+==================================================
+13. REPORT SOURCE OF TRUTH
+==================================================
+
+This is extremely important.
+
+Reports must use existing modules as the source of truth.
+
+Example:
+
+Sales:
+
+Sales records
+      ↓
+Reports
+
+Expenses:
+
+Expense records
+      ↓
+Reports
+
+Transactions:
+
+Transaction records
+      ↓
+Reports
+
+Inventory:
+
+Inventory + Stock Movements + Purchases
+      ↓
+Reports
+
+Products:
+
+Products + Sales/Sale Items
+      ↓
+Reports
+
+Employees:
+
+Employees + Orders + Sales
+      ↓
+Reports
+
+DO NOT duplicate business data inside the Reports module.
+
+==================================================
+14. HISTORICAL DATA
+==================================================
+
+Reports must preserve historical values.
+
+Example:
+
+VAT was 15% when a sale happened.
+
+Later:
+
+VAT is changed to 10%.
+
+The old sale must still report:
+
+VAT = 15%
+
+Do not recalculate historical sales using current Settings.
+
+The same principle applies to:
+
+- Service charges
+- Product prices
+- Discounts
+- Payment methods
+- Business information where historical snapshots exist
+
+==================================================
+15. CASH FLOW LOGIC
+==================================================
+
+Use the existing Transactions module as the source for actual cash-flow calculations.
+
+Money In:
+
+- Completed customer sales
+- Other valid incoming transactions
+
+Money Out:
+
+- Paid expenses
+- Paid inventory purchases
+- Salaries
+- Refunds
+- Other valid outgoing transactions
+
+UNPAID records must NOT be counted as actual cash-out until payment occurs.
+
+Example:
+
+Expense:
+Electricity
+4,500 ETB
+UNPAID
+
+→ Expense report: included as unpaid expense
+
+→ Cash flow report: NOT money out yet
+
+After payment:
+
+→ Expense becomes PAID
+
+→ Transaction is created
+
+→ Cash flow report includes -4,500 ETB
+
+==================================================
+16. PERMISSIONS
+==================================================
+
+Reports must respect the existing authentication/authorization architecture.
+
+Do not create a new permission system inside Reports.
+
+Prepare the module so permissions can control:
+
+- View reports
+- View financial reports
+- View employee reports
+- Export reports
+
+Recommended access:
+
+Owner:
+- All reports
+
+Manager:
+- Operational reports
+- Sales
+- Inventory
+- Employees
+- Expenses according to permission
+
+Cashier:
+- Only permitted sales/payment reports
+
+Waiter:
+- Only permitted personal/operational reports
+
+Kitchen:
+- No financial reports unless explicitly permitted
+
+IMPORTANT:
+
+Do not hard-code role names throughout components.
+
+Use the existing permission system.
+
+==================================================
+17. PERFORMANCE
+==================================================
+
+Reports may process large amounts of data.
+
+Do not load every transaction/order/sale into the browser and calculate everything client-side if the dataset can become large.
+
+Prefer server-side aggregation where appropriate.
+
+Use:
+
+- Database aggregation
+- Indexed queries
+- Date filtering
+- Pagination
+- Cached summaries where appropriate
+
+Inspect the existing backend architecture and follow its patterns.
+
+Do not prematurely introduce a complex analytics infrastructure.
+
+==================================================
+18. OFFLINE-FIRST REQUIREMENTS
+==================================================
+
+The Restaurant ERP is designed to work without internet.
+
+Reports must work from the local database while offline.
+
+Example:
+
+Internet:
+OFFLINE
+
+Local sales:
+1,250
+
+Reports should still show:
+
+Today's Sales
+45,800 ETB
+
+Do not require cloud connectivity for basic reports.
+
+When synchronization occurs, reports should eventually reflect synchronized data according to the existing sync architecture.
+
+Do not create a fake cloud-sync implementation.
+
+==================================================
+19. EMPTY STATES
+==================================================
+
+If there is no data for the selected date range:
+
+Show something like:
+
+"No sales found for this period."
+
+Do not display:
+
+0 charts
+broken charts
+NaN
+undefined
+negative-looking empty states
+
+Give the user a useful message and optionally:
+
+[ Change Date Range ]
+
+==================================================
+20. ERROR HANDLING
+==================================================
+
+If report generation fails:
 
 Show:
 
-"You have unsaved changes. Leave without saving?"
+"Unable to load this report."
 
-Actions:
-
-[ Stay ]
-[ Leave ]
-
-Do not silently discard changes.
-
-==================================================
-13. SAVE FEEDBACK
-==================================================
-
-After saving:
-
-Show a clear success notification:
-
-"Settings saved successfully."
-
-If saving fails:
-
-"Unable to save settings. Please try again."
+[ Try Again ]
 
 Do not silently fail.
 
+Do not show raw database errors to users.
+
 ==================================================
-14. RESPONSIVE DESIGN
+21. UX PRINCIPLES
 ==================================================
 
-The Settings page should work on:
+The users are not accountants or data analysts.
+
+Reports must be easy to understand.
+
+Use:
+
+- Clear labels
+- ETB/currency formatting
+- Human-readable dates
+- Simple charts
+- Summary cards
+- Useful defaults
+- Consistent terminology
+
+Avoid:
+
+- Technical database terms
+- Internal IDs unless useful
+- Excessive configuration
+- Unnecessary charts
+- Complex accounting terminology
+
+The owner should be able to open Reports and understand the business within a few seconds.
+
+==================================================
+22. RESPONSIVE DESIGN
+==================================================
+
+Reports should work on:
 
 - Desktop
 - Tablet
 - Mobile
 
-However, prioritize desktop because this is primarily an administration interface.
+Desktop is the priority because reports are mainly used by owners/managers.
 
-Use the existing design system.
+Charts should resize properly.
 
-Do not introduce a new visual language.
+Tables should have appropriate horizontal scrolling on small screens.
 
-Use existing:
-
-- Buttons
-- Inputs
-- Selects
-- Switches
-- Dialogs
-- Toasts
-- Cards
-- Tables
+Do not destroy usability on mobile just to fit tables.
 
 ==================================================
-15. SECURITY
+23. AUDIT / READ-ONLY BEHAVIOR
 ==================================================
 
-Settings contain sensitive business configuration.
+Reports must not modify:
 
-Use the existing authentication and authorization system.
+- Sales
+- Orders
+- Inventory
+- Expenses
+- Transactions
+- Employees
+- Products
 
-Do NOT create a new authentication mechanism.
+Opening a report should never change business data.
 
-The module should be prepared for role-based permissions.
+Exporting a report should never change business data.
 
-For now, respect whatever authorization system already exists.
-
-Do not expose sensitive system configuration to unauthorized users.
-
-==================================================
-16. AUDIT LOGGING
-==================================================
-
-Important settings changes should be auditable.
-
-Record:
-
-- User
-- Setting/category changed
-- Previous value where appropriate
-- New value where appropriate
-- Date/time
-
-Especially log changes to:
-
-- Payment methods
-- Tax rates
-- Service charges
-- Inventory costing method
-- Negative stock setting
-- Receipt configuration
-- System configuration
-
-Use the existing audit-log architecture if available.
+Filtering a report should never change business data.
 
 ==================================================
-17. UX PRINCIPLES
+24. TESTING
 ==================================================
 
-The users of this ERP are not technical users.
+Test Reports against realistic data.
 
-Keep the Settings UI simple.
+Test:
 
-Users should not need to understand:
+1. Sales report matches Sales module totals.
 
-- Database structure
-- Internal IDs
-- API configuration
-- Sync internals
-- Technical implementation
+2. Expense report matches Expenses module totals.
 
-Use:
+3. Transaction report matches Transactions module totals.
 
-- Clear labels
-- Helpful descriptions
-- Sensible defaults
-- Confirmation dialogs for important changes
-- Minimal required fields
+4. Inventory report matches Inventory stock.
 
-Use progressive disclosure for advanced options.
+5. Product report matches actual sale items.
 
-Do not overwhelm users with unnecessary configuration.
+6. Employee report uses real order/sale data.
 
-==================================================
-18. IMPORTANT BUSINESS RULE
-==================================================
+7. Date filters correctly exclude records outside the selected period.
 
-Settings are configuration.
+8. Today filter works correctly.
 
-They should change how the system behaves going forward.
+9. This month filter works correctly.
 
-They should NOT rewrite historical business records.
+10. Custom date range works correctly.
 
-Examples:
+11. Paid expenses appear in cash-flow calculations.
 
-Changing VAT from 15% to 10%
-→ affects future sales
-→ does NOT change old sales
+12. Unpaid expenses do not appear as money-out.
 
-Disabling Mobile Banking
-→ prevents new Mobile Banking payments
-→ does NOT alter previous Mobile Banking transactions
+13. Paid inventory purchases appear as money-out.
 
-Changing receipt footer
-→ affects future receipt printing
-→ does NOT rewrite old transaction data
+14. Historical tax values remain unchanged when Settings change.
 
-Changing currency settings
-→ must be handled carefully and should not silently convert existing financial records.
+15. Reports work while offline.
+
+16. CSV export respects active filters.
+
+17. Empty date ranges display correctly.
+
+18. Unauthorized users cannot access restricted reports.
+
+19. Large datasets do not cause the UI to freeze unnecessarily.
+
+20. Refreshing/restarting the application does not break report functionality.
 
 ==================================================
-19. TESTING
-==================================================
-
-Test every setting end-to-end.
-
-Examples:
-
-1. Disable Card
-→ Card disappears from Sales checkout.
-
-2. Enable Mobile Banking
-→ Mobile Banking appears in checkout.
-
-3. Change tax rate
-→ New sales use the new rate.
-
-4. Change tax rate
-→ Existing sales remain unchanged.
-
-5. Change receipt footer
-→ Receipt preview changes.
-
-6. Change low-stock threshold
-→ Inventory alerts use the new threshold.
-
-7. Disable service charge
-→ Sales no longer calculate service charge.
-
-8. Change business name
-→ New receipts use the new name.
-
-9. Disable a payment method
-→ Historical transactions remain intact.
-
-10. Restart application
-→ Settings persist.
-
-11. Refresh page
-→ Settings persist.
-
-12. Test unauthorized access according to existing permission system.
-
-==================================================
-20. FINAL IMPLEMENTATION REQUIREMENTS
+25. FINAL IMPLEMENTATION REQUIREMENTS
 ==================================================
 
 Before finishing:
 
-1. Inspect the existing project architecture.
-2. Reuse existing components and services.
-3. Reuse existing authentication/authorization.
-4. Reuse existing database patterns.
-5. Reuse existing design system.
-6. Do not duplicate business logic.
-7. Do not create mock data as the final implementation.
-8. Do not break existing modules.
-9. Connect settings to their actual consumers.
-10. Ensure settings persist after restart.
-11. Ensure historical records are not modified by configuration changes.
-12. Add appropriate loading, error, empty, and success states.
-13. Test the complete Settings module end-to-end.
+1. Inspect the existing project first.
+2. Reuse existing components.
+3. Reuse existing APIs.
+4. Reuse existing authentication.
+5. Reuse existing permissions.
+6. Reuse existing database models.
+7. Do not duplicate business logic.
+8. Do not create fake/mock report data.
+9. Do not create duplicate transaction/inventory/sales data.
+10. Use real database aggregation.
+11. Ensure reports work offline.
+12. Ensure date filtering is accurate.
+13. Ensure historical data remains historically accurate.
+14. Add proper loading states.
+15. Add proper empty states.
+16. Add proper error states.
+17. Add CSV export.
+18. Add print-friendly report views.
+19. Ensure responsive design.
+20. Test every report against the existing modules.
 
-The final result should feel like one coherent part of the existing Restaurant ERP, not a separate application.
+The final Reports module should feel like a natural part of the existing Restaurant ERP.
+
+The core principle is:
+
+MODULES RECORD WHAT HAPPENED.
+
+REPORTS EXPLAIN WHAT HAPPENED.
+
+Do not turn Reports into another data-entry module.
