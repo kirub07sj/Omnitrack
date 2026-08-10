@@ -10,6 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import ReceiptDialog from '../components/ReceiptDialog';
 import RefundDialog from '../components/RefundDialog';
+import { CheckCircle2 } from 'lucide-react';
 
 export default function SalesHistoryPage() {
   const { currentUser } = useAppStore();
@@ -20,6 +21,7 @@ export default function SalesHistoryPage() {
   const [selectedSale, setSelectedSale] = useState<any | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showRefund, setShowRefund] = useState(false);
+  const [refundSuccess, setRefundSuccess] = useState(false);
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 40;
@@ -70,8 +72,8 @@ export default function SalesHistoryPage() {
 
   // Calculate metrics based on current filtered (and date-selected) sales
   const totalAmount = filteredSales.reduce((sum, s) => sum + parseFloat(s.total), 0);
-  const cashSales = filteredSales.filter(s => s.order?.payments?.[0]?.method === 'Cash' || s.payment_method === 'Cash').reduce((sum, s) => sum + parseFloat(s.total), 0);
-  const mobileSales = filteredSales.filter(s => s.order?.payments?.[0]?.method === 'Mobile Banking' || s.payment_method === 'Mobile Banking').reduce((sum, s) => sum + parseFloat(s.total), 0);
+  const cashSales = filteredSales.filter(s => s.order?.transactions?.[0]?.method === 'Cash' || s.payment_method === 'Cash').reduce((sum, s) => sum + parseFloat(s.total), 0);
+  const mobileSales = filteredSales.filter(s => s.order?.transactions?.[0]?.method === 'Mobile Banking' || s.payment_method === 'Mobile Banking').reduce((sum, s) => sum + parseFloat(s.total), 0);
   const totalRefunds = filteredSales.filter(s => parseFloat(s.total) < 0).reduce((sum, s) => sum + Math.abs(parseFloat(s.total)), 0);
 
   return (
@@ -196,7 +198,7 @@ export default function SalesHistoryPage() {
                   </tr>
                 ) : (
                   paginatedSales.map((sale) => {
-                    const firstPayment = sale.order?.payments?.[0];
+                    const firstPayment = sale.order?.transactions?.[0];
                     return (
                       <tr key={sale.id} className="hover:bg-muted/20 transition-colors">
                         <td className="px-6 py-4">
@@ -237,18 +239,20 @@ export default function SalesHistoryPage() {
                             >
                               <Printer className="w-4 h-4 text-muted-foreground" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              title="Refund" 
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => {
-                                setSelectedSale(sale);
-                                setShowRefund(true);
-                              }}
-                            >
-                              <RotateCcw className="w-4 h-4" />
-                            </Button>
+                            {parseFloat(sale.total) > 0 && sale.order?.status !== 'Cancelled' && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                title="Refund" 
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => {
+                                  setSelectedSale(sale);
+                                  setShowRefund(true);
+                                }}
+                              >
+                                <RotateCcw className="w-4 h-4" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -304,9 +308,17 @@ export default function SalesHistoryPage() {
         onOpenChange={setShowRefund}
         onSuccess={() => {
           fetchSales();
-          alert('Refund processed successfully!');
+          setRefundSuccess(true);
+          setTimeout(() => setRefundSuccess(false), 3000);
         }}
       />
+
+      {refundSuccess && (
+        <div className="fixed top-6 right-6 bg-emerald-500 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 z-50 animate-in slide-in-from-top-5 fade-in duration-300">
+          <CheckCircle2 className="w-5 h-5" />
+          <p className="font-medium">Refund processed successfully!</p>
+        </div>
+      )}
     </div>
   );
 }

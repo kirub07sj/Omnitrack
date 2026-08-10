@@ -65,15 +65,16 @@ export const checkoutOrder = async (req: Request, res: Response) => {
         }
       });
 
-      // 3. Create Payment
-      const payment = await tx.payment.create({
+      // 3. Create Transaction
+      const transaction = await tx.transaction.create({
         data: {
           business_id,
           order_id,
+          type: 'INCOME',
           amount: total, // For now assuming full payment
           method: payment_method,
           status: 'PAID',
-          paid_at: new Date()
+          date: new Date()
         }
       });
 
@@ -95,7 +96,7 @@ export const checkoutOrder = async (req: Request, res: Response) => {
               table: true,
               waiter: true,
               items: { include: { product: true } },
-              payments: true
+              transactions: true
             }
           }
         }
@@ -151,15 +152,16 @@ export const createManualSale = async (req: Request, res: Response) => {
         }
       });
 
-      // 3. Create Payment
-      const payment = await tx.payment.create({
+      // 3. Create Transaction
+      const transaction = await tx.transaction.create({
         data: {
           business_id,
           order_id: order.id,
+          type: 'INCOME',
           amount: total,
           method: payment_method,
           status: 'PAID',
-          paid_at: new Date()
+          date: new Date()
         }
       });
 
@@ -181,7 +183,7 @@ export const createManualSale = async (req: Request, res: Response) => {
               table: true,
               waiter: true,
               items: { include: { product: true } },
-              payments: true
+              transactions: true
             }
           }
         }
@@ -237,7 +239,7 @@ export const getSalesHistory = async (req: Request, res: Response) => {
             items: {
               include: { product: true }
             },
-            payments: true
+            transactions: true
           }
         }
       },
@@ -280,15 +282,16 @@ export const refundSale = async (req: Request, res: Response) => {
         }
       });
 
-      // 3. Create negative Payment record
-      const payment = await tx.payment.create({
+      // 3. Create Transaction record for the refund
+      const transaction = await tx.transaction.create({
         data: {
           business_id,
           order_id: originalSale.order_id,
-          amount: -refundAmount,
+          type: 'EXPENSE',
+          amount: refundAmount, // Store as a positive amount since type is EXPENSE
           method: 'Refund',
-          status: 'REFUNDED',
-          paid_at: new Date()
+          status: 'PAID', // Mark as PAID so it appears in the transactions list
+          date: new Date()
         }
       });
 
@@ -300,7 +303,7 @@ export const refundSale = async (req: Request, res: Response) => {
         });
       }
 
-      return { refundSale, payment };
+      return { refundSale, transaction };
     });
 
     res.json({ success: true, data: result });

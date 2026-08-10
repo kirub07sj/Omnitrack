@@ -52,6 +52,19 @@ export const createPurchase = async (req: Request, res: Response) => {
         }
       });
 
+      // Create a Transaction for this purchase
+      await tx.transaction.create({
+        data: {
+          business_id,
+          purchase_id: newPurchase.id,
+          type: 'EXPENSE',
+          amount: total,
+          method: 'Cash',
+          status: status || 'Paid',
+          date: new Date()
+        }
+      });
+
       for (const item of items) {
         let invItem;
 
@@ -153,9 +166,19 @@ export const updatePurchaseStatus = async (req: Request, res: Response) => {
       return;
     }
 
-    const purchase = await prisma.purchase.update({
-      where: { id },
-      data: { status }
+    const purchase = await prisma.$transaction(async (tx) => {
+      const p = await tx.purchase.update({
+        where: { id },
+        data: { status }
+      });
+
+      // Also update the associated transaction's status
+      await tx.transaction.updateMany({
+        where: { purchase_id: id },
+        data: { status: status.toUpperCase() }
+      });
+
+      return p;
     });
 
     res.json(purchase);

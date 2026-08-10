@@ -64,10 +64,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Wallet,
       items: isManager ? [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
+        { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
         { title: "Expenses", url: "#" },
       ] : [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
-        { title: "Payments", url: "#" },
+        { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
         { title: "Expenses", url: "#" },
       ],
     },

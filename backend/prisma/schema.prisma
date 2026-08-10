@@ -30,7 +30,7 @@ model Business {
   suppliers  Supplier[]
   purchases  Purchase[]
   orders     Order[]
-  payments   Payment[]
+  transactions Transaction[]
   sales      Sale[]
   expenses   Expense[]
   sync_queue SyncQueue[]
@@ -211,6 +211,7 @@ model Purchase {
   business Business       @relation(fields: [business_id], references: [id])
   supplier Supplier       @relation(fields: [supplier_id], references: [id])
   items    PurchaseItem[]
+  transactions Transaction[]
 
   @@map("purchases")
 }
@@ -241,7 +242,7 @@ model Order {
   table    RestaurantTable? @relation(fields: [table_id], references: [id])
   waiter   Employee?       @relation(fields: [waiter_id], references: [id])
   items    OrderItem[]
-  payments Payment[]
+  transactions Transaction[]
   sales    Sale[]
 
   @@map("orders")
@@ -260,20 +261,23 @@ model OrderItem {
   @@map("order_items")
 }
 
-model Payment {
+model Transaction {
   id          String    @id @default(uuid())
   business_id String
-  order_id    String
+  order_id    String?
+  purchase_id String?
+  type        String    // "INCOME" or "EXPENSE"
   amount      Decimal
-  method      String
+  method      String?
   status      String?
   proof_image String?
-  paid_at     DateTime?
+  date        DateTime  @default(now())
 
-  business Business @relation(fields: [business_id], references: [id])
-  order    Order    @relation(fields: [order_id], references: [id])
+  business Business  @relation(fields: [business_id], references: [id])
+  order    Order?    @relation(fields: [order_id], references: [id])
+  purchase Purchase? @relation(fields: [purchase_id], references: [id])
 
-  @@map("payments")
+  @@map("transactions")
 }
 
 model Sale {

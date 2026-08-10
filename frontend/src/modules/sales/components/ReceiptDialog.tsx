@@ -16,7 +16,7 @@ export default function ReceiptDialog({ sale, open, onOpenChange }: ReceiptDialo
     window.print();
   };
 
-  const payment = sale.order?.payments?.[0];
+  const payment = sale.order?.transactions?.[0];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
