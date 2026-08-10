@@ -67,7 +67,7 @@ export const createExpense = async (req: Request, res: Response) => {
 
 export const updateExpense = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { category, amount, description, paid_to, date, status, method } = req.body;
 
     const expense = await prisma.$transaction(async (tx) => {
@@ -124,7 +124,7 @@ export const updateExpense = async (req: Request, res: Response) => {
 
 export const deleteExpense = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     
     await prisma.$transaction(async (tx) => {
       await tx.transaction.deleteMany({ where: { expense_id: id } });
@@ -139,7 +139,7 @@ export const deleteExpense = async (req: Request, res: Response) => {
 
 export const payExpense = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { method, reference, receipt_image } = req.body;
 
     const expense = await prisma.$transaction(async (tx) => {

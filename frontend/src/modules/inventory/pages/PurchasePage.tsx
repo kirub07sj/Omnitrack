@@ -14,7 +14,7 @@ import { useAppStore } from "@/store/useAppStore";
 export default function AddEditInventoryPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentUser } = useAppStore();
+  const { currentUser, fetchUnpaidCounts } = useAppStore();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [existingItems, setExistingItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -89,6 +89,7 @@ export default function AddEditInventoryPage() {
       };
 
       await InventoryService.createPurchase(payload);
+      fetchUnpaidCounts();
       navigate("/owner/inventory");
     } catch (error) {
       console.error(error);

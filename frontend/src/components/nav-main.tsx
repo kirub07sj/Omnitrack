@@ -30,6 +30,7 @@ export function NavMain({
     items?: {
       title: string
       url: string
+      badge?: number
     }[]
   }[]
 }) {
@@ -82,8 +83,13 @@ export function NavMain({
                       return (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild isActive={isActive}>
-                          <Link to={subItem.url}>
+                          <Link to={subItem.url} className="relative w-full">
                             <span>{subItem.title}</span>
+                            {subItem.badge !== undefined && subItem.badge > 0 && (
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                {subItem.badge}
+                              </span>
+                            )}
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>

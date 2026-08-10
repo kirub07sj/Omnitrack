@@ -34,8 +34,14 @@ const teams = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { currentUser, businessSettings } = useAppStore();
+  const { currentUser, businessSettings, unpaidCounts, fetchUnpaidCounts } = useAppStore();
   const isKitchenActive = businessSettings?.is_kitchen_active ?? true;
+
+  React.useEffect(() => {
+    fetchUnpaidCounts();
+    const interval = setInterval(fetchUnpaidCounts, 30000);
+    return () => clearInterval(interval);
+  }, [currentUser?.business_id, fetchUnpaidCounts]);
 
   const user = {
     name: currentUser?.firstName + " " + currentUser?.lastName,
@@ -65,11 +71,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       items: isManager ? [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
-        { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses` },
+        { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses`, badge: unpaidCounts.expenses },
       ] : [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
-        { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses` },
+        { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses`, badge: unpaidCounts.expenses },
       ],
     },
     {
@@ -77,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "#",
       icon: Package,
       items: [
-        { title: "Inventory", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/inventory` },
+        { title: "Inventory", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/inventory`, badge: unpaidCounts.purchases },
         { title: "Products", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/products` },
         { title: "Suppliers", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/suppliers` },
       ],

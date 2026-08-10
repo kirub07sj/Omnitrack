@@ -20,7 +20,7 @@ import DeleteExpenseDialog from '../components/DeleteExpenseDialog';
 import AddExpenseDialog from '../components/AddExpenseDialog';
 
 export default function ExpensesPage() {
-  const { currentUser } = useAppStore();
+  const { currentUser, fetchUnpaidCounts } = useAppStore();
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,6 +41,7 @@ export default function ExpensesPage() {
     try {
       const { data } = await axios.get(`http://localhost:5000/api/expenses?business_id=${currentUser.business_id}`);
       setExpenses(data.data);
+      fetchUnpaidCounts(); // Refresh global unpaid counts
     } catch (error) {
       console.error('Failed to fetch expenses', error);
     } finally {
@@ -196,9 +197,9 @@ export default function ExpensesPage() {
                       <td className="px-6 py-4 text-muted-foreground truncate max-w-[200px]">{expense.description || expense.paid_to || '-'}</td>
                       <td className="px-6 py-4 font-bold">{parseFloat(expense.amount).toLocaleString()} <span className="text-xs font-normal">ETB</span></td>
                       <td className="px-6 py-4">
-                        <Badge variant={expense.status === 'PAID' ? 'default' : 'secondary'} className={expense.status === 'PAID' ? 'bg-emerald-500' : 'bg-orange-500 text-white'}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${expense.status === 'PAID' ? 'bg-primary/20 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
                           {expense.status}
-                        </Badge>
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
                         {expense.status === 'UNPAID' && (
