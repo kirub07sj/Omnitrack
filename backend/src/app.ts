@@ -18,6 +18,7 @@ import tableRoutes from './modules/tables/table.routes';
 import salesRoutes from './modules/sales/sales.routes';
 import uploadRoutes from './modules/upload/upload.routes';
 import transactionsRoutes from './modules/transactions/transactions.routes';
+import expenseRoutes from './modules/expenses/expense.routes';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use('/api/tables', tableRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/transactions', transactionsRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 // Serve static uploaded files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

@@ -266,6 +266,7 @@ model Transaction {
   business_id String
   order_id    String?
   purchase_id String?
+  expense_id  String?
   type        String    // "INCOME" or "EXPENSE"
   amount      Decimal
   method      String?
@@ -276,6 +277,7 @@ model Transaction {
   business Business  @relation(fields: [business_id], references: [id])
   order    Order?    @relation(fields: [order_id], references: [id])
   purchase Purchase? @relation(fields: [purchase_id], references: [id])
+  expense  Expense?  @relation(fields: [expense_id], references: [id])
 
   @@map("transactions")
 }
@@ -304,10 +306,14 @@ model Expense {
   category      String
   amount        Decimal
   description   String?
+  paid_to       String?
+  status        String   @default("PAID")
   receipt_image String?
+  date          DateTime @default(now())
   created_at    DateTime @default(now())
 
   business Business @relation(fields: [business_id], references: [id])
+  transactions Transaction[]
 
   @@map("expenses")
 }

@@ -154,7 +154,7 @@ export default function TransactionsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm font-mono">
-                        {tx.order_id ? `ORD-${tx.order_id.substring(0, 8)}` : tx.purchase_id ? `PUR-${tx.purchase_id.substring(0, 8)}` : '-'}
+                        {tx.order_id ? `ORD-${tx.order_id.substring(0, 8)}` : tx.purchase_id ? `PUR-${tx.purchase_id.substring(0, 8)}` : tx.expense_id ? `EXP-${tx.expense_id.substring(0, 8)}` : '-'}
                       </TableCell>
                       <TableCell>{tx.method || '-'}</TableCell>
                       <TableCell className={`text-right px-6 font-bold ${tx.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'}`}>

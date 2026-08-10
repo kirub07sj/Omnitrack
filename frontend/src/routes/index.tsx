@@ -33,6 +33,8 @@ import PaymentQueue from '../modules/sales/pages/PaymentQueue';
 import ManualSalePage from '../modules/sales/pages/ManualSalePage';
 import SalesHistoryPage from '../modules/sales/pages/SalesHistoryPage';
 import TransactionsPage from '../modules/transactions/pages/TransactionsPage';
+import ExpensesPage from '../modules/expenses/pages/ExpensesPage';
+import AddExpensePage from '../modules/expenses/pages/AddExpensePage';
 
 export const router = createBrowserRouter([
   {
@@ -157,6 +159,14 @@ export const router = createBrowserRouter([
       {
         path: 'transactions',
         element: <TransactionsPage />
+      },
+      {
+        path: 'expenses',
+        element: <ExpensesPage />
+      },
+      {
+        path: 'expenses/new',
+        element: <AddExpensePage />
       }
     ]
   },
@@ -256,6 +266,14 @@ export const router = createBrowserRouter([
       {
         path: 'transactions',
         element: <TransactionsPage />
+      },
+      {
+        path: 'expenses',
+        element: <ExpensesPage />
+      },
+      {
+        path: 'expenses/new',
+        element: <AddExpensePage />
       }
     ]
   }

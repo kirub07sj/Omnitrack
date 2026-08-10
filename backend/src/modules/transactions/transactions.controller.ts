@@ -16,7 +16,8 @@ export const getTransactions = async (req: Request, res: Response) => {
           include: {
             supplier: true
           }
-        }
+        },
+        expense: true
       },
       orderBy: { date: 'desc' }
     });

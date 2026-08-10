@@ -65,11 +65,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       items: isManager ? [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
-        { title: "Expenses", url: "#" },
+        { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses` },
       ] : [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
-        { title: "Expenses", url: "#" },
+        { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses` },
       ],
     },
     {
