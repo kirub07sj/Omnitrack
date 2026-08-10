@@ -137,11 +137,11 @@ export default function PaymentQueue() {
             const total = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * parseFloat(item.quantity)), 0);
             
             return (
-              <Card key={order.id} className="group relative flex flex-col hover:border-primary/50 transition-all min-h-[200px] overflow-hidden cursor-pointer shadow-sm hover:shadow-md">
+              <Card key={order.id} className="group relative flex flex-col hover:border-primary/50 transition-all min-h-[200px] overflow-hidden cursor-pointer shadow-sm hover:shadow-md omni-paper-fold">
                 <CardHeader className="pb-3 border-b bg-muted/20">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">Table {tableNum}</CardTitle>
+                      <CardTitle className="text-lg">{tableNum}</CardTitle>
                       <p className="text-xs text-muted-foreground font-mono mt-1">#{order.id.split('-')[0]}</p>
                     </div>
                     <span className="text-xs font-bold px-2 py-1 bg-amber-500/20 text-amber-700 rounded-full uppercase">

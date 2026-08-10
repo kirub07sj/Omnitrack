@@ -317,7 +317,7 @@ export default function OwnerDashboard() {
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-bold text-red-500">{stock.current}</span>
-                        <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground"><Plus className="w-4 h-4" /></Button>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground  hover:bg-accent hover:text-accent-foreground"><Plus className="w-4 h-4" /></Button>
                       </div>
                     </div>
                   ))}

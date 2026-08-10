@@ -93,19 +93,19 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl p-6 sm:p-8">
-        <DialogHeader className="mb-4">
+      <DialogContent className="sm:max-w-3xl h-[90vh] sm:h-[500px] p-6 sm:p-8 flex flex-col">
+        <DialogHeader className="mb-2 shrink-0">
           <DialogTitle className="text-2xl font-bold flex justify-between items-center">
             <span>{isManual ? 'Complete Manual Sale' : `Checkout Order #${order.id?.split('-')[0]}`}</span>
             <span className="text-primary">{total.toFixed(2)} ETB</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-          <div className="space-y-4">
-            <h4 className="font-semibold text-muted-foreground uppercase text-xs">Order Summary</h4>
-            <div className="bg-muted/30 p-4 rounded-xl space-y-3">
-              <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 overflow-hidden min-h-0">
+          <div className="flex flex-col h-full overflow-hidden">
+            <h4 className="font-semibold text-muted-foreground uppercase text-xs mb-3 shrink-0">Order Summary</h4>
+            <div className="bg-muted/30 p-4 rounded-xl flex flex-col flex-1 overflow-hidden border border-border/50">
+              <div className="overflow-y-auto flex-1 space-y-2 pr-2 custom-scrollbar">
                 {order.items.map((item: any, i: number) => (
                   <div key={i} className="flex justify-between text-sm">
                     <span>{item.quantity}x {item.product?.name}</span>
@@ -113,12 +113,12 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
                   </div>
                 ))}
               </div>
-              <div className="border-t pt-3 space-y-1">
+              <div className="border-t pt-3 space-y-1 mt-3 shrink-0">
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Subtotal</span>
                   <span>{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-base font-bold pt-2">
+                <div className="flex justify-between text-lg font-bold pt-1">
                   <span>Total Due</span>
                   <span className="text-primary">{total.toFixed(2)} ETB</span>
                 </div>
@@ -126,10 +126,10 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h4 className="font-semibold text-muted-foreground uppercase text-xs">Payment Details</h4>
+          <div className="flex flex-col h-full">
+            <h4 className="font-semibold text-muted-foreground uppercase text-xs mb-3 shrink-0">Payment Details</h4>
             
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2 shrink-0">
               <Button
                 variant={method === 'Cash' ? 'default' : 'outline'}
                 className="flex flex-col gap-1 h-auto py-3"
@@ -156,10 +156,24 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
               </Button>
             </div>
 
-            {method === 'Cash' && (
-              <div className="space-y-3 pt-2">
-                <div className="space-y-1">
-                  <Label>Amount Received (ETB)</Label>
+            <div className="flex-1 flex flex-col justify-end relative mt-12 pb-4">
+              <div className="absolute bottom-[88px] left-0 right-0 w-full z-10 flex flex-col gap-2 pointer-events-none">
+                {error && (
+                  <div className="bg-destructive/10 border border-destructive/20 text-destructive px-3 py-2.5 rounded-lg text-sm font-medium animate-in fade-in slide-in-from-bottom-2 shadow-sm pointer-events-auto">
+                    {error}
+                  </div>
+                )}
+                {!error && method === 'Cash' && received && parseFloat(received) >= total && (
+                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2.5 rounded-lg flex justify-between items-center animate-in fade-in slide-in-from-bottom-2 shadow-sm pointer-events-auto">
+                    <span className="font-medium text-sm">Change to return:</span>
+                    <span className="font-bold text-lg">{change.toFixed(2)} ETB</span>
+                  </div>
+                )}
+              </div>
+
+              {method === 'Cash' && (
+                <div className="space-y-1.5 shrink-0">
+                  <Label className="text-muted-foreground font-semibold text-xs uppercase">Amount Received (ETB)</Label>
                   <Input 
                     type="number" 
                     placeholder="e.g. 1000" 
@@ -168,33 +182,24 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
                     className="text-lg h-12 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                 </div>
-                {received && parseFloat(received) >= total && (
-                  <div className="bg-emerald-50 text-emerald-700 p-3 rounded-lg border border-emerald-200 flex justify-between items-center">
-                    <span className="font-medium">Change to return:</span>
-                    <span className="font-bold text-lg">{change.toFixed(2)} ETB</span>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
 
-            {method === 'Mobile Banking' && (
-              <div className="space-y-3 pt-2">
-                <div className="space-y-1">
-                  <Label>Reference Number</Label>
+              {method === 'Mobile Banking' && (
+                <div className="space-y-1.5 shrink-0">
+                  <Label className="text-muted-foreground font-semibold text-xs uppercase">Reference Number</Label>
                   <Input 
                     type="text" 
                     placeholder="Transaction ref..." 
                     value={reference}
                     onChange={(e) => setReference(e.target.value)}
+                    className="text-lg h-12"
                   />
                 </div>
-              </div>
-            )}
-
-            {error && <p className="text-sm text-destructive font-medium bg-destructive/10 p-3 rounded-md">{error}</p>}
+              )}
+            </div>
 
             <Button 
-              className="w-full h-14 text-lg font-bold mt-6 shadow-md" 
+              className="w-full h-14 text-lg font-bold mt-auto shadow-md shrink-0 transition-all active:scale-[0.98]" 
               onClick={handleCheckout}
               disabled={loading}
             >

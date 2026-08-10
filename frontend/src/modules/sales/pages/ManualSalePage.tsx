@@ -3,7 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, ArrowLeft, ShoppingCart, Minus, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Search, ArrowLeft, ShoppingCart, Minus, Plus, Trash2, ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   Select,
@@ -143,17 +143,38 @@ export default function ManualSalePage() {
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-2">
-                  {filteredProducts.map(product => (
-                    <div 
-                      key={product.id} 
-                      className="border rounded-xl p-3 cursor-pointer hover:border-primary/50 transition-colors bg-card flex flex-col"
-                      onClick={() => addToCart(product)}
-                    >
-                      <div className="font-bold text-sm leading-tight mb-1">{product.name}</div>
-                      <div className="text-xs text-muted-foreground mt-auto pt-2">{parseFloat(product.price).toFixed(2)} ETB</div>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2 pb-10">
+                  {filteredProducts.map((product, i) => {
+                    const staggerClass = `omni-stagger-${Math.min((i % 8) + 1, 8)}`;
+                    const catName = product.Category?.name || product.category_name || '';
+                    return (
+                      <div 
+                        key={product.id} 
+                        onClick={() => addToCart(product)}
+                        className={`cursor-pointer bg-card/50 hover:bg-card border border-border/50 rounded-xl transition-all duration-300 omni-card-hover omni-animate-in-scale ${staggerClass} flex flex-col overflow-hidden group`}
+                      >
+                        <div className="relative h-32 w-full bg-muted/30 flex flex-col items-center justify-center">
+                          {catName && (
+                            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-background/80 backdrop-blur-sm text-foreground text-[10px] font-bold z-10 shadow-sm border border-border/50">
+                              {catName}
+                            </div>
+                          )}
+                          
+                          {(product.image_url || product.imageUrl) ? (
+                            <img src={(product.image_url || product.imageUrl)?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/40 group-hover:text-primary/40 group-hover:scale-110 transition-all duration-500">
+                              <ImageIcon size={32} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-4 flex flex-col flex-1 text-center items-center justify-between">
+                          <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">{product.name}</h3>
+                          <p className="text-primary font-bold mt-2 text-lg"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">ETB</span> {Number(product.price).toFixed(2)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
