@@ -4,6 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Users, Utensils, CheckCircle2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function TableManagementPage() {
   const { currentUser } = useAppStore();
@@ -110,13 +117,13 @@ export default function TableManagementPage() {
           fetch(`/api/tables/${tableId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ waiter_id: selectedWaiter || null })
+            body: JSON.stringify({ waiter_id: (!selectedWaiter || selectedWaiter === 'unassigned') ? null : selectedWaiter })
           })
         )
       );
       
       setTables(prev => prev.map(t => 
-        selectedTables.includes(t.id) ? { ...t, waiter_id: selectedWaiter || null } : t
+        selectedTables.includes(t.id) ? { ...t, waiter_id: (!selectedWaiter || selectedWaiter === 'unassigned') ? null : selectedWaiter } : t
       ));
       
       setIsAssignModalOpen(false);
@@ -226,18 +233,19 @@ export default function TableManagementPage() {
           <div className="py-4 space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium">Select Waiter</label>
-              <select 
-                className="w-full bg-background border border-border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary outline-none"
-                value={selectedWaiter}
-                onChange={(e) => setSelectedWaiter(e.target.value)}
-              >
-                <option value="">-- Unassigned (Clear Waiter) --</option>
-                {waiters.map(waiter => (
-                  <option key={waiter.id} value={waiter.id}>
-                    {waiter.first_name} {waiter.last_name}
-                  </option>
-                ))}
-              </select>
+              <Select value={selectedWaiter} onValueChange={setSelectedWaiter}>
+                <SelectTrigger className="w-full h-11 bg-background border-border text-foreground">
+                  <SelectValue placeholder="-- Unassigned (Clear Waiter) --" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">-- Unassigned (Clear Waiter) --</SelectItem>
+                  {waiters.map(waiter => (
+                    <SelectItem key={waiter.id} value={waiter.id}>
+                      {waiter.first_name} {waiter.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">

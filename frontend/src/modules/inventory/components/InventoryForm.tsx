@@ -30,7 +30,6 @@ export function InventoryForm({ initialData, suppliers = [], onSubmit, isLoading
     resolver: zodResolver(inventorySchema),
     defaultValues: {
       name: "",
-      sku: "",
       unit: "",
       quantity: 0,
       minimum_quantity: 0,
@@ -44,7 +43,6 @@ export function InventoryForm({ initialData, suppliers = [], onSubmit, isLoading
     if (initialData) {
       form.reset({
         name: initialData.name,
-        sku: initialData.sku,
         unit: initialData.unit,
         quantity: initialData.quantity,
         minimum_quantity: initialData.minimum_quantity,
@@ -67,19 +65,6 @@ export function InventoryForm({ initialData, suppliers = [], onSubmit, isLoading
                 <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input placeholder="Inventory Name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="sku"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>SKU</FormLabel>
-                <FormControl>
-                  <Input placeholder="SKU" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -75,16 +75,16 @@ export const getOrders = async (req: Request, res: Response) => {
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { business_id, table_id, waiter_id, notes, items } = req.body;
+    const { business_id, table_id, waiter_id, notes, items, status } = req.body;
 
-    // Check if there is an existing Open or Pending order for this table
+    // Check if there is an existing active order for this table
     if (table_id) {
       const existingOrder = await prisma.order.findFirst({
         where: {
           business_id,
           table_id,
           status: {
-            in: ['Pending', 'Open']
+            notIn: ['Completed', 'Cancelled', 'PAID']
           }
         }
       });
@@ -105,9 +105,19 @@ export const createOrder = async (req: Request, res: Response) => {
           ? (existingOrder.notes ? `${existingOrder.notes}\n${notes}` : notes)
           : existingOrder.notes;
 
+        // If the order was Ready or Served, change it back to Pending so the kitchen can prepare the new items.
+        // Otherwise, keep its current status.
+        let updatedStatus = existingOrder.status;
+        if (['Ready', 'Served'].includes(existingOrder.status as string)) {
+          updatedStatus = 'Pending';
+        }
+
         const updatedOrder = await prisma.order.update({
           where: { id: existingOrder.id },
-          data: { notes: updatedNotes },
+          data: { 
+            notes: updatedNotes,
+            status: updatedStatus 
+          },
           include: {
             table: true,
             waiter: true,
@@ -116,6 +126,27 @@ export const createOrder = async (req: Request, res: Response) => {
             }
           }
         });
+
+        // Decrement inventory for newly added items
+        for (const reqItem of items) {
+          const product = await prisma.product.findUnique({ where: { id: reqItem.product_id } });
+          if (product?.track_inventory && product?.inventory_item_id) {
+            await prisma.inventoryItem.update({
+              where: { id: product.inventory_item_id },
+              data: { quantity: { decrement: reqItem.quantity } }
+            });
+            await prisma.inventoryMovement.create({
+              data: {
+                business_id,
+                inventory_item_id: product.inventory_item_id,
+                type: 'OUT',
+                quantity: reqItem.quantity,
+                reference_type: 'Order',
+                reference_id: updatedOrder.id
+              }
+            });
+          }
+        }
 
         notifyClients(business_id, 'UPDATE_ORDER', updatedOrder);
         res.status(200).json(updatedOrder);
@@ -130,7 +161,7 @@ export const createOrder = async (req: Request, res: Response) => {
         table_id,
         waiter_id,
         notes,
-        status: 'Pending',
+        status: status || 'Pending',
         items: {
           create: items.map((item: any) => ({
             product_id: item.product_id,
@@ -149,6 +180,26 @@ export const createOrder = async (req: Request, res: Response) => {
         }
       }
     });
+
+    // Decrement inventory for all items in the new order
+    for (const item of order.items) {
+      if (item.product?.track_inventory && item.product?.inventory_item_id) {
+        await prisma.inventoryItem.update({
+          where: { id: item.product.inventory_item_id },
+          data: { quantity: { decrement: item.quantity } }
+        });
+        await prisma.inventoryMovement.create({
+          data: {
+            business_id,
+            inventory_item_id: item.product.inventory_item_id,
+            type: 'OUT',
+            quantity: item.quantity,
+            reference_type: 'Order',
+            reference_id: order.id
+          }
+        });
+      }
+    }
 
     notifyClients(business_id, 'NEW_ORDER', order);
 
@@ -202,6 +253,28 @@ export const updateOrder = async (req: Request, res: Response) => {
       }
     });
 
+    // If status changed to Cancelled, restore inventory
+    if (status === 'Cancelled' && existingOrder.status !== 'Cancelled') {
+      for (const item of order.items) {
+        if (item.product?.track_inventory && item.product?.inventory_item_id) {
+          await prisma.inventoryItem.update({
+            where: { id: item.product.inventory_item_id },
+            data: { quantity: { increment: item.quantity } }
+          });
+          await prisma.inventoryMovement.create({
+            data: {
+              business_id: existingOrder.business_id,
+              inventory_item_id: item.product.inventory_item_id,
+              type: 'IN',
+              quantity: item.quantity,
+              reference_type: 'Order Cancelled',
+              reference_id: order.id
+            }
+          });
+        }
+      }
+    }
+
     notifyClients(existingOrder.business_id, 'UPDATE_ORDER', order);
     
     res.json(order);
@@ -218,6 +291,33 @@ export const deleteOrder = async (req: Request, res: Response) => {
     if (!order) {
        res.status(404).json({ message: 'Order not found' });
        return;
+    }
+
+    const items = await prisma.orderItem.findMany({ 
+      where: { order_id: id },
+      include: { product: true }
+    });
+
+    // Restore inventory if not already cancelled
+    if (order.status !== 'Cancelled') {
+      for (const item of items) {
+        if (item.product?.track_inventory && item.product?.inventory_item_id) {
+          await prisma.inventoryItem.update({
+            where: { id: item.product.inventory_item_id },
+            data: { quantity: { increment: item.quantity } }
+          });
+          await prisma.inventoryMovement.create({
+            data: {
+              business_id: order.business_id,
+              inventory_item_id: item.product.inventory_item_id,
+              type: 'IN',
+              quantity: item.quantity,
+              reference_type: 'Order Deleted',
+              reference_id: order.id
+            }
+          });
+        }
+      }
     }
 
     // Delete items first (though cascade might handle it if set, prisma doesn't cascade by default unless specified)

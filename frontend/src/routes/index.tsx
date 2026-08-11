@@ -16,6 +16,7 @@ import AddEditProductPage from '../modules/products/pages/AddEditProductPage';
 
 import InventoryListPage from '../modules/inventory/pages/InventoryListPage';
 import AddEditInventoryPage from '../modules/inventory/pages/AddEditInventoryPage';
+import PurchasePage from '../modules/inventory/pages/PurchasePage';
 
 import SupplierListPage from '../modules/suppliers/pages/SupplierListPage';
 import AddEditSupplierPage from '../modules/suppliers/pages/AddEditSupplierPage';
@@ -24,6 +25,17 @@ import SupplierDetailsPage from '../modules/suppliers/pages/SupplierDetailsPage'
 import POSPage from '../modules/orders/pages/POSPage';
 import WaiterAppPage from '../modules/orders/pages/WaiterAppPage';
 import TableManagementPage from '../modules/tables/pages/TableManagementPage';
+import SettingsPage from '../modules/settings/pages/SettingsPage';
+import KitchenAppPage from '../modules/kitchen/pages/KitchenAppPage';
+import KitchenDashboardPage from '../modules/kitchen/pages/KitchenDashboardPage';
+import SalesLayout from '../modules/sales/SalesLayout';
+import PaymentQueue from '../modules/sales/pages/PaymentQueue';
+import ManualSalePage from '../modules/sales/pages/ManualSalePage';
+import SalesHistoryPage from '../modules/sales/pages/SalesHistoryPage';
+import TransactionsPage from '../modules/transactions/pages/TransactionsPage';
+import ExpensesPage from '../modules/expenses/pages/ExpensesPage';
+import AddExpensePage from '../modules/expenses/pages/AddExpensePage';
+import ReportsPage from '../modules/reports/pages/ReportsPage';
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +45,10 @@ export const router = createBrowserRouter([
   {
     path: '/waiter',
     element: <WaiterAppPage />
+  },
+  {
+    path: '/kitchen',
+    element: <KitchenAppPage />
   },
   {
     path: '/setup',
@@ -94,7 +110,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'inventory/new',
-        element: <AddEditInventoryPage />
+        element: <PurchasePage />
       },
       {
         path: 'inventory/:id/edit',
@@ -123,6 +139,39 @@ export const router = createBrowserRouter([
       {
         path: 'tables',
         element: <TableManagementPage />
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />
+      },
+      {
+        path: 'kitchen',
+        element: <KitchenDashboardPage />
+      },
+      {
+        path: 'sales',
+        element: <SalesLayout />,
+        children: [
+          { index: true, element: <PaymentQueue /> },
+          { path: 'manual', element: <ManualSalePage /> },
+          { path: 'history', element: <SalesHistoryPage /> }
+        ]
+      },
+      {
+        path: 'transactions',
+        element: <TransactionsPage />
+      },
+      {
+        path: 'expenses',
+        element: <ExpensesPage />
+      },
+      {
+        path: 'expenses/new',
+        element: <AddExpensePage />
+      },
+      {
+        path: 'reports',
+        element: <ReportsPage />
       }
     ]
   },
@@ -172,7 +221,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'inventory/new',
-        element: <AddEditInventoryPage />
+        element: <PurchasePage />
       },
       {
         path: 'inventory/:id/edit',
@@ -201,6 +250,39 @@ export const router = createBrowserRouter([
       {
         path: 'tables',
         element: <TableManagementPage />
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />
+      },
+      {
+        path: 'kitchen',
+        element: <KitchenDashboardPage />
+      },
+      {
+        path: 'sales',
+        element: <SalesLayout />,
+        children: [
+          { index: true, element: <PaymentQueue /> },
+          { path: 'manual', element: <ManualSalePage /> },
+          { path: 'history', element: <SalesHistoryPage /> }
+        ]
+      },
+      {
+        path: 'transactions',
+        element: <TransactionsPage />
+      },
+      {
+        path: 'expenses',
+        element: <ExpensesPage />
+      },
+      {
+        path: 'expenses/new',
+        element: <AddExpensePage />
+      },
+      {
+        path: 'reports',
+        element: <ReportsPage />
       }
     ]
   }

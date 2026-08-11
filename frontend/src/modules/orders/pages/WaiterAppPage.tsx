@@ -3,7 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import { useProductStore } from '@/store/useProductStore';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Loader2, ShoppingCart, CheckCircle2, Plus, Minus, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Bell, Search, UtensilsCrossed, Settings, Clock, Check, X, ChevronRight, Hash, LogOut, Minus, Plus, Loader2, ShoppingCart, CheckCircle2, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function WaiterAppPage() {
   const [searchParams] = useSearchParams();
@@ -235,16 +242,16 @@ export default function WaiterAppPage() {
         )}
 
         <div className="flex gap-3">
-          <select
-            value={selectedTable}
-            onChange={(e) => setSelectedTable(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all text-slate-800"
-          >
-            <option value="" disabled>Select Table</option>
-            {tables.map(t => (
-              <option key={t.id} value={t.id}>{t.table_number}</option>
-            ))}
-          </select>
+          <Select value={selectedTable} onValueChange={setSelectedTable}>
+            <SelectTrigger className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 h-auto text-sm font-medium focus:ring-2 focus:ring-emerald-600 transition-all text-slate-800">
+              <SelectValue placeholder="Select Table" />
+            </SelectTrigger>
+            <SelectContent>
+              {tables.map(t => (
+                <SelectItem key={t.id} value={t.id}>{t.table_number}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </header>
 

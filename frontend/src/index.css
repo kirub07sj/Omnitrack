@@ -5,6 +5,16 @@
 @tailwind utilities;
 
 @layer base {
+  /* Hide number input spin buttons */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
   :root {
     --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
@@ -204,6 +214,43 @@
   box-shadow:
     0 8px 30px -8px hsla(153, 60%, 40%, 0.15),
     0 0 0 1px hsla(153, 40%, 30%, 0.1);
+}
+
+/* ═══════════════════════════════════════════
+   Paper Fold Effect
+   ═══════════════════════════════════════════ */
+
+.omni-paper-fold {
+  position: relative;
+  border-top-right-radius: 0 !important;
+  clip-path: polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%);
+  transition: clip-path 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.omni-paper-fold::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: hsl(var(--secondary));
+  border-bottom-left-radius: 6px;
+  box-shadow: -3px 3px 6px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  border-left: 1px solid hsl(var(--border) / 0.5);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.omni-paper-fold:hover {
+  clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 0 100%);
+}
+
+.omni-paper-fold:hover::after {
+  width: 40px;
+  height: 40px;
+  box-shadow: -5px 5px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* ═══════════════════════════════════════════

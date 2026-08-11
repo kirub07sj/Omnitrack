@@ -12,8 +12,14 @@ import productRoutes from './modules/products/product.routes';
 import uploadRoutes from './modules/upload/upload.routes';
 import inventoryRoutes from './modules/inventory/inventory.routes';
 import supplierRoutes from './modules/inventory/supplier.routes';
+import purchaseRoutes from './modules/inventory/purchase.routes';
 import orderRoutes from './modules/orders/order.routes';
 import tableRoutes from './modules/tables/table.routes';
+import salesRoutes from './modules/sales/sales.routes';
+import transactionsRoutes from './modules/transactions/transactions.routes';
+import expenseRoutes from './modules/expenses/expense.routes';
+import dashboardRoutes from './modules/dashboard/dashboard.routes';
+import reportsRoutes from './modules/reports/reports.routes';
 
 dotenv.config();
 
@@ -31,9 +37,15 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/purchases', purchaseRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/tables', tableRoutes);
+app.use('/api/sales', salesRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/transactions', transactionsRoutes);
+app.use('/api/expenses', expenseRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // Serve static uploaded files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
