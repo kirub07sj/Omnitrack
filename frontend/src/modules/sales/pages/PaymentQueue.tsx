@@ -38,7 +38,7 @@ export default function PaymentQueue() {
     if (!currentUser?.business_id) return;
     fetchUnpaidOrders();
 
-    const es = new EventSource(`/api/orders/stream?business_id=${currentUser.business_id}`);
+    const es = new EventSource(`/api/orders/sse?business_id=${currentUser.business_id}`);
     
     es.addEventListener('UPDATE_ORDER', (e) => {
       try {

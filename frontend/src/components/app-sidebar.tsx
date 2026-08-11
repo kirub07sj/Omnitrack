@@ -72,10 +72,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
         { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses`, badge: unpaidCounts.expenses },
+        { title: "Reports", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/reports` },
       ] : [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
         { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses`, badge: unpaidCounts.expenses },
+        { title: "Reports", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/reports` },
       ],
     },
     {
@@ -94,11 +96,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Users,
       items: isManager ? [
         { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
-        { title: "Reports", url: "#" },
       ] : [
         { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
         { title: "Accounts & Permissions", url: "#" },
-        { title: "Reports", url: "#" },
       ],
     },
     ...(isManager ? [] : [{

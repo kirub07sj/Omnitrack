@@ -35,6 +35,7 @@ import SalesHistoryPage from '../modules/sales/pages/SalesHistoryPage';
 import TransactionsPage from '../modules/transactions/pages/TransactionsPage';
 import ExpensesPage from '../modules/expenses/pages/ExpensesPage';
 import AddExpensePage from '../modules/expenses/pages/AddExpensePage';
+import ReportsPage from '../modules/reports/pages/ReportsPage';
 
 export const router = createBrowserRouter([
   {
@@ -167,6 +168,10 @@ export const router = createBrowserRouter([
       {
         path: 'expenses/new',
         element: <AddExpensePage />
+      },
+      {
+        path: 'reports',
+        element: <ReportsPage />
       }
     ]
   },
@@ -274,6 +279,10 @@ export const router = createBrowserRouter([
       {
         path: 'expenses/new',
         element: <AddExpensePage />
+      },
+      {
+        path: 'reports',
+        element: <ReportsPage />
       }
     ]
   }

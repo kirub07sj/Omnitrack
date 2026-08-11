@@ -77,14 +77,14 @@ export const createOrder = async (req: Request, res: Response) => {
   try {
     const { business_id, table_id, waiter_id, notes, items, status } = req.body;
 
-    // Check if there is an existing Open or Pending order for this table
-    if (table_id && (!status || status === 'Pending' || status === 'Open')) {
+    // Check if there is an existing active order for this table
+    if (table_id) {
       const existingOrder = await prisma.order.findFirst({
         where: {
           business_id,
           table_id,
           status: {
-            in: ['Pending', 'Open']
+            notIn: ['Completed', 'Cancelled', 'PAID']
           }
         }
       });
@@ -105,9 +105,19 @@ export const createOrder = async (req: Request, res: Response) => {
           ? (existingOrder.notes ? `${existingOrder.notes}\n${notes}` : notes)
           : existingOrder.notes;
 
+        // If the order was Ready or Served, change it back to Pending so the kitchen can prepare the new items.
+        // Otherwise, keep its current status.
+        let updatedStatus = existingOrder.status;
+        if (['Ready', 'Served'].includes(existingOrder.status as string)) {
+          updatedStatus = 'Pending';
+        }
+
         const updatedOrder = await prisma.order.update({
           where: { id: existingOrder.id },
-          data: { notes: updatedNotes },
+          data: { 
+            notes: updatedNotes,
+            status: updatedStatus 
+          },
           include: {
             table: true,
             waiter: true,
