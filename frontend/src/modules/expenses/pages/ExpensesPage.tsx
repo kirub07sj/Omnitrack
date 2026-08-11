@@ -102,12 +102,12 @@ export default function ExpensesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="bg-gradient-to-r from-emerald-500 to-emerald-800 text-white border-0 shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total This Month</CardTitle>
+            <CardTitle className="text-sm font-medium text-emerald-50">Total This Month</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{totalThisMonth.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">ETB</span></div>
+            <div className="text-3xl font-bold text-white">{totalThisMonth.toLocaleString()} <span className="text-sm font-normal text-emerald-100">ETB</span></div>
           </CardContent>
         </Card>
         <Card>

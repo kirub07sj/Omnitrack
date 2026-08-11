@@ -3,7 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, Filter, Eye, Printer, RotateCcw, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { Loader2, Search, Filter, Printer, RotateCcw, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -225,9 +225,6 @@ export default function SalesHistoryPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button variant="ghost" size="icon" title="View Details">
-                              <Eye className="w-4 h-4 text-muted-foreground" />
-                            </Button>
                             <Button 
                               variant="ghost" 
                               size="icon" 

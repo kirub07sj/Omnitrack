@@ -25,7 +25,7 @@ export default function ReceiptDialog({ sale, open, onOpenChange }: ReceiptDialo
           <DialogTitle>Receipt Preview</DialogTitle>
         </DialogHeader>
 
-        <div className="font-mono text-sm mx-auto w-full max-w-sm bg-white text-black p-6 rounded-lg shadow-sm border print:shadow-none print:border-none print:p-0">
+        <div className="font-mono text-sm mx-auto w-full max-w-sm bg-white text-black p-6 rounded-lg shadow-sm border max-h-[60vh] overflow-y-auto print:max-h-none print:overflow-visible print:shadow-none print:border-none print:p-0">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold uppercase mb-1">OmniTrack</h2>
             <p className="text-xs">Restaurant Management System</p>
