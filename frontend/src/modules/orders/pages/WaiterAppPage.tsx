@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useProductStore } from '@/store/useProductStore';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Bell, Search, UtensilsCrossed, Settings, Clock, Check, X, ChevronRight, Hash, LogOut, Minus, Plus, Loader2, ShoppingCart, CheckCircle2, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { X, Minus, Plus, Loader2, ShoppingCart, CheckCircle2, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import {
   Select,
   SelectContent,

@@ -3,7 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, Filter, Printer, RotateCcw, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { Loader2, Search, Printer, RotateCcw, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';

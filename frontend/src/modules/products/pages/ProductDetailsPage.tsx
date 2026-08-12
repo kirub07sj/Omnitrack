@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ProductService } from "../services/product.service";
-import { ArrowLeft, Edit, Package, DollarSign, Tag, Box, AlertTriangle, Layers, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Edit, DollarSign, Tag, Box, AlertTriangle, Layers, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ProductDetailsPage() {

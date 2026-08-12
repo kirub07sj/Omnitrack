@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Loader2, ChefHat, CheckCircle2, Clock, Image as ImageIcon, QrCode } from 'lucide-react';

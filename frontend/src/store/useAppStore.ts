@@ -73,7 +73,6 @@ export const useAppStore = create<AppState>((set) => ({
   unpaidCounts: { sales: 0, expenses: 0, purchases: 0 },
   
   fetchUnpaidCounts: async () => {
-    const state = set as any; // Using getState would be better but we can use the stored currentUser
     // We can't access currentUser directly without get(), so we update the store creator to use (set, get)
     // We'll rewrite the create call in a separate edit if needed, or just use useAppStore.getState()
     const currentUser = useAppStore.getState().currentUser;

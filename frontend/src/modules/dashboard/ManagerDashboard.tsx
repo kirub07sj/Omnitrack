@@ -1,425 +1,458 @@
 import { 
-  Users, 
-  ShoppingCart, 
-  AlertCircle, 
-  Clock, 
-  Plus, 
-  ChefHat, 
+  AlertTriangle,
+  CheckCircle2,
+  ChefHat,
+  Clock,
   Coffee,
-  Activity,
   Package,
-  DollarSign,
-  Timer
+  ShoppingCart,
+  Users,
+  Activity,
+  Calendar,
+  TrendingUp,
+  TrendingDown
 } from "lucide-react";
 import { 
   Card, 
   CardContent, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { format } from 'date-fns';
 
-const hourlyOrdersData = [
-  { hour: "10 AM", orders: 12 },
-  { hour: "11 AM", orders: 25 },
-  { hour: "12 PM", orders: 48 },
-  { hour: "1 PM", orders: 56 },
-  { hour: "2 PM", orders: 30 },
-  { hour: "3 PM", orders: 15 },
-  { hour: "4 PM", orders: 22 },
-];
-
-const productSalesData = [
-  { name: "Burgers", value: 45 },
-  { name: "Pizzas", value: 30 },
-  { name: "Salads", value: 15 },
-  { name: "Drinks", value: 10 },
-];
-const COLORS = ['#10b981', '#14b8a6', '#06b6d4', '#8b5cf6'];
-
 export default function ManagerDashboard() {
+  const EMERALD_COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#047857', '#a7f3d0'];
   const { currentUser } = useAppStore();
-  const [sales, setSales] = useState<any[]>([]);
+  const navigate = useNavigate();
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`/api/dashboard/manager?business_id=${currentUser?.business_id}`);
+      if (res.data.success) {
+        setData(res.data.data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch manager dashboard data:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchSales = async () => {
-      try {
-        const res = await fetch(`/api/sales/history?business_id=${currentUser?.business_id}`);
-        const data = await res.json();
-        if (data.success) {
-          setSales(data.data);
-        }
-      } catch (e) {
-        console.error("Failed to fetch dashboard sales:", e);
-      }
-    };
-    if (currentUser?.business_id) fetchSales();
+    if (currentUser?.business_id) {
+      fetchData();
+    }
   }, [currentUser?.business_id]);
 
-  // Compute live metrics
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const todaySales = sales.filter(s => format(new Date(s.created_at), 'yyyy-MM-dd') === today);
-  const totalAmountToday = todaySales.reduce((sum, s) => sum + parseFloat(s.total), 0);
+  if (loading && !data) {
+    return <div className="p-8 text-center text-muted-foreground flex h-full items-center justify-center">Loading dashboard...</div>;
+  }
+
+  if (!data) {
+    return <div className="p-8 text-center text-destructive flex h-full items-center justify-center">Failed to load dashboard data.</div>;
+  }
+
+  const {
+    isKitchenActive = true,
+    operationalSummary,
+    ordersAttention,
+    kitchenStatus,
+    tableStatus,
+    inventoryAlerts,
+    staffActivity,
+    todayActivity,
+    recentActivity
+  } = data;
 
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
       <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto omni-animate-in">
         
-        {/* Header Section */}
+        {/* 1. Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 omni-stagger-1">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Operations Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Daily Operations & Shift Management</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground capitalize">
+              Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {currentUser?.username || 'Manager'}
+            </h1>
+            <p className="text-muted-foreground mt-1 flex items-center gap-2">
+              <Calendar className="w-4 h-4" /> {format(new Date(), 'EEEE, MMMM do, yyyy')}
+            </p>
           </div>
           
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" className="bg-muted border-border text-foreground hover:bg-accent hover:text-accent-foreground"><Plus className="w-4 h-4 mr-2" /> New Order</Button>
-            <Button variant="outline" className="bg-muted border-border text-foreground hover:bg-accent hover:text-accent-foreground"><Coffee className="w-4 h-4 mr-2" /> Assign Table</Button>
-            <Button variant="outline" className="bg-muted border-border text-foreground hover:bg-accent hover:text-accent-foreground"><Package className="w-4 h-4 mr-2" /> Receive Inventory</Button>
-            <Button variant="outline" className="bg-muted border-border text-foreground hover:bg-accent hover:text-accent-foreground"><DollarSign className="w-4 h-4 mr-2" /> Add Expense</Button>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground"><Users className="w-4 h-4 mr-2" /> Manage Employees</Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" className="bg-muted border-border" onClick={() => navigate('/manager/orders')}><ShoppingCart className="w-4 h-4 mr-2" /> Orders</Button>
+            {isKitchenActive && (
+              <Button variant="outline" className="bg-muted border-border" onClick={() => navigate('/manager/kitchen')}><ChefHat className="w-4 h-4 mr-2" /> Kitchen</Button>
+            )}
+            <Button variant="outline" className="bg-muted border-border" onClick={() => navigate('/manager/tables')}><Coffee className="w-4 h-4 mr-2" /> Tables</Button>
+            <Button variant="outline" className="bg-muted border-border" onClick={() => navigate('/manager/inventory')}><Package className="w-4 h-4 mr-2" /> Inventory</Button>
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => navigate('/manager/employees')}><Users className="w-4 h-4 mr-2" /> Employees</Button>
           </div>
         </div>
 
-        {/* System Notifications */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 omni-stagger-2">
-          <div className="flex items-center gap-3 bg-red-950/40 border border-red-900/50 rounded-xl p-4 omni-notification">
-            <Timer className="w-5 h-5 text-red-500" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-red-200">Delayed Orders</p>
-              <p className="text-xs text-red-400">3 orders exceeding 30m prep time.</p>
-            </div>
-            <Button size="sm" variant="outline" className="h-7 text-xs border-red-900/50 hover:bg-red-900/50 text-red-200">View</Button>
-          </div>
-          <div className="flex items-center gap-3 bg-amber-950/40 border border-amber-900/50 rounded-xl p-4 omni-notification">
-            <AlertCircle className="w-5 h-5 text-amber-500" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-amber-200">Low Stock</p>
-              <p className="text-xs text-amber-400">Tomatoes & Buns below par.</p>
-            </div>
-            <Button size="sm" variant="outline" className="h-7 text-xs border-amber-900/50 hover:bg-amber-900/50 text-amber-200">Restock</Button>
-          </div>
-          <div className="flex items-center gap-3 bg-blue-950/40 border border-blue-900/50 rounded-xl p-4 omni-notification">
-            <ShoppingCart className="w-5 h-5 text-blue-500" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-blue-200">New Orders</p>
-              <p className="text-xs text-blue-400">5 pending web orders to accept.</p>
-            </div>
-            <Button size="sm" variant="outline" className="h-7 text-xs border-blue-900/50 hover:bg-blue-900/50 text-blue-200">Review</Button>
-          </div>
-          <div className="flex items-center gap-3 bg-amber-950/40 border border-amber-900/50 rounded-xl p-4 omni-notification">
-            <Users className="w-5 h-5 text-amber-500" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-amber-200">Staff Alerts</p>
-              <p className="text-xs text-amber-400">1 server late for shift.</p>
-            </div>
-            <Button size="sm" variant="outline" className="h-7 text-xs border-amber-900/50 hover:bg-amber-900/50 text-amber-200">Details</Button>
-          </div>
-        </div>
+        {/* 2. Operational Summary */}
+        {isKitchenActive && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 omni-stagger-2">
+            <Card className="bg-card border-border omni-kpi-card">
+              <CardHeader className="pb-2 space-y-0">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-amber-500">{operationalSummary.pending}</div>
+              </CardContent>
+            </Card>
 
-        {/* Top KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 omni-stagger-3">
-          <Card className="bg-card border-border omni-kpi-card">
+            <Card className="bg-card border-border omni-kpi-card">
+              <CardHeader className="pb-2 space-y-0">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">In Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-blue-500">{operationalSummary.inProgress}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border omni-kpi-card">
+              <CardHeader className="pb-2 space-y-0">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Ready</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-emerald-500">{operationalSummary.ready}</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Financial KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 omni-stagger-3 mb-6">
+          <Card className="bg-gradient-to-r from-emerald-500 to-emerald-800 text-white border-0 shadow-sm omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Active Orders</CardTitle>
-              <Activity className="w-4 h-4 text-muted-foreground" />
+              <CardTitle className="text-xs font-medium text-emerald-50">Total Sales</CardTitle>
+              <TrendingUp className="w-4 h-4 text-white" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">18</div>
-              <p className="text-xs text-muted-foreground mt-1">4 delivery, 14 dine-in</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Occupied Tables</CardTitle>
-              <Coffee className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">14 / 30</div>
-              <p className="text-xs text-emerald-500 flex items-center mt-1">46% occupancy rate</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Today's Sales</CardTitle>
-              <DollarSign className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {totalAmountToday.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">ETB</span>
+              <div className="text-3xl font-bold text-white">
+                {todayActivity.sales?.toLocaleString() || 0} <span className="text-sm font-normal text-emerald-100">ETB</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">From {todaySales.length} transactions</p>
+              <p className="text-xs text-emerald-100 mt-2 opacity-80 capitalize">Today</p>
             </CardContent>
           </Card>
+
           <Card className="bg-card border-border omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Low Stock Items</CardTitle>
-              <Package className="w-4 h-4 text-muted-foreground" />
+              <CardTitle className="text-xs font-medium text-muted-foreground">Total Expenses</CardTitle>
+              <TrendingDown className="w-4 h-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-500">6</div>
-              <p className="text-xs text-muted-foreground mt-1">Require urgent attention</p>
+              <div className="text-3xl font-bold text-foreground">
+                {todayActivity.expenses?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">ETB</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Expenses & Purchases</p>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border omni-kpi-card">
+
+          <Card className="bg-emerald-100 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/30 omni-kpi-card text-emerald-950 dark:text-emerald-200">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Employees on Shift</CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground" />
+              <CardTitle className="text-xs font-medium text-emerald-800 dark:text-emerald-300">Net Cash Flow</CardTitle>
+              <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">12</div>
-              <p className="text-xs text-muted-foreground mt-1">3 FOH, 7 BOH, 2 Managers</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Kitchen Queue</CardTitle>
-              <ChefHat className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">24</div>
-              <p className="text-xs text-red-400 mt-1">Items currently prepping</p>
+              <div className={`text-3xl font-bold ${todayActivity.net >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
+                {todayActivity.net > 0 ? '+' : ''}{todayActivity.net?.toLocaleString() || 0} <span className="text-sm font-normal opacity-70">ETB</span>
+              </div>
+              <p className="text-xs text-emerald-700/80 dark:text-emerald-300/70 mt-2">Operating margin</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 omni-stagger-4">
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader>
-              <CardTitle className="text-base text-foreground">Orders by Hour</CardTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 omni-stagger-4 mb-6">
+          
+          {/* 3. Sales & Expenses Chart */}
+          <Card className={`bg-card border-border omni-chart-card flex flex-col ${isKitchenActive ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+            <CardHeader className="border-b border-border bg-muted/20 flex flex-row items-center justify-between">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Activity className="w-5 h-5 text-indigo-500" /> Sales & Expenses (Today)
+              </CardTitle>
+              <Button variant="ghost" size="sm" className="h-8 text-xs p-0 px-2" onClick={() => navigate('/manager/reports')}>View Reports</Button>
             </CardHeader>
-            <CardContent>
-              <div className="h-[250px] w-full">
+            <CardContent className="p-4 flex-1">
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={hourlyOrdersData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} />
-                    <XAxis dataKey="hour" stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
+                  <BarChart data={todayActivity.chartData || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} opacity={0.2} />
+                    <XAxis dataKey="name" stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value > 0 ? value / 1000 + 'k' : value}`} />
                     <Tooltip 
-                      cursor={{fill: 'hsl(153, 40%, 12%)', opacity: 0.6}}
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }}
+                      cursor={{fill: 'rgba(0,0,0,0.1)'}}
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px' }}
                     />
-                    <Bar dataKey="orders" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Orders" />
+                    <Bar dataKey="sales" name="Sales" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                    <Bar dataKey="expenses" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={40} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader>
-              <CardTitle className="text-base text-foreground">Table Utilization</CardTitle>
+
+          {/* Top Products */}
+          <Card className="bg-card border-border lg:col-span-1 flex flex-col">
+            <CardHeader className="border-b border-border bg-muted/20">
+              <CardTitle className="text-base font-semibold">Top Products</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={hourlyOrdersData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} />
-                    <XAxis dataKey="hour" stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="hsl(153, 20%, 40%)" fontSize={12} tickLine={false} axisLine={false} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }}
-                    />
-                    <Line type="monotone" dataKey="orders" stroke="hsl(153, 60%, 50%)" strokeWidth={3} dot={{ r: 4, fill: "hsl(153, 60%, 50%)", strokeWidth: 2, stroke: "hsl(153, 50%, 4%)" }} activeDot={{ r: 6 }} name="Guests Seated" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+            <CardContent className="flex-1 flex items-center justify-center p-4">
+              {todayActivity.topProducts?.length > 0 ? (
+                <div className="w-full h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={todayActivity.topProducts}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={3}
+                        dataKey="value"
+                        nameKey="name"
+                      >
+                        {todayActivity.topProducts.map((_: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={EMERALD_COLORS[index % EMERALD_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--card))' }}
+                        formatter={(value: number, name: string) => [`${value} units`, name]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground text-center w-full h-[200px] flex items-center justify-center">No product data available</div>
+              )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Dense Data Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 omni-stagger-5">
-          <Card className="bg-card border-border lg:col-span-2 flex flex-col omni-card-hover">
-            <CardHeader className="pb-3 border-b border-border">
+          {/* 4. Kitchen Status */}
+          {isKitchenActive && (
+            <Card className="bg-card border-border flex flex-col lg:col-span-1">
+              <CardHeader className="border-b border-border bg-muted/20">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base text-foreground">Live Order Queue</CardTitle>
-                <Button variant="link" className="text-primary h-auto p-0">View All Orders</Button>
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <ChefHat className="w-5 h-5 text-blue-500" /> Kitchen
+                </CardTitle>
+                <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => navigate('/manager/kitchen')}>Open Kitchen</Button>
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="text-muted-foreground">Order</TableHead>
-                    <TableHead className="text-muted-foreground">Table/Type</TableHead>
-                    <TableHead className="text-muted-foreground">Time Elapsed</TableHead>
-                    <TableHead className="text-muted-foreground">Items</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    { id: "482", table: "T-14", time: "22m", items: "2x Burger, 1x Coke", status: "Delayed" },
-                    { id: "483", table: "T-02", time: "15m", items: "1x Steak, 2x Wine", status: "Cooking" },
-                    { id: "484", table: "Delivery", time: "8m", items: "4x Pizza, 1x Salad", status: "Prep" },
-                    { id: "485", table: "T-08", time: "3m", items: "2x Coffee", status: "New" },
-                    { id: "486", table: "Takeaway", time: "1m", items: "1x Wrap", status: "New" },
-                  ].map((ord, i) => (
-                    <TableRow key={i} className="border-border/50 hover:bg-muted/50">
-                      <TableCell className="font-medium text-card-foreground">#{ord.id}</TableCell>
-                      <TableCell className="text-muted-foreground">{ord.table}</TableCell>
-                      <TableCell className={`text-muted-foreground font-medium ${ord.status === 'Delayed' ? 'text-red-400' : ''}`}>{ord.time}</TableCell>
-                      <TableCell className="text-muted-foreground truncate max-w-[150px]">{ord.items}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant="outline" className={
-                          ord.status === "Delayed" ? "text-red-500 border-red-900 bg-red-950/30" : 
-                          ord.status === "Cooking" ? "text-amber-500 border-amber-900 bg-amber-950/30" : 
-                          "text-blue-500 border-blue-900 bg-blue-950/30"
-                        }>
-                          {ord.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <CardContent className="p-4 flex-1 flex flex-col gap-4">
+              <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                <div className="bg-muted/50 p-2 rounded-md">
+                  <div className="font-bold text-lg text-amber-500">{kitchenStatus.pending}</div>
+                  <div className="text-xs text-muted-foreground">Pending</div>
+                </div>
+                <div className="bg-muted/50 p-2 rounded-md">
+                  <div className="font-bold text-lg text-blue-500">{kitchenStatus.inProgress}</div>
+                  <div className="text-xs text-muted-foreground">In Progress</div>
+                </div>
+                <div className="bg-muted/50 p-2 rounded-md">
+                  <div className="font-bold text-lg text-emerald-500">{kitchenStatus.ready}</div>
+                  <div className="text-xs text-muted-foreground">Ready</div>
+                </div>
+              </div>
+              
+              <div className="pt-2 border-t border-border">
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-3 tracking-wider">Oldest Active Orders</p>
+                <div className="space-y-3">
+                  {kitchenStatus.oldestOrders.length > 0 ? kitchenStatus.oldestOrders.map((order: any, i: number) => (
+                    <div key={i} className="flex justify-between items-center text-sm">
+                      <div>
+                        <span className="font-medium">#{order.id.split('-')[0]}</span> <span className="text-muted-foreground ml-1">T{order.table}</span>
+                      </div>
+                      <div className="text-amber-500 font-medium">{order.waitingMinutes} min</div>
+                    </div>
+                  )) : (
+                    <div className="text-sm text-muted-foreground">No active kitchen orders.</div>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 omni-stagger-4">
           
-          <Card className="bg-card border-border flex flex-col">
-            <CardHeader className="pb-3 border-b border-border">
-              <CardTitle className="text-base text-foreground">Employee Attendance</CardTitle>
+          {/* 5. Table Status */}
+          <Card className="bg-card border-border lg:col-span-1">
+            <CardHeader className="border-b border-border bg-muted/20">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Coffee className="w-5 h-5 text-emerald-500" /> Tables
+                </CardTitle>
+                <Button variant="ghost" size="sm" className="h-8 text-xs p-0 px-2" onClick={() => navigate('/manager/tables')}>Manage</Button>
+              </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1">
-              <ScrollArea className="h-[280px]">
-                <div className="p-4 space-y-4">
-                  {[
-                    { name: "Sarah J.", role: "Server", status: "Clocked In", time: "09:00 AM" },
-                    { name: "Mike T.", role: "Chef", status: "Clocked In", time: "08:30 AM" },
-                    { name: "David L.", role: "Server", status: "Late", time: "Scheduled 10:00 AM" },
-                    { name: "Emma W.", role: "Bartender", status: "Clocked In", time: "10:15 AM" },
-                    { name: "Tom B.", role: "Dishwasher", status: "Clocked Out", time: "04:00 PM" },
-                  ].map((emp, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-card-foreground">{emp.name}</p>
-                        <p className="text-xs text-muted-foreground">{emp.role}</p>
-                      </div>
-                      <div className="text-right space-y-1">
-                        <span className={`text-xs font-bold ${emp.status === 'Late' ? 'text-red-500' : emp.status === 'Clocked In' ? 'text-emerald-500' : 'text-zinc-500'}`}>
-                          {emp.status}
-                        </span>
-                        <p className="text-[10px] text-muted-foreground">{emp.time}</p>
-                      </div>
-                    </div>
-                  ))}
+            <CardContent className="p-4 space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Available</span>
+                  <span className="font-bold text-emerald-500">{tableStatus.available}</span>
                 </div>
-              </ScrollArea>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Occupied</span>
+                  <span className="font-bold text-foreground">{tableStatus.occupied}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Reserved</span>
+                  <span className="font-bold text-blue-500">{tableStatus.reserved}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Needs Cleaning</span>
+                  <span className="font-bold text-amber-500">{tableStatus.needsCleaning}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 6. Inventory Alerts */}
+          <Card className="bg-card border-border lg:col-span-2">
+            <CardHeader className="border-b border-border bg-muted/20">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Package className="w-5 h-5 text-amber-500" /> Inventory Alerts
+                </CardTitle>
+                <Button variant="ghost" size="sm" className="h-8 text-xs p-0 px-2" onClick={() => navigate('/manager/inventory')}>View Inventory</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 flex flex-col md:flex-row gap-6">
+              <div className="flex flex-col gap-4 min-w-[120px]">
+                <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-center">
+                  <div className="text-xs font-semibold text-red-500 uppercase">Out of Stock</div>
+                  <div className="text-2xl font-bold text-red-500 mt-1">{inventoryAlerts.outOfStockCount}</div>
+                </div>
+                <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-center">
+                  <div className="text-xs font-semibold text-amber-500 uppercase">Low Stock</div>
+                  <div className="text-2xl font-bold text-amber-500 mt-1">{inventoryAlerts.lowStockCount}</div>
+                </div>
+              </div>
+              
+              <div className="flex-1 space-y-3">
+                {inventoryAlerts.topItems.length > 0 ? inventoryAlerts.topItems.map((item: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center border-b border-border/50 pb-2 last:border-0 last:pb-0">
+                    <span className="text-sm font-medium">{item.name}</span>
+                    <div className="text-right">
+                      <div className={`text-sm font-bold ${item.current <= 0 ? 'text-red-500' : 'text-amber-500'}`}>{item.current} {item.unit}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase">Min: {item.minimum} {item.unit}</div>
+                    </div>
+                  </div>
+                )) : (
+                  <div className="h-full flex items-center justify-center text-sm text-emerald-500 font-medium">
+                    Inventory levels look good.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 7. Staff Activity */}
+          <Card className="bg-card border-border lg:col-span-1">
+            <CardHeader className="border-b border-border bg-muted/20">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Users className="w-5 h-5 text-purple-500" /> Staff Today
+                </CardTitle>
+                <Button variant="ghost" size="sm" className="h-8 text-xs p-0 px-2" onClick={() => navigate('/manager/employees')}>Manage</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-2 text-sm text-center">
+                <div className="bg-muted p-2 rounded">
+                  <div className="font-bold">{staffActivity.waitersActive}</div>
+                  <div className="text-xs text-muted-foreground">Waiters</div>
+                </div>
+                <div className="bg-muted p-2 rounded">
+                  <div className="font-bold">{staffActivity.kitchenActive}</div>
+                  <div className="text-xs text-muted-foreground">Kitchen</div>
+                </div>
+              </div>
+              <div className="space-y-3 pt-2">
+                {staffActivity.activeStaff.length > 0 ? staffActivity.activeStaff.map((staff: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center text-sm">
+                    <div>
+                      <span className="font-medium">{staff.name}</span>
+                      <span className="text-xs text-muted-foreground block">{staff.role || 'Staff'}</span>
+                    </div>
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">{staff.status}</Badge>
+                  </div>
+                )) : (
+                  <div className="text-sm text-muted-foreground text-center">No staff active.</div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Lower Widgets Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 omni-stagger-6">
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader className="pb-3 border-b border-border">
-              <CardTitle className="text-base text-foreground">Product Sales Today</CardTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8 omni-stagger-5">
+          {/* 8. Orders Needing Attention */}
+          <Card className="bg-card border-border flex flex-col shadow-sm border-l-4 border-l-red-500/50">
+            <CardHeader className="border-b border-border bg-muted/20">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" /> Orders Needing Attention
+              </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
-              <div className="h-[200px] w-full flex items-center justify-center relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={productSalesData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {productSalesData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(153, 20%, 98%)' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-                {/* Custom Legend */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-foreground">105</span>
-                    <p className="text-xs text-muted-foreground">Items Sold</p>
+            <CardContent className="p-0 flex-1">
+              <div className="divide-y divide-border">
+                {ordersAttention.length > 0 ? ordersAttention.map((order: any, i: number) => (
+                  <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                    <div className="space-y-1">
+                      <div className="font-medium text-foreground">Order #{order.id.split('-')[0]} <span className="text-muted-foreground font-normal ml-2">Table {order.table}</span></div>
+                      <div className="text-sm text-red-400 font-medium">Waiting: {order.waitingMinutes} minutes</div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge variant="outline" className="uppercase bg-muted text-muted-foreground">{order.status}</Badge>
+                      <Button size="sm" variant="outline" onClick={() => navigate('/manager/orders')}>View Order</Button>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2 justify-center mt-2">
-                {productSalesData.map((cat, i) => (
-                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[i]}} />
-                    {cat.name} ({cat.value}%)
+                )) : (
+                  <div className="p-8 text-center flex flex-col items-center justify-center text-emerald-500">
+                    <CheckCircle2 className="w-8 h-8 mb-2 opacity-80" />
+                    <p className="font-medium">All orders are running normally.</p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader className="pb-3 border-b border-border">
-              <CardTitle className="text-base text-foreground">Inventory Alerts</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableBody>
-                  {[
-                    { desc: "Fresh Tomatoes", cat: "Produce", qty: "2 kg (Par: 10)" },
-                    { desc: "Burger Buns", cat: "Bakery", qty: "15 pk (Par: 50)" },
-                    { desc: "Napkins", cat: "Supplies", qty: "1 box (Par: 5)" },
-                    { desc: "Draft Beer", cat: "Beverage", qty: "0.5 keg (Par: 2)" },
-                  ].map((exp, i) => (
-                    <TableRow key={i} className="border-border/50 hover:bg-muted/50">
-                      <TableCell className="font-medium text-card-foreground py-3">{exp.desc}</TableCell>
-                      <TableCell className="text-muted-foreground py-3 text-xs">{exp.cat}</TableCell>
-                      <TableCell className="text-right text-amber-500 text-xs font-medium py-3">{exp.qty}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <div className="p-3 text-center border-t border-border">
-                <Button variant="link" className="text-primary text-xs h-auto p-0">View All Inventory</Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader className="pb-3 border-b border-border">
-              <CardTitle className="text-base text-foreground">Recent Activities</CardTitle>
+          {/* 9. Recent Operational Activity */}
+          <Card className="bg-card border-border">
+            <CardHeader className="border-b border-border bg-muted/20">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Clock className="w-5 h-5 text-zinc-500" /> Recent Activity
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-border">
-                {[
-                  { user: "System", action: "EOD Report Generated", time: "10 mins ago" },
-                  { user: "Sarah J.", action: "Voided Order #480", time: "25 mins ago" },
-                  { user: "Mike T.", action: "Updated Kitchen Stock", time: "1 hour ago" },
-                  { user: "Manager", action: "Approved Schedule", time: "2 hours ago" },
-                ].map((act, i) => (
-                  <div key={i} className="p-4 flex items-start justify-between hover:bg-muted/30 transition-colors">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-sm font-medium text-card-foreground">{act.action}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">By {act.user}</p>
-                    </div>
-                    <div className="text-right space-y-1">
-                      <p className="text-[10px] text-muted-foreground">{act.time}</p>
-                    </div>
+                {recentActivity.length > 0 ? recentActivity.map((act: any, i: number) => (
+                  <div key={i} className="px-6 py-4 flex justify-between items-center hover:bg-muted/30 transition-colors text-sm">
+                    <div className="font-medium">{act.action}</div>
+                    <div className="text-xs text-muted-foreground">{format(new Date(act.time), 'HH:mm')}</div>
                   </div>
-                ))}
+                )) : (
+                  <div className="p-4 text-sm text-muted-foreground text-center">No recent activity.</div>
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
+
       </div>
     </ScrollArea>
   );

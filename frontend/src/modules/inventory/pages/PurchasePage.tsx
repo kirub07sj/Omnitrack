@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { InventoryService } from "../services/inventory.service";
 import { SupplierService } from "../../suppliers/services/supplier.service";
 import { Supplier } from "../../suppliers/types/supplier";
@@ -12,7 +12,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAppStore } from "@/store/useAppStore";
 
 export default function AddEditInventoryPage() {
-  const { id } = useParams();
   const navigate = useNavigate();
   const { currentUser, fetchUnpaidCounts } = useAppStore();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -111,25 +110,10 @@ export default function AddEditInventoryPage() {
         </div>
       </div>
 
-      <div className="bg-card p-6 md:p-8 rounded-xl border shadow-sm space-y-8 relative overflow-hidden">
-        {/* Supplier Selection */}
-        <div className="max-w-md">
-          <Label className="text-sm font-semibold mb-2 block uppercase text-muted-foreground">Supplier</Label>
-          <Select value={supplierId} onValueChange={setSupplierId}>
-            <SelectTrigger className="h-12 bg-muted/20">
-              <SelectValue placeholder="Select a supplier..." />
-            </SelectTrigger>
-            <SelectContent>
-              {suppliers.map(s => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Items List */}
+      <div className="bg-card p-6 md:p-8 rounded-xl border shadow-sm space-y-6 relative overflow-hidden">
+        {/* Products Section on Top */}
         <div className="space-y-4">
-          <Label className="text-sm font-semibold uppercase text-muted-foreground">Products</Label>
+          <Label className="text-sm font-semibold uppercase text-muted-foreground block">Products</Label>
           
           {items.map((item, idx) => (
             <Card key={item.id} className="relative group bg-muted/10 border-muted/30">
@@ -220,12 +204,31 @@ export default function AddEditInventoryPage() {
           <Plus className="mr-2 h-4 w-4" /> Add another item
         </Button>
 
-        {/* Footer info */}
-        <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-end gap-6">
-          <div className="space-y-3 w-full md:w-auto">
+        {/* Divider */}
+        <div className="border-t border-border pt-4" />
+
+        {/* Supplier & Payment Status Side-by-Side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+          {/* Supplier Selection */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold uppercase text-muted-foreground block">Supplier</Label>
+            <Select value={supplierId} onValueChange={setSupplierId}>
+              <SelectTrigger className="h-12 bg-muted/20">
+                <SelectValue placeholder="Select a supplier..." />
+              </SelectTrigger>
+              <SelectContent>
+                {suppliers.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Payment Status */}
+          <div className="space-y-2">
             <Label className="text-sm font-semibold uppercase text-muted-foreground block">Payment Status</Label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div className="flex items-center gap-6 h-12 bg-muted/10 border border-muted/30 rounded-xl px-4">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
                 <input 
                   type="radio" 
                   name="payment" 
@@ -234,9 +237,9 @@ export default function AddEditInventoryPage() {
                   onChange={e => setStatus(e.target.value)}
                   className="w-4 h-4 text-primary accent-primary"
                 />
-                <span className={status === 'Paid' ? 'font-bold' : ''}>Paid</span>
+                <span className={status === 'Paid' ? 'font-bold text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}>Paid</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
                 <input 
                   type="radio" 
                   name="payment" 
@@ -245,22 +248,29 @@ export default function AddEditInventoryPage() {
                   onChange={e => setStatus(e.target.value)}
                   className="w-4 h-4 text-primary accent-primary"
                 />
-                <span className={status === 'Unpaid' ? 'font-bold' : ''}>Unpaid</span>
+                <span className={status === 'Unpaid' ? 'font-bold text-red-500 dark:text-red-400' : 'text-muted-foreground'}>Unpaid</span>
               </label>
             </div>
           </div>
-
-          <div className="bg-primary/10 p-4 rounded-xl text-right min-w-[250px] w-full md:w-auto">
-            <p className="text-sm font-medium text-primary uppercase mb-1">Total Due</p>
-            <h3 className="text-3xl font-black text-primary">{totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB</h3>
-          </div>
         </div>
 
-        <div className="pt-4 flex justify-end">
-          <Button size="lg" className="h-14 px-8 text-lg font-bold shadow-md w-full md:w-auto" onClick={onSubmit} disabled={isLoading}>
-            {isLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
-            Save Purchase
-          </Button>
+        {/* Total Due & Save Button Side-by-Side below Supplier & Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center pt-2">
+          {/* Total Due */}
+          <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-xl border border-primary/10 flex justify-between items-center h-14">
+            <span className="text-sm font-semibold uppercase text-primary">Total Due</span>
+            <span className="text-2xl font-black text-primary">
+              {totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB
+            </span>
+          </div>
+
+          {/* Save Button */}
+          <div>
+            <Button size="lg" className="h-14 px-8 text-lg font-bold shadow-md w-full bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center" onClick={onSubmit} disabled={isLoading}>
+              {isLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
+              Save Purchase
+            </Button>
+          </div>
         </div>
       </div>
     </div>
