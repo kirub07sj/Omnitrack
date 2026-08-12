@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useSettings } from '@/hooks/useSettings';
 
 interface Props {
   initialData?: Partial<EmployeeFormData>;
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Props) {
+  const { currency } = useSettings();
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema) as any,
     defaultValues: {
@@ -329,7 +331,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
               name="salary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Salary (Monthly in ETB)</FormLabel>
+                  <FormLabel>Salary (Monthly in {currency})</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 

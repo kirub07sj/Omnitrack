@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppStore } from '@/store/useAppStore';
+import { useSettings } from '@/hooks/useSettings';
 import { ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -22,6 +23,7 @@ const CATEGORIES = [
 export default function AddExpensePage() {
   const navigate = useNavigate();
   const { currentUser } = useAppStore();
+  const { currency, enabledPaymentMethods } = useSettings();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -59,7 +61,7 @@ export default function AddExpensePage() {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/expenses', {
+      await axios.post('/api/expenses', {
         ...formData,
         business_id: currentUser.business_id,
         amount: parseFloat(formData.amount)
@@ -111,7 +113,7 @@ export default function AddExpensePage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Amount (ETB) <span className="text-destructive">*</span></Label>
+                <Label>Amount ({currency}) <span className="text-destructive">*</span></Label>
                 <Input 
                   type="number" 
                   step="0.01" 
@@ -176,10 +178,9 @@ export default function AddExpensePage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Cash">Cash</SelectItem>
-                        <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                        <SelectItem value="Card">Card</SelectItem>
-                        <SelectItem value="Mobile Banking">Mobile Banking</SelectItem>
+                        {enabledPaymentMethods.map((m) => (
+                          <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

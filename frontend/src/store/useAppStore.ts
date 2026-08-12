@@ -79,7 +79,7 @@ export const useAppStore = create<AppState>((set) => ({
     if (!currentUser?.business_id) return;
     
     try {
-      const res = await fetch(`http://localhost:5000/api/dashboard/unpaid-counts?business_id=${currentUser.business_id}`);
+      const res = await fetch(`/api/dashboard/unpaid-counts?business_id=${currentUser.business_id}`);
       const data = await res.json();
       if (data.success) {
         set({

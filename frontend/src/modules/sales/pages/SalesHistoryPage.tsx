@@ -11,9 +11,11 @@ import { cn } from '@/lib/utils';
 import ReceiptDialog from '../components/ReceiptDialog';
 import RefundDialog from '../components/RefundDialog';
 import { CheckCircle2 } from 'lucide-react';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function SalesHistoryPage() {
   const { currentUser } = useAppStore();
+  const { currency } = useSettings();
   const [sales, setSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -132,7 +134,7 @@ export default function SalesHistoryPage() {
           <CardContent className="p-4">
             <div className="text-sm font-medium text-muted-foreground">Total Sales</div>
             <div className="text-2xl font-bold text-primary">
-              {totalAmount.toFixed(2)} <span className="text-xs font-normal">ETB</span>
+              {totalAmount.toFixed(2)} <span className="text-xs font-normal">{currency}</span>
             </div>
           </CardContent>
         </Card>
@@ -146,7 +148,7 @@ export default function SalesHistoryPage() {
           <CardContent className="p-4">
             <div className="text-sm font-medium text-muted-foreground">Cash Sales</div>
             <div className="text-2xl font-bold">
-              {cashSales.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">ETB</span>
+              {cashSales.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">{currency}</span>
             </div>
           </CardContent>
         </Card>
@@ -154,7 +156,7 @@ export default function SalesHistoryPage() {
           <CardContent className="p-4">
             <div className="text-sm font-medium text-muted-foreground">Mobile Banking</div>
             <div className="text-2xl font-bold">
-              {mobileSales.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">ETB</span>
+              {mobileSales.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">{currency}</span>
             </div>
           </CardContent>
         </Card>
@@ -162,7 +164,7 @@ export default function SalesHistoryPage() {
           <CardContent className="p-4">
             <div className="text-sm font-medium text-muted-foreground">Refunds</div>
             <div className="text-2xl font-bold text-destructive">
-              {totalRefunds.toFixed(2)} <span className="text-xs font-normal">ETB</span>
+              {totalRefunds.toFixed(2)} <span className="text-xs font-normal">{currency}</span>
             </div>
           </CardContent>
         </Card>
@@ -216,7 +218,7 @@ export default function SalesHistoryPage() {
                           {sale.cashier?.first_name || 'System'}
                         </td>
                         <td className="px-6 py-4 font-bold text-foreground">
-                          {parseFloat(sale.total).toFixed(2)} <span className="text-xs font-normal text-muted-foreground">ETB</span>
+                          {parseFloat(sale.total).toFixed(2)} <span className="text-xs font-normal text-muted-foreground">{currency}</span>
                         </td>
                         <td className="px-6 py-4">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">

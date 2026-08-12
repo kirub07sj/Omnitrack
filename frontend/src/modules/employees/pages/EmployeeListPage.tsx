@@ -11,8 +11,10 @@ import { DeleteEmployeeDialog } from "../components/DeleteEmployeeDialog";
 import { DeactivateEmployeeDialog } from "../components/DeactivateEmployeeDialog";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useSettings } from '@/hooks/useSettings';
 
 export default function EmployeeListPage() {
+  const { currency } = useSettings();
   const navigate = useNavigate();
   const { currentUser } = useAppStore();
   const roleBase = `/${currentUser?.role?.toLowerCase() || 'owner'}`;
@@ -96,7 +98,7 @@ export default function EmployeeListPage() {
       e.department,
       e.status, 
       e.phoneNumber, 
-      `${e.salary} ETB`,
+      `${e.salary} ${currency}`,
       new Date(e.hireDate).toLocaleDateString()
     ]);
     

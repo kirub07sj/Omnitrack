@@ -3,8 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle2, Banknote, Smartphone, CreditCard } from 'lucide-react';
+import { Loader2, CheckCircle2, Banknote, Smartphone, CreditCard, Wallet } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
+import { useSettings } from '@/hooks/useSettings';
 
 interface CheckoutDialogProps {
   order: any | null;
@@ -16,7 +17,8 @@ interface CheckoutDialogProps {
 
 export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, isManual = false }: CheckoutDialogProps) {
   const { currentUser } = useAppStore();
-  const [method, setMethod] = useState<'Cash' | 'Mobile Banking' | 'Card'>('Cash');
+  const { currency, taxSettings, calculateTotal, enabledPaymentMethods } = useSettings();
+  const [method, setMethod] = useState<string>('Cash');
   const [received, setReceived] = useState<string>('');
   const [reference, setReference] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,10 +26,9 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
 
   if (!order) return null;
 
-  const subtotal = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * parseFloat(item.quantity)), 0);
-  const tax = 0;
+  const rawSubtotal = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * parseFloat(item.quantity)), 0);
   const discount = 0;
-  const total = subtotal + tax - discount;
+  const { subtotal, tax, serviceCharge, total } = calculateTotal(rawSubtotal, discount);
   const change = method === 'Cash' && received ? parseFloat(received) - total : 0;
 
   const handleCheckout = async () => {
@@ -53,6 +54,7 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
         payment_method: method,
         subtotal,
         tax,
+        serviceCharge,
         discount,
         total,
         amount_received: method === 'Cash' ? parseFloat(received) : total,
@@ -97,7 +99,7 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
         <DialogHeader className="mb-2 shrink-0">
           <DialogTitle className="text-2xl font-bold flex justify-between items-center">
             <span>{isManual ? 'Complete Manual Sale' : `Checkout Order #${order.id?.split('-')[0]}`}</span>
-            <span className="text-primary">{total.toFixed(2)} ETB</span>
+            <span className="text-primary">{total.toFixed(2)} {currency}</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -118,9 +120,21 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
                   <span>Subtotal</span>
                   <span>{subtotal.toFixed(2)}</span>
                 </div>
+                {taxSettings.enableTax && (
+                  <div className="flex justify-between text-sm text-muted-foreground pt-1">
+                    <span>{taxSettings.taxName} ({taxSettings.taxRate}%)</span>
+                    <span>{tax.toFixed(2)}</span>
+                  </div>
+                )}
+                {taxSettings.enableServiceCharge && (
+                  <div className="flex justify-between text-sm text-muted-foreground pt-1">
+                    <span>Service Charge ({taxSettings.serviceChargeRate}%)</span>
+                    <span>{serviceCharge.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-lg font-bold pt-1">
                   <span>Total Due</span>
-                  <span className="text-primary">{total.toFixed(2)} ETB</span>
+                  <span className="text-primary">{total.toFixed(2)} {currency}</span>
                 </div>
               </div>
             </div>
@@ -130,30 +144,26 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
             <h4 className="font-semibold text-muted-foreground uppercase text-xs mb-3 shrink-0">Payment Details</h4>
             
             <div className="grid grid-cols-3 gap-2 shrink-0">
-              <Button
-                variant={method === 'Cash' ? 'default' : 'outline'}
-                className="flex flex-col gap-1 h-auto py-3"
-                onClick={() => setMethod('Cash')}
-              >
-                <Banknote className="w-5 h-5" />
-                <span className="text-xs">Cash</span>
-              </Button>
-              <Button
-                variant={method === 'Mobile Banking' ? 'default' : 'outline'}
-                className="flex flex-col gap-1 h-auto py-3 px-1"
-                onClick={() => setMethod('Mobile Banking')}
-              >
-                <Smartphone className="w-5 h-5" />
-                <span className="text-[10px] leading-tight text-center">Mobile<br/>Banking</span>
-              </Button>
-              <Button
-                variant={method === 'Card' ? 'default' : 'outline'}
-                className="flex flex-col gap-1 h-auto py-3"
-                onClick={() => setMethod('Card')}
-              >
-                <CreditCard className="w-5 h-5" />
-                <span className="text-xs">Card</span>
-              </Button>
+              {enabledPaymentMethods.map((pm: any) => {
+                let Icon = Wallet;
+                if (pm.name === 'Cash') Icon = Banknote;
+                else if (pm.name === 'Mobile Banking') Icon = Smartphone;
+                else if (pm.name === 'Card') Icon = CreditCard;
+
+                return (
+                  <Button
+                    key={pm.id}
+                    variant={method === pm.name ? 'default' : 'outline'}
+                    className="flex flex-col gap-1 h-auto py-3 px-1"
+                    onClick={() => setMethod(pm.name)}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="text-[10px] leading-tight text-center whitespace-normal">
+                      {pm.name.includes(' ') ? pm.name.split(' ').map((word: string, i: number) => <span key={i}>{word}<br/></span>) : pm.name}
+                    </span>
+                  </Button>
+                );
+              })}
             </div>
 
             <div className="flex-1 flex flex-col justify-end relative mt-12 pb-4">
@@ -166,14 +176,14 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
                 {!error && method === 'Cash' && received && parseFloat(received) >= total && (
                   <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2.5 rounded-lg flex justify-between items-center animate-in fade-in slide-in-from-bottom-2 shadow-sm pointer-events-auto">
                     <span className="font-medium text-sm">Change to return:</span>
-                    <span className="font-bold text-lg">{change.toFixed(2)} ETB</span>
+                    <span className="font-bold text-lg">{change.toFixed(2)} {currency}</span>
                   </div>
                 )}
               </div>
 
               {method === 'Cash' && (
                 <div className="space-y-1.5 shrink-0">
-                  <Label className="text-muted-foreground font-semibold text-xs uppercase">Amount Received (ETB)</Label>
+                  <Label className="text-muted-foreground font-semibold text-xs uppercase">Amount Received ({currency})</Label>
                   <Input 
                     type="number" 
                     placeholder="e.g. 1000" 

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import axios from 'axios';
+import { useSettings } from '@/hooks/useSettings';
 
 interface ExpenseDetailsDialogProps {
   expense: any;
@@ -12,13 +13,14 @@ interface ExpenseDetailsDialogProps {
 }
 
 export default function ExpenseDetailsDialog({ expense, open, onOpenChange, onSuccess }: ExpenseDetailsDialogProps) {
+  const { currency } = useSettings();
   if (!expense) return null;
 
   const handleVoid = async () => {
     if (!confirm('Are you sure you want to void this expense? This action cannot be undone.')) return;
     
     try {
-      await axios.delete(`http://localhost:5000/api/expenses/${expense.id}`);
+      await axios.delete(`/api/expenses/${expense.id}`);
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -47,7 +49,7 @@ export default function ExpenseDetailsDialog({ expense, open, onOpenChange, onSu
 
           <div>
             <p className="text-sm text-muted-foreground">Amount</p>
-            <p className="font-bold text-2xl text-red-600">{parseFloat(expense.amount).toLocaleString()} <span className="text-sm font-normal">ETB</span></p>
+            <p className="font-bold text-2xl text-red-600">{parseFloat(expense.amount).toLocaleString()} <span className="text-sm font-normal">{currency}</span></p>
           </div>
 
           {expense.description && (

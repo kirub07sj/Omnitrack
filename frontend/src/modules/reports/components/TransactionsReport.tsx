@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Download, Search, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
+import { useSettings } from '@/hooks/useSettings';
 
 export function TransactionsReport({ dateRange, refreshTrigger = 0 }: { dateRange: { startDate: string, endDate: string }, refreshTrigger?: number }) {
+  const { currency } = useSettings();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -116,7 +118,7 @@ export function TransactionsReport({ dateRange, refreshTrigger = 0 }: { dateRang
                     </td>
                     <td className="px-6 py-4">{row.method || '-'}</td>
                     <td className={`px-6 py-4 text-right font-bold ${row.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {row.type === 'INCOME' ? '+' : '-'}{parseFloat(row.amount).toLocaleString()} ETB
+                      {row.type === 'INCOME' ? '+' : '-'}{parseFloat(row.amount).toLocaleString()} {currency}
                     </td>
                   </tr>
                 ))

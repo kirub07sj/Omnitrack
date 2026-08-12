@@ -1,5 +1,6 @@
 //@ts-nocheck
 import { useState } from "react";
+import { useSettings } from '@/hooks/useSettings';
 import {
   ColumnDef,
   flexRender,
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: Props) {
+  const { currency } = useSettings();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -78,7 +80,7 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
       accessorKey: "salary",
       header: ({ column }) => (
         <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="p-0 hover:bg-transparent">
-          Salary (ETB) <ArrowUpDown className="ml-1 h-3 w-3" />
+          Salary ({currency}) <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
       cell: ({ row }) => {

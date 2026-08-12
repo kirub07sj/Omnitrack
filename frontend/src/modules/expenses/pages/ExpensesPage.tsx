@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { useSettings } from '@/hooks/useSettings';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import AddExpenseDialog from '../components/AddExpenseDialog';
 
 export default function ExpensesPage() {
   const { currentUser, fetchUnpaidCounts } = useAppStore();
+  const { currency } = useSettings();
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +40,7 @@ export default function ExpensesPage() {
   const fetchExpenses = async () => {
     if (!currentUser?.business_id) return;
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/expenses?business_id=${currentUser.business_id}`);
+      const { data } = await axios.get(`/api/expenses?business_id=${currentUser.business_id}`);
       setExpenses(data.data);
       fetchUnpaidCounts(); // Refresh global unpaid counts
     } catch (error) {
@@ -51,7 +53,7 @@ export default function ExpensesPage() {
   const handleDelete = async () => {
     if (!selectedExpense) return;
     try {
-      await axios.delete(`http://localhost:5000/api/expenses/${selectedExpense.id}`);
+      await axios.delete(`/api/expenses/${selectedExpense.id}`);
       fetchExpenses();
     } catch (error) {
       console.error('Failed to delete expense', error);
@@ -106,7 +108,7 @@ export default function ExpensesPage() {
             <CardTitle className="text-sm font-medium text-emerald-50">Total This Month</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-white">{totalThisMonth.toLocaleString()} <span className="text-sm font-normal text-emerald-100">ETB</span></div>
+            <div className="text-3xl font-bold text-white">{totalThisMonth.toLocaleString()} <span className="text-sm font-normal text-emerald-100">{currency}</span></div>
           </CardContent>
         </Card>
         <Card>
@@ -114,7 +116,7 @@ export default function ExpensesPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Paid</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-emerald-600">{totalPaid.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">ETB</span></div>
+            <div className="text-3xl font-bold text-emerald-600">{totalPaid.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span></div>
           </CardContent>
         </Card>
         <Card>
@@ -122,7 +124,7 @@ export default function ExpensesPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Unpaid</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-500">{totalUnpaid.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">ETB</span></div>
+            <div className="text-3xl font-bold text-orange-500">{totalUnpaid.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span></div>
           </CardContent>
         </Card>
       </div>
@@ -194,7 +196,7 @@ export default function ExpensesPage() {
                       <td className="px-6 py-4 whitespace-nowrap">{format(new Date(expense.date), 'MMM dd, yyyy')}</td>
                       <td className="px-6 py-4 font-medium">{expense.category}</td>
                       <td className="px-6 py-4 text-muted-foreground truncate max-w-[200px]">{expense.description || expense.paid_to || '-'}</td>
-                      <td className="px-6 py-4 font-bold">{parseFloat(expense.amount).toLocaleString()} <span className="text-xs font-normal">ETB</span></td>
+                      <td className="px-6 py-4 font-bold">{parseFloat(expense.amount).toLocaleString()} <span className="text-xs font-normal">{currency}</span></td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${expense.status === 'PAID' ? 'bg-primary/20 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
                           {expense.status}

@@ -6,9 +6,11 @@ import { format } from 'date-fns';
 import { ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function TransactionsPage() {
   const { currentUser } = useAppStore();
+  const { currency, paymentMethods } = useSettings();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -78,12 +80,12 @@ export default function TransactionsPage() {
         <div className="flex items-center gap-6 bg-muted/30 px-4 py-2 rounded-lg border">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground uppercase tracking-wider">income</span>
-            <span className="text-emerald-600 font-bold">{totalIncome.toLocaleString()} <span className="text-xs font-normal">ETB</span></span>
+            <span className="text-emerald-600 font-bold">{totalIncome.toLocaleString()} <span className="text-xs font-normal">{currency}</span></span>
           </div>
           <div className="w-px h-8 bg-border" />
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground uppercase tracking-wider">expenses</span>
-            <span className="text-red-600 font-bold">{totalExpense.toLocaleString()} <span className="text-xs font-normal">ETB</span></span>
+            <span className="text-red-600 font-bold">{totalExpense.toLocaleString()} <span className="text-xs font-normal">{currency}</span></span>
           </div>
         </div>
       </div>
@@ -112,9 +114,9 @@ export default function TransactionsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="All">All Methods</SelectItem>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Mobile Banking">Mobile Banking</SelectItem>
-                  <SelectItem value="Card">Card</SelectItem>
+                  {paymentMethods.map(m => (
+                    <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>
+                  ))}
                   <SelectItem value="Refund">Refund</SelectItem>
                 </SelectContent>
               </Select>
@@ -157,7 +159,7 @@ export default function TransactionsPage() {
                       </TableCell>
                       <TableCell>{tx.method || '-'}</TableCell>
                       <TableCell className={`text-right px-6 font-bold ${tx.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {tx.type === 'INCOME' ? '+' : '-'}{parseFloat(tx.amount).toLocaleString()} <span className="text-xs font-normal">ETB</span>
+                        {tx.type === 'INCOME' ? '+' : '-'}{parseFloat(tx.amount).toLocaleString()} <span className="text-xs font-normal">{currency}</span>
                       </TableCell>
                     </TableRow>
                   ))}

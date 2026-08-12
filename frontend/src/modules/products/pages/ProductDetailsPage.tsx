@@ -3,8 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ProductService } from "../services/product.service";
 import { ArrowLeft, Edit, DollarSign, Tag, Box, AlertTriangle, Layers, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSettings } from '@/hooks/useSettings';
 
 export default function ProductDetailsPage() {
+  const { currency } = useSettings();
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState<any>(null);
@@ -111,17 +113,17 @@ export default function ProductDetailsPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-3 border-b border-border/50">
                 <span className="text-muted-foreground text-sm font-medium">Selling Price</span>
-                <span className="text-lg font-bold text-emerald-600">{product.price ? `${Number(product.price).toFixed(2)} ETB` : "-"}</span>
+                <span className="text-lg font-bold text-emerald-600">{product.price ? `${Number(product.price).toFixed(2)} ${currency}` : "-"}</span>
               </div>
               <div className="flex justify-between items-center pb-3 border-b border-border/50">
                 <span className="text-muted-foreground text-sm font-medium">Cost</span>
-                <span className="text-base font-semibold">{product.cost ? `${Number(product.cost).toFixed(2)} ETB` : "-"}</span>
+                <span className="text-base font-semibold">{product.cost ? `${Number(product.cost).toFixed(2)} ${currency}` : "-"}</span>
               </div>
               {profit !== null && (
                 <div className="flex justify-between items-center pt-1">
                   <span className="text-muted-foreground text-sm font-medium">Profit Margin</span>
                   <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
-                    {profit.toFixed(2)} ETB ({margin}%)
+                    {profit.toFixed(2)} {currency} ({margin}%)
                   </span>
                 </div>
               )}

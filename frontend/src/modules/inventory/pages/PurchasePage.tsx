@@ -10,8 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppStore } from "@/store/useAppStore";
+import { useSettings } from '@/hooks/useSettings';
 
 export default function AddEditInventoryPage() {
+  const { currency } = useSettings();
   const navigate = useNavigate();
   const { currentUser, fetchUnpaidCounts } = useAppStore();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -260,7 +262,7 @@ export default function AddEditInventoryPage() {
           <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-xl border border-primary/10 flex justify-between items-center h-14">
             <span className="text-sm font-semibold uppercase text-primary">Total Due</span>
             <span className="text-2xl font-black text-primary">
-              {totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB
+              {totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {currency}
             </span>
           </div>
 

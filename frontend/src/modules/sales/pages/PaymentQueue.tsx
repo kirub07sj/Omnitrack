@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import CheckoutDialog from '../components/CheckoutDialog';
 import ReceiptDialog from '../components/ReceiptDialog';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function PaymentQueue() {
   const { currentUser } = useAppStore();
+  const { currency } = useSettings();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -161,7 +163,7 @@ export default function PaymentQueue() {
                     </div>
                     <div className="flex justify-between font-bold text-lg pt-2 border-t mt-2">
                       <span>Total:</span>
-                      <span className="text-primary">{total.toFixed(2)} ETB</span>
+                      <span className="text-primary">{total.toFixed(2)} {currency}</span>
                     </div>
                   </div>
                 </CardContent>

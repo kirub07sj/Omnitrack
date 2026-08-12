@@ -20,12 +20,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { useSettings } from '@/hooks/useSettings';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { format } from 'date-fns';
 
 export default function OwnerDashboard() {
   const { currentUser } = useAppStore();
+  const { currency } = useSettings();
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -106,7 +108,7 @@ export default function OwnerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white">
-                {financialSummary.totalIncome.toLocaleString()} <span className="text-sm font-normal text-emerald-100">ETB</span>
+                {financialSummary.totalIncome.toLocaleString()} <span className="text-sm font-normal text-emerald-100">{currency}</span>
               </div>
               <p className="text-xs text-emerald-100 mt-2 opacity-80 capitalize">{dateRange}</p>
             </CardContent>
@@ -119,7 +121,7 @@ export default function OwnerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">
-                {financialSummary.moneyOut.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">ETB</span>
+                {financialSummary.moneyOut.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-2">Expenses & Purchases</p>
             </CardContent>
@@ -132,7 +134,7 @@ export default function OwnerDashboard() {
             </CardHeader>
             <CardContent>
               <div className={`text-3xl font-bold ${financialSummary.netCashFlow >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
-                {financialSummary.netCashFlow > 0 ? '+' : ''}{financialSummary.netCashFlow.toLocaleString()} <span className="text-sm font-normal opacity-70">ETB</span>
+                {financialSummary.netCashFlow > 0 ? '+' : ''}{financialSummary.netCashFlow.toLocaleString()} <span className="text-sm font-normal opacity-70">{currency}</span>
               </div>
               <p className="text-xs text-emerald-700/80 dark:text-emerald-300/70 mt-2">Operating margin</p>
             </CardContent>

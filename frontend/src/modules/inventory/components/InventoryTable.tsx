@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSettings } from '@/hooks/useSettings';
 import {
   ColumnDef,
   flexRender,
@@ -26,6 +27,7 @@ interface InventoryTableProps {
 }
 
 export function InventoryTable({ data, onEdit, onDelete }: InventoryTableProps) {
+  const { currency, inventorySettings } = useSettings();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -48,14 +50,16 @@ export function InventoryTable({ data, onEdit, onDelete }: InventoryTableProps) 
       header: "Quantity",
       cell: ({ row }) => {
         const item = row.original;
+        const minQty = Number(item.minimum_quantity) || inventorySettings.lowStockThreshold;
+        const qty = Number(item.quantity);
         return (
           <div className="flex items-center gap-2">
             {item.quantity}
-            {Number(item.quantity) <= Number(item.minimum_quantity) ? (
+            {inventorySettings.lowStockAlerts && qty <= minQty ? (
               <Badge variant="destructive" className="flex items-center gap-1 h-5 px-1.5 text-[10px] bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20">
                 <AlertTriangle className="w-3 h-3" /> Critical
               </Badge>
-            ) : Number(item.quantity) <= Number(item.minimum_quantity) * 1.25 + 5 ? (
+            ) : inventorySettings.lowStockAlerts && qty <= minQty * 1.5 ? (
               <Badge variant="outline" className="flex items-center gap-1 h-5 px-1.5 text-[10px] bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20">
                 <AlertTriangle className="w-3 h-3" /> Low Stock
               </Badge>
@@ -70,7 +74,7 @@ export function InventoryTable({ data, onEdit, onDelete }: InventoryTableProps) 
     },
     {
       accessorKey: "cost_per_unit",
-      header: "Cost/Unit (ETB) ",
+      header: `Cost/Unit (${currency}) `,
       cell: ({ row }) => <div>{Number(row.getValue("cost_per_unit")).toFixed(2)} <span className="text-xs"></span></div>,
     },
     {

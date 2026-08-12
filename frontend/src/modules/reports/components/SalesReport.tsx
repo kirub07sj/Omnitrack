@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Download, Search, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
+import { useSettings } from '@/hooks/useSettings';
 
 export function SalesReport({ dateRange, refreshTrigger = 0 }: { dateRange: { startDate: string, endDate: string }, refreshTrigger?: number }) {
+  const { currency } = useSettings();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,7 +115,7 @@ export function SalesReport({ dateRange, refreshTrigger = 0 }: { dateRange: { st
                     <td className="px-6 py-4">{row.cashier?.first_name} {row.cashier?.last_name}</td>
                     <td className="px-6 py-4 text-right">{parseFloat(row.subtotal).toLocaleString()}</td>
                     <td className="px-6 py-4 text-right">{parseFloat(row.tax).toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right font-bold text-emerald-600">{parseFloat(row.total).toLocaleString()} ETB</td>
+                    <td className="px-6 py-4 text-right font-bold text-emerald-600">{parseFloat(row.total).toLocaleString()} {currency}</td>
                   </tr>
                 ))
               )}

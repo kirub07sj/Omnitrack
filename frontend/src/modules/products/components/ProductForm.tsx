@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSettings } from '@/hooks/useSettings';
 // import { productSchema, ProductFormData } from "../schemas/product.schema";
 import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -37,6 +38,7 @@ interface Props {
 }
 
 export function ProductForm({ initialData, onSubmit, isLoading, onCancel, categories, inventoryItems = [] }: Props) {
+  const { currency } = useSettings();
   const form = useForm<z.infer<typeof tempSchema>>({
     resolver: zodResolver(tempSchema) as any,
     defaultValues: {
@@ -232,7 +234,7 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Selling Price (ETB) *</FormLabel>
+                  <FormLabel>Selling Price ({currency}) *</FormLabel>
                   <FormControl>
                     <Input type="number" step="0.01" {...field} className="bg-background border-border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                   </FormControl>

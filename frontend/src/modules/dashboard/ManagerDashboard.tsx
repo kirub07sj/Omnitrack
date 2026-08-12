@@ -24,6 +24,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { useSettings } from '@/hooks/useSettings';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -31,6 +32,7 @@ import { format } from 'date-fns';
 export default function ManagerDashboard() {
   const EMERALD_COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#047857', '#a7f3d0'];
   const { currentUser } = useAppStore();
+  const { currency } = useSettings();
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -142,7 +144,7 @@ export default function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white">
-                {todayActivity.sales?.toLocaleString() || 0} <span className="text-sm font-normal text-emerald-100">ETB</span>
+                {todayActivity.sales?.toLocaleString() || 0} <span className="text-sm font-normal text-emerald-100">{currency}</span>
               </div>
               <p className="text-xs text-emerald-100 mt-2 opacity-80 capitalize">Today</p>
             </CardContent>
@@ -155,7 +157,7 @@ export default function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">
-                {todayActivity.expenses?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">ETB</span>
+                {todayActivity.expenses?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-2">Expenses & Purchases</p>
             </CardContent>
@@ -168,7 +170,7 @@ export default function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <div className={`text-3xl font-bold ${todayActivity.net >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
-                {todayActivity.net > 0 ? '+' : ''}{todayActivity.net?.toLocaleString() || 0} <span className="text-sm font-normal opacity-70">ETB</span>
+                {todayActivity.net > 0 ? '+' : ''}{todayActivity.net?.toLocaleString() || 0} <span className="text-sm font-normal opacity-70">{currency}</span>
               </div>
               <p className="text-xs text-emerald-700/80 dark:text-emerald-300/70 mt-2">Operating margin</p>
             </CardContent>
