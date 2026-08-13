@@ -1,669 +1,626 @@
-okey now lets make the users module on the acount and permissions page
+Build the OFFLINE-FIRST SYNCHRONIZATION SYSTEM for our Restaurant Management System.
 
-The Owner focuses on business performance and finances.
-The Manager focuses on daily restaurant operations.
+IMPORTANT ARCHITECTURE:
 
-==================================================
-MANAGER DASHBOARD GOAL
-==================================================
+The restaurant operates primarily on a LOCAL PostgreSQL database.
 
-When the manager logs in, they should immediately understand:
+Multiple devices inside the restaurant connect through the local network/Wi-Fi to the local backend/server.
 
-1. How busy the restaurant currently is
-2. How many orders are waiting
-3. What the kitchen is currently handling
-4. Which tables are occupied/free
-5. Whether any orders are delayed
-6. Whether inventory needs attention
-7. Which employees are working
-8. Whether there are operational problems
-9. Today's basic sales/order activity
+The cloud system uses:
 
-The manager should be able to identify problems and take action without opening multiple modules.
+- Cloud Backend API
+- Neon PostgreSQL
 
-==================================================
-PAGE STRUCTURE
-==================================================
+The frontend/devices MUST NOT connect directly to Neon.
 
-Create the dashboard in this order:
+The architecture is:
 
-1. Header
-2. Operational summary
-3. Orders requiring attention
-4. Kitchen status
-5. Table status
-6. Inventory alerts
-7. Staff activity
-8. Today's activity
-9. Recent operational activity
+CLIENT DEVICES
+    ↓
+LOCAL BACKEND
+    ↓
+LOCAL POSTGRESQL
+    ↕
+SYNC ENGINE
+    ↕
+CLOUD BACKEND API
+    ↓
+NEON POSTGRESQL
 
-Do NOT add unnecessary charts.
+The local system must continue operating when the internet is unavailable.
 
 ==================================================
-1. HEADER
+PRIMARY REQUIREMENT
 ==================================================
 
-Display:
+Build synchronization so that:
 
-Good morning/afternoon/evening, [Manager Name]
-
-Restaurant name
-
-Current date
-
-Optional:
-
-[ Today ▼ ]
-
-The manager's dashboard should primarily focus on the current day.
+1. All normal restaurant operations happen locally.
+2. Changes are saved to local PostgreSQL first.
+3. Changes are placed into a local sync/change queue.
+4. When internet is available, the sync engine uploads changes to the cloud.
+5. Cloud changes that need to be downloaded are pulled into the local database.
+6. Failed synchronization attempts are retried automatically.
+7. The application never blocks normal restaurant operations because the internet is unavailable.
+8. Synchronization must be idempotent so the same change cannot create duplicate records.
+9. Do not expose Neon credentials to frontend clients.
 
 ==================================================
-2. OPERATIONAL SUMMARY
+DATABASE / SYNC METADATA
 ==================================================
 
-Create summary cards:
+Inspect the existing PostgreSQL schema before making changes.
 
-ACTIVE ORDERS
-Example:
-12
+Do not duplicate existing business models.
+
+Create a synchronization/change-log mechanism.
+
+Suggested table:
+
+sync_changes
+
+Fields:
+
+id
+entity_type
+entity_id
+operation
+device_id
+installation_id
+created_at
+processed_at
+status
+retry_count
+last_error
+
+Suggested operations:
+
+CREATE
+UPDATE
+DELETE
+
+Suggested statuses:
 
 PENDING
-Example:
-4
+SYNCING
+SYNCED
+FAILED
 
-IN PROGRESS
-Example:
-5
+Use UUIDs where the existing system already uses UUIDs.
 
-READY
-Example:
-3
-
-OCCUPIED TABLES
-Example:
-8 / 20
-
-ACTIVE STAFF
-Example:
-7
-
-These values must come from real application data.
-
-Do not use mock values.
+Do not blindly add sync_status columns to every business table if a centralized change log is more appropriate.
 
 ==================================================
-3. ORDERS REQUIRING ATTENTION
+INSTALLATION ID
 ==================================================
 
-This should be one of the most important sections.
-
-Show orders that require manager attention.
-
-Examples:
-
-Delayed orders
-Orders waiting too long
-Orders with problems
-Orders that are ready but not served
-Cancelled orders
+Every deployed restaurant installation must have a unique installation ID.
 
 Example:
 
-ORDERS NEEDING ATTENTION
+INSTALLATION-xxxxxxxx
 
-Order #BF4C2D50
-Table 4
-Waiting: 18 minutes
-Status: In Progress
+This identifies one restaurant installation.
 
-[ View Order ]
-
---------------------------------------------------
-
-Order #BF4C2D61
-Table 8
-Waiting: 24 minutes
-Status: Ready
-
-[ View Order ]
-
-Use clear urgency indicators.
-
-Do NOT show every order here.
-
-Only show orders requiring attention.
-
-If there are no problems:
-
-"All orders are running normally."
-
-==================================================
-4. KITCHEN STATUS
-==================================================
-
-Show a compact overview of the kitchen.
+Every device should also have a unique device ID.
 
 Example:
 
-KITCHEN
+SERVER-xxxxxxxx
+CASHIER-xxxxxxxx
+WAITER-xxxxxxxx
+KITCHEN-xxxxxxxx
 
-Pending        4
-In Progress    5
-Ready          3
+Do not use usernames as device IDs.
 
-Then show the oldest active orders.
+Store installation/device identity securely.
+
+==================================================
+LOCAL-FIRST WRITE FLOW
+==================================================
+
+Every business operation must follow:
+
+User action
+    ↓
+Local backend
+    ↓
+Local PostgreSQL transaction
+    ↓
+Business data saved
+    ↓
+Sync change recorded
+    ↓
+Response returned immediately
+
+The cloud must NOT be required for the operation to succeed.
 
 Example:
 
-Order #1045
-Table 6
-Waiting: 17 min
-Status: In Progress
+Waiter creates order
 
-Order #1047
-Table 3
-Waiting: 14 min
-Status: Pending
+1. Create order locally.
+2. Create order items locally.
+3. Commit database transaction.
+4. Create sync change.
+5. Return success to waiter.
+6. Sync engine later sends the change to the cloud.
 
-[ Open Kitchen ]
-
-The manager should be able to quickly identify bottlenecks.
-
-Do not duplicate the entire Kitchen module.
+If the internet is unavailable, steps 1-5 still succeed.
 
 ==================================================
-5. TABLE STATUS
+SYNC ENGINE
 ==================================================
 
-Show the current restaurant table situation.
+Create a dedicated synchronization service.
+
+Responsibilities:
+
+- Detect internet/cloud availability.
+- Read pending sync changes.
+- Send changes to cloud API.
+- Process acknowledgements.
+- Mark successful changes as SYNCED.
+- Retry failed changes.
+- Use exponential backoff.
+- Prevent duplicate processing.
+- Record errors.
+- Pull remote changes when required.
+- Update local database safely.
+
+Do not run unlimited retry loops.
+
+Suggested retry delays:
+
+5 seconds
+15 seconds
+30 seconds
+1 minute
+5 minutes
+15 minutes
+
+Adapt this to the existing application architecture.
+
+==================================================
+CLOUD API
+==================================================
+
+Create a secure cloud synchronization API.
+
+The local system should communicate with:
+
+Cloud Backend
+    ↓
+Neon PostgreSQL
+
+Do NOT allow clients to connect directly to Neon.
+
+Create appropriate endpoints such as:
+
+POST /sync/push
+POST /sync/pull
+
+or adapt to the existing backend architecture.
+
+The API must authenticate the restaurant installation/device.
+
+Do not use the user's normal login password as synchronization credentials.
+
+==================================================
+IDEMPOTENCY
+==================================================
+
+This is critical.
+
+Every synchronization event must have a unique identifier.
+
+If the local system sends the same event twice because of a timeout:
+
+The cloud must recognize that the event was already processed.
 
 Example:
 
-TABLES
+Change ID:
+CHANGE-123
 
-Available       12
-Occupied         6
-Reserved         2
-Needs Cleaning   1
+First request:
+processed successfully.
 
-Show a compact visual/table map if the existing Tables module already supports it.
+Second request:
+return already processed / success.
 
-Use the existing table data.
-
-Example:
-
-Table 1   Available
-Table 2   Occupied
-Table 3   Occupied
-Table 4   Needs Cleaning
-
-[ Manage Tables ]
-
-The dashboard should NOT become a full table-management page.
-
-==================================================
-6. INVENTORY ALERTS
-==================================================
-
-Show inventory items that require manager attention.
-
-Examples:
-
-LOW STOCK
-5 items
-
-OUT OF STOCK
-2 items
-
-Show the most important items:
-
-Rice
-Current: 8 kg
-Minimum: 15 kg
-
-Cooking Oil
-Current: 3 L
-Minimum: 10 L
-
-Chicken
-Current: 4 kg
-Minimum: 10 kg
-
-[ View Inventory ]
-
-Do not show the entire inventory.
-
-The manager needs warnings, not the whole database.
-
-==================================================
-7. STAFF ACTIVITY
-==================================================
-
-Show the manager who is currently working.
-
-Example:
-
-STAFF TODAY
-
-Waiters
-4 active
-
-Cashiers
-1 active
-
-Kitchen Staff
-3 active
-
-Then:
-
-CURRENT STAFF
-
-Abebe
-Waiter
-Active
-
-Hana
-Waiter
-Active
-
-Dawit
-Kitchen
-Active
-
-Sara
-Cashier
-Active
-
-Use the existing Employee module and attendance/session data if available.
-
-Do not turn this into an employee management page.
-
-[ Manage Employees ]
-
-==================================================
-8. TODAY'S ACTIVITY
-==================================================
-
-Show basic operational numbers:
-
-Orders Today
-48
-
-Completed
-39
-
-Cancelled
-2
-
-Sales
-45,800 ETB
-
-Average Order
-954 ETB
-
-Do not overload this section with financial metrics.
-
-The owner has access to detailed financial information.
-
-The manager only needs enough information to understand today's operation.
-
-==================================================
-9. RECENT OPERATIONAL ACTIVITY
-==================================================
-
-Show recent events.
-
-Examples:
-
-10:42
-Order #1045 completed
-
-10:38
-Table 6 assigned to Abebe
-
-10:31
-Order #1047 sent to kitchen
-
-10:20
-Rice stock adjusted
-
-10:12
-Order #1042 cancelled
-
-Keep this focused on operational events.
-
-Do not show every database action.
-
-==================================================
-MANAGER QUICK ACTIONS
-==================================================
-
-Provide useful shortcuts:
-
-[ Orders ]
-
-[ Kitchen ]
-
-[ Tables ]
-
-[ Inventory ]
-
-[ Employees ]
-
-[ Reports ]
-
-Do NOT put financial actions such as:
-
-- Process payment
-- Refund sale
-- Manage financial settings
-
-unless the existing permission system explicitly allows the manager to perform them.
-
-==================================================
-MANAGER RESPONSIBILITIES
-==================================================
-
-The manager dashboard should focus on:
-
-Orders
-Kitchen
-Tables
-Inventory
-Employees
-Daily operations
-
-The manager may have access to:
+Never create duplicate:
 
 - Orders
-- Tables
-- Kitchen
-- Inventory
-- Products
-- Suppliers
-- Employees
 - Sales
 - Expenses
 - Transactions
+- Products
+- Inventory movements
+- Employees
+- Purchases
+
+==================================================
+CONFLICT HANDLING
+==================================================
+
+The restaurant's local server is the primary operational source for devices inside the same restaurant.
+
+Multiple local devices should NOT synchronize independently with the cloud.
+
+Instead:
+
+Waiter
+Cashier
+Kitchen
+Manager
+    ↓
+LOCAL SERVER
+    ↓
+LOCAL DATABASE
+    ↓
+CLOUD SYNC
+
+This minimizes conflicts.
+
+For cloud/local conflicts, create a deterministic conflict strategy.
+
+Do not silently overwrite important financial records.
+
+For conflicts involving:
+
+Sales
+Transactions
+Expenses
+Purchases
+Inventory movements
+
+log the conflict and preserve the original records.
+
+Do not delete financial history automatically.
+
+==================================================
+SOFT DELETES
+==================================================
+
+Do not physically delete synchronized business records where doing so could break references or financial history.
+
+Use soft deletion where appropriate:
+
+deleted_at
+
+Synchronization must propagate deletions correctly.
+
+==================================================
+FINANCIAL DATA
+==================================================
+
+Financial records require special handling.
+
+Do not synchronize financial operations by simply replacing rows.
+
+Sales, transactions, expenses, purchases and inventory movements should be treated as historical events.
+
+Never silently overwrite financial history.
+
+==================================================
+OFFLINE OPERATION
+==================================================
+
+The restaurant must continue working without internet.
+
+Offline functionality includes:
+
+- Orders
+- Sales
+- Tables
+- Kitchen
+- Inventory
+- Purchases
+- Expenses
+- Transactions
+- Employees
 - Reports
 
-However, access must follow the existing permission system.
-
-Do NOT hard-code permissions in dashboard components.
+Do not disable modules because the internet is unavailable.
 
 ==================================================
-OWNER VS MANAGER
+SYNC STATUS UI
 ==================================================
 
-IMPORTANT:
+Add a small global synchronization indicator to the application header.
 
-Do not duplicate the Owner Dashboard.
+Possible states:
 
-OWNER:
-
-"How is the business performing?"
-
-Focus:
-- Revenue
-- Expenses
-- Cash flow
-- Business trends
-- Inventory value
-- Financial alerts
-- Overall performance
-
-MANAGER:
-
-"What is happening right now?"
-
-Focus:
-- Active orders
-- Kitchen
-- Tables
-- Staff
-- Inventory alerts
-- Operational problems
-- Delayed orders
-
-==================================================
-ALERT SYSTEM
-==================================================
-
-Only show alerts when something requires attention.
+ONLINE + SYNCED
+ONLINE + SYNCING
+OFFLINE
+PENDING SYNC
+SYNC ERROR
 
 Examples:
 
-Order delayed
-Inventory critically low
-Product out of stock
-Kitchen backlog
-Table needs cleaning
-Staff shortage
-Unusual number of cancelled orders
+🟢 Synced
 
-If there are no issues:
+🟡 Syncing...
 
-"Everything is running normally."
+🔴 Offline
+24 changes waiting
 
-Do not fill the dashboard with empty warning cards.
+⚠ Sync issue
+3 changes failed
+
+Do not make this indicator intrusive.
 
 ==================================================
-CHARTS
+SETTINGS → SYNCHRONIZATION
 ==================================================
 
-Charts are NOT a priority.
+Create:
 
-Do not add charts simply to make the dashboard look impressive.
+Settings
+    ↓
+Synchronization
 
-If one visualization is useful, optionally show:
+Display:
 
-Orders by hour today
+Connection:
+Online / Offline
 
-This can help the manager understand busy periods.
+Sync status:
+Synced / Syncing / Pending / Error
 
-Otherwise, use numbers and lists instead.
+Last successful sync:
+Date and time
+
+Pending changes:
+Number
+
+Failed changes:
+Number
+
+Installation ID:
+Masked/read-only
+
+Device ID:
+Masked/read-only
+
+Provide:
+
+[ Sync Now ]
+
+The Sync Now button should manually trigger a sync attempt.
+
+Normal synchronization must happen automatically.
 
 ==================================================
-OFFLINE-FIRST
+SYNC DETAILS
 ==================================================
 
-The dashboard must work without internet.
-
-All dashboard information must come from the local database when offline.
-
-Do not make dashboard rendering dependent on cloud services.
-
-If synchronization is available, show a small status indicator:
-
-Synced
-
-or
-
-Last synced: 10 minutes ago
-
-Do not block the manager dashboard when there is no internet.
-
-==================================================
-DATA SOURCES
-==================================================
-
-Use the existing modules:
-
-Orders
-Kitchen
-Tables
-Inventory
-Employees
-Sales
-Reports
-
-Reuse existing services, types, APIs, and database relationships.
-
-Do NOT create duplicate models.
-
-If aggregate data is required, create a dedicated manager dashboard service rather than placing database/business logic inside React components.
-
-Prefer a single dashboard summary request where practical.
+Allow the owner/authorized manager to inspect synchronization problems.
 
 Example:
 
-GET /dashboard/manager
+Sync Issues
 
-Return:
+Order #1042
+Failed
+Reason: temporary server error
+Retrying automatically
 
-{
-  operationalSummary,
-  ordersAttention,
-  kitchenStatus,
-  tableStatus,
-  inventoryAlerts,
-  staffActivity,
-  todayActivity,
-  recentActivity
-}
+Expense #EXP-104
+Failed
+Reason: network timeout
 
-Adapt this to the existing architecture rather than blindly creating a new endpoint.
+Do not expose technical stack traces to normal users.
+
+Provide a user-friendly message.
+
+==================================================
+CLOUD DATABASE: NEON
+==================================================
+
+Prepare the cloud backend for Neon PostgreSQL.
+
+Use an environment variable such as:
+
+DATABASE_URL
+
+The Neon connection string must exist ONLY on the cloud backend/server.
+
+Never expose:
+
+DATABASE_URL
+Neon password
+Neon credentials
+
+to React/frontend code.
+
+Use SSL as required by Neon.
+
+Create proper database migrations so the Neon database can be created from the existing schema.
+
+Do not manually create random tables in Neon that differ from the application's schema.
+
+==================================================
+ENVIRONMENTS
+==================================================
+
+Support:
+
+Development
+Local
+Production
+
+Example environment variables:
+
+LOCAL_DATABASE_URL
+CLOUD_API_URL
+SYNC_ENABLED
+INSTALLATION_ID
+
+Cloud backend:
+
+DATABASE_URL
+JWT_SECRET
+etc.
+
+Do not commit secrets.
+
+Update .env.example with placeholders only.
 
 ==================================================
 PERFORMANCE
 ==================================================
 
-The dashboard must load quickly.
+Do not continuously poll the cloud every second.
 
-Avoid dozens of independent requests.
+Use a reasonable sync interval.
 
-Use existing caching/query mechanisms where available.
+Also trigger synchronization when:
 
-Only refresh frequently changing information when necessary.
+- Internet becomes available
+- Application starts
+- Significant local changes are queued
+- User presses Sync Now
 
-For example:
+Use batching where appropriate.
 
-Orders and kitchen status may refresh more frequently than employee information.
+Example:
 
-==================================================
-EMPTY STATES
-==================================================
+Instead of:
 
-Handle all empty states.
+1 change → 1 HTTP request
 
-No active orders:
+prefer:
 
-"No active orders."
+50 pending changes → 1 sync batch
 
-No delayed orders:
-
-"All orders are running normally."
-
-No inventory alerts:
-
-"Inventory levels look good."
-
-No staff activity:
-
-"No staff activity recorded."
-
-Do not show fake numbers.
+when appropriate.
 
 ==================================================
-DESIGN
+SECURITY
 ==================================================
 
-Use the existing Restaurant ERP design system.
+Never trust client-provided installation IDs or device identities without validation.
 
-Use:
+Authenticate sync requests.
 
-React
-TypeScript
-Tailwind CSS
-shadcn/ui
-Existing components
-Existing theme
+Validate:
 
-Design should be:
+- Installation
+- Device
+- Request signature/token
+- Change IDs
+- Entity IDs
+- Payloads
 
-- Clean
-- Fast
-- Professional
-- Easy to scan
-- Operational
-- Touch-friendly where appropriate
+Rate-limit cloud synchronization endpoints.
 
-Avoid:
+Do not allow one restaurant installation to access another restaurant's data.
 
-- Excessive charts
-- Decorative cards
-- Huge empty spaces
-- Unnecessary animations
-- Excessive colors
-- Information overload
-
-Use color primarily to communicate state:
-
-Normal
-Warning
-Critical
-Completed
+Every cloud query must be scoped to the correct business/tenant.
 
 ==================================================
-RESPONSIVE DESIGN
+MULTI-TENANCY
 ==================================================
 
-Desktop is the primary environment.
+The cloud database will eventually contain multiple restaurant businesses.
 
-Also support:
+Every cloud business record must be associated with the correct business/tenant.
 
-- Laptop
-- Tablet
-- Smaller screens
+Example:
 
-On smaller screens:
+business_id
 
-- Stack summary cards
-- Stack alert sections
-- Allow tables to scroll horizontally
-- Keep important actions accessible
+Never allow:
 
-==================================================
-FINAL UX PRINCIPLE
-==================================================
+Business A
+    ↓
+access
+    ↓
+Business B data
 
-When the manager opens the dashboard, they should immediately be able to answer:
-
-"How busy are we?"
-
-"Are any orders delayed?"
-
-"How is the kitchen doing?"
-
-"Which tables need attention?"
-
-"Do we have inventory problems?"
-
-"Who is working?"
-
-"Is anything going wrong?"
-
-"What should I deal with first?"
-
-If a component does not help answer these questions or help the manager take action, do not add it.
+This is critical.
 
 ==================================================
-IMPLEMENTATION REQUIREMENTS
+BACKUP
+==================================================
+
+Do not treat synchronization as the same thing as backup.
+
+Synchronization keeps cloud/local data aligned.
+
+Backups are a separate concern.
+
+Design the system so cloud database backups can be configured independently.
+
+==================================================
+IMPLEMENTATION RULES
 ==================================================
 
 Before implementation:
 
-1. Inspect the existing Orders module.
-2. Inspect the Kitchen module.
-3. Inspect the Tables module.
-4. Inspect the Inventory module.
-5. Inspect the Employees module.
-6. Inspect Sales and Reports where relevant.
-7. Reuse existing types and services.
-8. Do not create duplicate business logic.
-9. Do not use mock data as the final implementation.
-10. Do not break existing modules.
-11. Respect the existing role/permission system.
-12. Make the dashboard fully functional with real local database data.
+1. Inspect the existing database schema.
+2. Inspect authentication.
+3. Inspect business/tenant relationships.
+4. Inspect all major modules.
+5. Inspect existing API architecture.
+6. Determine whether local PostgreSQL is already configured.
+7. Determine the current backend entry point.
+8. Reuse existing database utilities.
+9. Do not rewrite working modules unnecessarily.
+10. Do not introduce a second ORM/database abstraction without a reason.
+11. Do not break offline functionality.
+12. Do not replace existing business logic.
 
-Build the complete Manager Dashboard end-to-end.
+Build synchronization incrementally.
+
+First implement:
+
+1. Installation/device identity
+2. Sync change log
+3. Local change recording
+4. Cloud authentication
+5. Push synchronization
+6. Idempotency
+7. Retry system
+8. Pull synchronization
+9. Conflict handling
+10. Sync status UI
+11. Settings synchronization page
+12. Error handling
+13. Production configuration
+
+Test each stage before moving to the next.
+
+==================================================
+ACCEPTANCE TESTS
+==================================================
+
+Test:
+
+1. Create order while online.
+2. Confirm local database receives it.
+3. Confirm cloud receives it.
+4. Disconnect internet.
+5. Create several orders.
+6. Confirm they work normally.
+7. Confirm changes become pending.
+8. Reconnect internet.
+9. Confirm automatic synchronization.
+10. Confirm no duplicate orders.
+11. Repeat with sales.
+12. Repeat with expenses.
+13. Repeat with inventory.
+14. Repeat with transactions.
+15. Simulate failed cloud requests.
+16. Confirm retry behavior.
+17. Simulate duplicate sync request.
+18. Confirm idempotency.
+19. Test multiple devices through local network.
+20. Confirm one restaurant cannot access another restaurant's cloud data.
+
+The final result must feel invisible to normal users.
+
+The system should simply work whether the restaurant is online or offline.

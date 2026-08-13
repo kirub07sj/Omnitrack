@@ -101,5 +101,74 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ success: false, message: 'An error occurred during login.' });
   }
 });
+router.put('/update-profile', async (req, res) => {
+  try {
+    const { userId, firstName, lastName, currentPin, newPin } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required.' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { employee: true, role: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    // Update Employee Name
+    if (firstName || lastName) {
+      await prisma.employee.update({
+        where: { id: user.employee_id },
+        data: {
+          first_name: firstName || user.employee.first_name,
+          last_name: lastName || user.employee.last_name
+        }
+      });
+    }
+
+    // Update PIN if provided
+    if (currentPin && newPin) {
+      const isValid = await bcrypt.compare(currentPin, user.password_hash);
+      if (!isValid) {
+        return res.status(401).json({ success: false, message: 'Current PIN is incorrect.' });
+      }
+      
+      const salt = await bcrypt.genSalt(10);
+      const password_hash = await bcrypt.hash(newPin, salt);
+      
+      await prisma.user.update({
+        where: { id: userId },
+        data: { password_hash }
+      });
+    }
+
+    // Return updated user object
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { employee: true, role: true }
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Profile updated successfully.',
+      user: {
+        id: updatedUser!.id,
+        username: updatedUser!.username,
+        firstName: updatedUser!.employee.first_name,
+        lastName: updatedUser!.employee.last_name,
+        role: updatedUser!.role.name,
+        business_id: updatedUser!.employee.business_id,
+        employee_id: updatedUser!.employee.id
+      }
+    });
+
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ success: false, message: 'An error occurred while updating profile.' });
+  }
+});
 
 export default router;
