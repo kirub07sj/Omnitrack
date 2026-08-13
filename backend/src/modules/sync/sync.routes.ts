@@ -26,4 +26,18 @@ router.post('/now', async (req, res) => {
   }
 });
 
+// GET /api/sync/history
+router.get('/history', async (req, res) => {
+  try {
+    const { prisma } = require('../../database');
+    const history = await prisma.syncChange.findMany({
+      orderBy: { created_at: 'desc' },
+      take: 10
+    });
+    res.json({ success: true, data: history });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 export default router;

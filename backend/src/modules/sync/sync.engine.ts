@@ -111,8 +111,18 @@ class SyncEngine {
           }
         });
 
-        if (response.data.success) {
-          await this.markAsSynced(pendingChanges.map(c => c.id));
+        if (response.data.success && response.data.processed) {
+          await this.markAsSynced(response.data.processed);
+          
+          if (response.data.errors && response.data.errors.length > 0) {
+            console.error('[SYNC ENGINE] Some items failed on cloud:', response.data.errors);
+            // Optionally update their status back to FAILED
+            const failedIds = response.data.errors.map((e: any) => e.changeId);
+            await prisma.syncChange.updateMany({
+              where: { id: { in: failedIds } },
+              data: { status: 'FAILED' }
+            });
+          }
         } else {
           throw new Error('Cloud API returned failure status');
         }

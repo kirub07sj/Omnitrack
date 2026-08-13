@@ -43,8 +43,28 @@ app.post('/api/sync/push', async (req, res) => {
         continue;
       }
 
-      // In a full implementation, you would dynamically update the correct table here
-      // For now, we just record the change in the cloud's sync_change log for audit
+      // 1. Replicate the actual data into the Neon PostgreSQL database FIRST
+      // This prevents foreign key errors when creating the sync_change audit log (e.g. if the change IS the Business)
+      const modelName = change.entityType.charAt(0).toLowerCase() + change.entityType.slice(1);
+      const modelDelegate = (prisma as any)[modelName];
+
+      if (modelDelegate) {
+        if (change.operation === 'DELETE') {
+          try {
+            await modelDelegate.delete({ where: { id: change.entityId } });
+          } catch (e: any) {
+            if (e.code !== 'P2025') throw e;
+          }
+        } else if (change.data) {
+          await modelDelegate.upsert({
+            where: { id: change.entityId },
+            create: change.data,
+            update: change.data
+          });
+        }
+      }
+
+      // 2. Record the change in the cloud's sync_change log for audit
       await prisma.syncChange.create({
         data: {
           id: change.changeId,
@@ -58,9 +78,6 @@ app.post('/api/sync/push', async (req, res) => {
           processed_at: new Date()
         }
       });
-      
-      // Here you would also update the actual business tables (Orders, Sales, etc.)
-      // e.g. if operation === 'CREATE' && entityType === 'Order', prisma.order.create(...)
 
       processedIds.push(change.changeId);
     } catch (error: any) {

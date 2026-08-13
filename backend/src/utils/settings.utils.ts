@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../database';
 
-const prisma = new PrismaClient();
 
 /**
  * Fetches and parses business settings from the database.

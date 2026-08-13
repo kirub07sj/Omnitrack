@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../database';
 import { checkStockAvailability } from '../../utils/settings.utils';
 
-const prisma = new PrismaClient();
 
 // Store SSE clients
 const clients: { id: string; business_id: string; res: Response }[] = [];

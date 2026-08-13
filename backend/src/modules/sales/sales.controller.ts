@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../database';
 
-const prisma = new PrismaClient();
 
 // 1. Get Unpaid Orders (Payment Queue)
 export const getUnpaidOrders = async (req: Request, res: Response) => {

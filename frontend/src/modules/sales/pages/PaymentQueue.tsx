@@ -11,7 +11,7 @@ import { useSettings } from '@/hooks/useSettings';
 
 export default function PaymentQueue() {
   const { currentUser } = useAppStore();
-  const { currency } = useSettings();
+  const { currency, calculateTotal } = useSettings();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,7 +136,8 @@ export default function PaymentQueue() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredOrders.map((order) => {
             const tableNum = order.table?.table_number || 'Walk-in';
-            const total = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * parseFloat(item.quantity)), 0);
+            const rawSubtotal = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * parseFloat(item.quantity)), 0);
+            const { total } = calculateTotal(rawSubtotal, 0);
             
             return (
               <Card key={order.id} className="group relative flex flex-col hover:border-primary/50 transition-all min-h-[200px] overflow-hidden cursor-pointer shadow-sm hover:shadow-md omni-paper-fold">

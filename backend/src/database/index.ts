@@ -9,11 +9,37 @@ const TRACKED_MODELS = [
   'InventoryItem', 'Supplier'
 ];
 
+interface SyncChangeData {
+  business_id: string;
+  entity_type: string;
+  entity_id: string;
+  operation: string;
+  installation_id: string;
+  device_id: string;
+  status: string;
+}
+
+const syncQueue: SyncChangeData[] = [];
+
+// Process queue every second to avoid SQLite deadlocks during transactions
+setInterval(async () => {
+  if (syncQueue.length === 0) return;
+  const batch = syncQueue.splice(0, syncQueue.length);
+  try {
+    await basePrisma.syncChange.createMany({
+      data: batch
+    });
+  } catch (err) {
+    console.error(`[SYNC ENGINE] Failed to save sync batch:`, err);
+    // Put them back
+    syncQueue.push(...batch);
+  }
+}, 1000);
+
 export const prisma = basePrisma.$extends({
   query: {
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
-        // Only track specific models and mutations
         if (
           !TRACKED_MODELS.includes(model as string) || 
           !['create', 'update', 'delete'].includes(operation)
@@ -21,30 +47,23 @@ export const prisma = basePrisma.$extends({
           return query(args);
         }
 
-        // We run the actual query first
         const result = await query(args);
 
-        // If the query was successful, we create a sync change record
-        // Handle getting the entity_id and business_id if possible
-        const entityId = result?.id;
-        const businessId = result?.business_id || args.data?.business_id || 'UNKNOWN';
+        const resAny = result as any;
+        const argsAny = args as any;
+        const entityId = resAny?.id;
+        const businessId = resAny?.business_id || argsAny?.data?.business_id || 'UNKNOWN';
 
         if (entityId && businessId !== 'UNKNOWN') {
-          try {
-            await basePrisma.syncChange.create({
-              data: {
-                business_id: businessId,
-                entity_type: model as string,
-                entity_id: entityId,
-                operation: operation.toUpperCase(),
-                installation_id: process.env.INSTALLATION_ID || 'INSTALLATION-LOCAL',
-                device_id: process.env.DEVICE_ID || 'SERVER-MAIN',
-                status: 'PENDING'
-              }
-            });
-          } catch (error) {
-            console.error(`[SYNC ENGINE] Failed to record sync change for ${model} ${entityId}:`, error);
-          }
+          syncQueue.push({
+            business_id: businessId,
+            entity_type: model as string,
+            entity_id: entityId,
+            operation: operation.toUpperCase(),
+            installation_id: process.env.INSTALLATION_ID || 'INSTALLATION-LOCAL',
+            device_id: process.env.DEVICE_ID || 'SERVER-MAIN',
+            status: 'PENDING'
+          });
         }
 
         return result;

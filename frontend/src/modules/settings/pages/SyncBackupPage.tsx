@@ -8,15 +8,18 @@ import { useAppStore } from '@/store/useAppStore';
 export default function SyncBackupPage() {
   const { businessSettings } = useAppStore();
   const [status, setStatus] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
 
   const fetchStatus = async () => {
     try {
-      const res = await axios.get('/api/sync/status');
-      if (res.data.success) {
-        setStatus(res.data.data);
-      }
+      const [statusRes, historyRes] = await Promise.all([
+        axios.get('/api/sync/status'),
+        axios.get('/api/sync/history')
+      ]);
+      if (statusRes.data.success) setStatus(statusRes.data.data);
+      if (historyRes.data.success) setHistory(historyRes.data.data);
     } catch (err) {
       console.error('Failed to fetch sync status', err);
     } finally {
@@ -158,6 +161,41 @@ export default function SyncBackupPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Sync Activity</CardTitle>
+          <CardDescription>The last 10 data changes processed by the sync engine.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {history.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No recent activity found.</p>
+          ) : (
+            <div className="space-y-3">
+              {history.map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg bg-card text-sm">
+                  <div className="flex flex-col">
+                    <span className="font-semibold">{item.operation} {item.entity_type}</span>
+                    <span className="text-xs text-muted-foreground">ID: {item.entity_id.slice(0,8)}...</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      item.status === 'SYNCED' ? 'bg-emerald-100 text-emerald-700' :
+                      item.status === 'FAILED' ? 'bg-destructive/20 text-destructive' :
+                      'bg-amber-100 text-amber-700'
+                    }`}>
+                      {item.status}
+                    </span>
+                    <span className="text-xs text-muted-foreground mt-1">
+                      {new Date(item.created_at).toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
