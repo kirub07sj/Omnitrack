@@ -11,8 +11,12 @@ import { SalesReport } from '../components/SalesReport';
 import { ExpenseReport } from '../components/ExpenseReport';
 import { TransactionsReport } from '../components/TransactionsReport';
 import { InventoryReport } from '../components/InventoryReport';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function ReportsPage() {
+  const { currentUser } = useAppStore();
+  const isCashier = currentUser?.role?.toLowerCase() === 'cashier';
+
   const [dateRange, setDateRange] = useState({
     startDate: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
     endDate: format(new Date(), 'yyyy-MM-dd')
@@ -32,9 +36,11 @@ export default function ReportsPage() {
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
+                disabled={isCashier}
                 className={cn(
                   "h-8 justify-start text-left font-normal px-3 w-[150px]",
-                  !dateRange.startDate && "text-muted-foreground"
+                  !dateRange.startDate && "text-muted-foreground",
+                  isCashier && "opacity-50 cursor-not-allowed"
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -55,9 +61,11 @@ export default function ReportsPage() {
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
+                disabled={isCashier}
                 className={cn(
                   "h-8 justify-start text-left font-normal px-3 w-[150px]",
-                  !dateRange.endDate && "text-muted-foreground"
+                  !dateRange.endDate && "text-muted-foreground",
+                  isCashier && "opacity-50 cursor-not-allowed"
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -81,34 +89,40 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs defaultValue={isCashier ? "sales" : "overview"} className="w-full">
         <TabsList className="w-full justify-start h-auto flex-wrap bg-transparent border-b p-0 rounded-none space-x-1 mb-6">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><BarChart3 className="w-4 h-4 mr-2"/> Overview</TabsTrigger>
+          {!isCashier && <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><BarChart3 className="w-4 h-4 mr-2"/> Overview</TabsTrigger>}
           <TabsTrigger value="sales" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><TrendingUp className="w-4 h-4 mr-2"/> Sales</TabsTrigger>
-          <TabsTrigger value="expenses" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><LineChart className="w-4 h-4 mr-2"/> Expenses</TabsTrigger>
+          {!isCashier && <TabsTrigger value="expenses" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><LineChart className="w-4 h-4 mr-2"/> Expenses</TabsTrigger>}
           <TabsTrigger value="transactions" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><PieChart className="w-4 h-4 mr-2"/> Cash Flow</TabsTrigger>
-          <TabsTrigger value="inventory" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><Package className="w-4 h-4 mr-2"/> Inventory</TabsTrigger>
+          {!isCashier && <TabsTrigger value="inventory" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><Package className="w-4 h-4 mr-2"/> Inventory</TabsTrigger>}
         </TabsList>
         
-        <TabsContent value="overview" className="animate-in fade-in-50 duration-300">
-          <OverviewReport dateRange={dateRange} refreshTrigger={refreshTrigger} />
-        </TabsContent>
+        {!isCashier && (
+          <TabsContent value="overview" className="animate-in fade-in-50 duration-300">
+            <OverviewReport dateRange={dateRange} refreshTrigger={refreshTrigger} />
+          </TabsContent>
+        )}
 
         <TabsContent value="sales" className="animate-in fade-in-50 duration-300">
           <SalesReport dateRange={dateRange} refreshTrigger={refreshTrigger} />
         </TabsContent>
 
-        <TabsContent value="expenses" className="animate-in fade-in-50 duration-300">
-           <ExpenseReport dateRange={dateRange} refreshTrigger={refreshTrigger} />
-        </TabsContent>
+        {!isCashier && (
+          <TabsContent value="expenses" className="animate-in fade-in-50 duration-300">
+             <ExpenseReport dateRange={dateRange} refreshTrigger={refreshTrigger} />
+          </TabsContent>
+        )}
 
         <TabsContent value="transactions" className="animate-in fade-in-50 duration-300">
            <TransactionsReport dateRange={dateRange} refreshTrigger={refreshTrigger} />
         </TabsContent>
 
-        <TabsContent value="inventory" className="animate-in fade-in-50 duration-300">
-           <InventoryReport refreshTrigger={refreshTrigger} />
-        </TabsContent>
+        {!isCashier && (
+          <TabsContent value="inventory" className="animate-in fade-in-50 duration-300">
+             <InventoryReport refreshTrigger={refreshTrigger} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

@@ -92,8 +92,14 @@ export const getOwnerDashboard = async (req: Request, res: Response) => {
 
     let totalIncome = 0;
     let totalExpense = 0;
+    let cashIncome = 0;
     currentTransactions.forEach(t => {
-      if (t.type === 'INCOME') totalIncome += Number(t.amount);
+      if (t.type === 'INCOME') {
+        totalIncome += Number(t.amount);
+        if (t.method === 'Cash' || !t.method) {
+          cashIncome += Number(t.amount);
+        }
+      }
       if (t.type === 'EXPENSE') totalExpense += Number(t.amount);
     });
     const netCashFlow = totalIncome - totalExpense;
@@ -241,7 +247,7 @@ export const getOwnerDashboard = async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: {
-        financialSummary: { totalIncome, totalExpense, moneyOut: totalExpense, netCashFlow, transactions: currentTransactions.length },
+        financialSummary: { totalIncome, cashIncome, totalExpense, moneyOut: totalExpense, netCashFlow, transactions: currentTransactions.length },
         salesPerformance,
         activitySummary,
         alerts,

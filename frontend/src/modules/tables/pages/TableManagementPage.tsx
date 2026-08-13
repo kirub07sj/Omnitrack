@@ -14,6 +14,7 @@ import {
 
 export default function TableManagementPage() {
   const { currentUser } = useAppStore();
+  const isCashier = currentUser?.role?.toLowerCase() === 'cashier';
   const [tables, setTables] = useState<any[]>([]);
   const [waiters, setWaiters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,48 +157,51 @@ export default function TableManagementPage() {
         </p>
       </div>
       
-      <div className="bg-card border border-border p-6 rounded-2xl shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Table Setup</h2>
-        <div className="flex flex-col sm:flex-row items-end gap-4">
-          <div className="flex-1 max-w-sm space-y-2">
-            <label className="text-sm font-medium">Number of Tables</label>
-            <Input 
-              type="number" 
-              min="1" max="100"
-              value={tableCount} 
-              onChange={(e) => setTableCount(e.target.value)} 
-              placeholder="e.g. 15"
-              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
-          </div>
-          <Button onClick={handleSetup} disabled={setupLoading || !tableCount}>
-            {setupLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Utensils className="w-4 h-4 mr-2" />}
-            Generate Tables
-          </Button>
-          <div className="flex-1 flex justify-end">
-            <Button variant="outline" onClick={() => setIsAssignModalOpen(true)} className="border-primary text-primary hover:bg-primary/10">
-              <Users className="w-4 h-4 mr-2" /> Assign Waiter
+      {/* Table Setup - Hidden for Cashier */}
+      {!isCashier && (
+        <div className="bg-card border border-border p-6 rounded-2xl shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Table Setup</h2>
+          <div className="flex flex-col sm:flex-row items-end gap-4">
+            <div className="flex-1 max-w-sm space-y-2">
+              <label className="text-sm font-medium">Number of Tables</label>
+              <Input 
+                type="number" 
+                min="1" max="100"
+                value={tableCount} 
+                onChange={(e) => setTableCount(e.target.value)} 
+                placeholder="e.g. 15"
+                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            </div>
+            <Button onClick={handleSetup} disabled={setupLoading || !tableCount}>
+              {setupLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Utensils className="w-4 h-4 mr-2" />}
+              Generate Tables
             </Button>
+            <div className="flex-1 flex justify-end">
+              <Button variant="outline" onClick={() => setIsAssignModalOpen(true)} className="border-primary text-primary hover:bg-primary/10">
+                <Users className="w-4 h-4 mr-2" /> Assign Waiter
+              </Button>
+            </div>
           </div>
+          
+          {/* Fixed Notifications */}
+          {(error || success) && (
+            <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 animate-in slide-in-from-top-5">
+              {error && (
+                <div className="bg-destructive text-destructive-foreground px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center">
+                  <CheckCircle2 className="w-5 h-5 mr-2" />
+                  {success}
+                </div>
+              )}
+            </div>
+          )}
         </div>
-        
-        {/* Fixed Notifications */}
-        {(error || success) && (
-          <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 animate-in slide-in-from-top-5">
-            {error && (
-              <div className="bg-destructive text-destructive-foreground px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center">
-                <CheckCircle2 className="w-5 h-5 mr-2" />
-                {success}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {tables.map(table => {

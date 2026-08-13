@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { KeyRound, Loader2, AlertCircle, ShieldCheck, CheckCircle2, MonitorSmartphone } from 'lucide-react';
+import { KeyRound, Loader2, AlertCircle, CheckCircle2, MonitorSmartphone } from 'lucide-react';
 import axios from 'axios';
 
 type StepStatus = 'pending' | 'loading' | 'done' | 'error';
@@ -112,68 +112,98 @@ export default function ActivationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden p-4">
-      {/* Ambient background */}
-      <div className="absolute inset-0 omni-bg-dots opacity-20 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden p-4 bg-[#0A0A0A] font-sans">
+      <style>{`
+        @keyframes float-slow {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        @keyframes float-slow-reverse {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(-30px, 50px) scale(1.1); }
+          66% { transform: translate(20px, -20px) scale(0.9); }
+        }
+        .animate-orb-1 {
+          animation: float-slow 15s ease-in-out infinite;
+        }
+        .animate-orb-2 {
+          animation: float-slow-reverse 18s ease-in-out infinite;
+        }
+      `}</style>
       
-      <div className="w-full max-w-md relative z-10 omni-animate-in">
-        <div className="bg-card border border-border shadow-2xl rounded-2xl p-8 flex flex-col items-center text-center overflow-hidden relative">
+      {/* Deep Emerald Background with Glows */}
+      <div className="absolute inset-0 z-0 bg-[#063322]" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#0B4A34] via-[#052619] to-[#02130C] opacity-90" />
+      <div className="absolute -top-[20%] -left-[20%] w-[80%] h-[80%] bg-[#0FA369] blur-[150px] rounded-full opacity-25 pointer-events-none animate-orb-1" />
+      <div className="absolute bottom-[10%] right-[10%] w-[60%] h-[60%] bg-[#086343] blur-[120px] rounded-full opacity-35 pointer-events-none animate-orb-2" />
+
+      {/* Brand Logo Top Left */}
+      <div className="absolute top-8 left-8 z-20 flex items-center gap-3">
+        <div className="w-10 h-10 flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+        </div>
+        <span className="text-lg font-semibold tracking-tight text-white">Omnitrack</span>
+      </div>
+      
+      <div className="w-full max-w-[440px] relative z-10 omni-animate-in">
+        <div className=" rounded-3xl p-10 flex flex-col items-center text-center overflow-hidden relative">
           
           {/* INPUT VIEW */}
           {view === 'input' && (
             <div className="w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <ShieldCheck className="w-8 h-8 text-primary" />
+              <div className="w-16 h-16 flex items-center justify-center mb-5">
+                <img src="/logo.png" alt="Omnitrack Logo" className="w-full h-full object-contain drop-shadow-md" />
               </div>
               
-              <h1 className="text-2xl font-bold mb-2 tracking-tight">Activate OmniTrack</h1>
-              <p className="text-muted-foreground mb-6 text-sm">
-                Please enter your Activation Key to continue using the software.
+              <h1 className="text-2xl font-bold mb-2 tracking-tight text-white">Activate Software</h1>
+              <p className="text-emerald-100/70 mb-8 text-sm">
+                Please enter your Activation Key to continue using the system.
               </p>
 
               {licenseError && !error && (
-                <div className="w-full bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg flex items-start gap-3 mb-6 text-sm text-left">
-                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <div className="w-full bg-amber-500/10 border border-amber-500/30 text-amber-200 p-3 rounded-xl flex items-start gap-3 mb-6 text-sm text-left">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
                   <span>{licenseError}</span>
                 </div>
               )}
 
               {error && (
-                <div className="w-full bg-destructive/10 border border-destructive/20 text-destructive p-3 rounded-lg flex items-start gap-3 mb-6 text-sm text-left animate-in fade-in slide-in-from-top-1">
-                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <div className="w-full bg-red-500/10 border border-red-500/30 text-red-300 p-3 rounded-xl flex items-start gap-3 mb-6 text-sm text-left animate-in fade-in slide-in-from-top-1">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-400" />
                   <span>{error}</span>
                 </div>
               )}
 
               <div className="w-full space-y-4">
-                <div className="space-y-2 text-left">
-                  <label className="text-sm font-semibold uppercase text-muted-foreground">Activation Key</label>
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[13px] font-medium text-emerald-100/80 pl-1">Activation Key</label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-100/40">
                       <KeyRound className="h-5 w-5" />
                     </div>
                     <Input 
                       type="text" 
-                      placeholder="Enter your activation key..." 
+                      placeholder="XXXX-XXXX-XXXX-XXXX" 
                       value={key}
                       onChange={(e) => setKey(e.target.value)}
-                      className="pl-10 h-12 text-md font-mono"
+                      className="pl-12 h-14 bg-white/5 border border-white/15 rounded-xl text-md font-mono text-white placeholder-emerald-100/30 focus-visible:ring-emerald-400 focus-visible:border-emerald-400 transition-all shadow-none"
                       onKeyDown={(e) => e.key === 'Enter' && handleActivate()}
                     />
                   </div>
                 </div>
 
                 <Button 
-                  className="w-full h-12 text-md font-semibold mt-4 shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:scale-95" 
+                  className="w-full h-14 text-[15px] font-semibold mt-4 shadow-lg shadow-emerald-950/60 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-all" 
                   onClick={handleActivate}
+                  disabled={view !== 'input'}
                 >
-                  Activate Software
+                  Activate License
                 </Button>
 
                 <button 
                   onClick={handleDevBypass}
-                  className="mt-6 text-xs text-muted-foreground underline hover:text-foreground transition-colors"
+                  className="mt-6 text-xs text-emerald-100/40 hover:text-emerald-100/80 transition-colors"
                 >
                   Bypass for development (Test Mode)
                 </button>
@@ -183,27 +213,27 @@ export default function ActivationPage() {
 
           {/* ACTIVATING VIEW */}
           {view === 'activating' && (
-            <div className="w-full flex flex-col items-center animate-in slide-in-from-right-8 fade-in duration-500">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 relative">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <div className="w-full flex flex-col items-center animate-in slide-in-from-right-8 fade-in duration-500 py-4">
+              <div className="w-16 h-16 flex items-center justify-center mb-5 relative">
+                <img src="/logo.png" alt="Omnitrack Logo" className="w-full h-full object-contain drop-shadow-md animate-pulse" />
               </div>
               
-              <h1 className="text-xl font-bold mb-8 tracking-tight">Activating your license...</h1>
+              <h1 className="text-2xl font-bold mb-8 tracking-tight text-white">Activating your license</h1>
               
-              <div className="w-full space-y-4 text-left">
+              <div className="w-full space-y-5 text-left pl-4">
                 {steps.map((step) => (
-                  <div key={step.id} className="flex items-center gap-3">
+                  <div key={step.id} className="flex items-center gap-4">
                     <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                      {step.status === 'pending' && <div className="w-2 h-2 rounded-full bg-border" />}
-                      {step.status === 'loading' && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
-                      {step.status === 'done' && <CheckCircle2 className="w-5 h-5 text-emerald-500 animate-in zoom-in" />}
-                      {step.status === 'error' && <AlertCircle className="w-5 h-5 text-destructive animate-in zoom-in" />}
+                      {step.status === 'pending' && <div className="w-2.5 h-2.5 rounded-full bg-white/20" />}
+                      {step.status === 'loading' && <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />}
+                      {step.status === 'done' && <CheckCircle2 className="w-6 h-6 text-emerald-400 animate-in zoom-in" />}
+                      {step.status === 'error' && <AlertCircle className="w-6 h-6 text-red-400 animate-in zoom-in" />}
                     </div>
-                    <span className={`text-sm transition-colors duration-300 ${
-                      step.status === 'pending' ? 'text-muted-foreground' :
-                      step.status === 'loading' ? 'text-foreground font-medium' :
-                      step.status === 'error' ? 'text-destructive font-medium' :
-                      'text-foreground'
+                    <span className={`text-[15px] transition-colors duration-300 ${
+                      step.status === 'pending' ? 'text-emerald-100/40' :
+                      step.status === 'loading' ? 'text-white font-medium' :
+                      step.status === 'error' ? 'text-red-400 font-medium' :
+                      'text-white'
                     }`}>
                       {step.label}
                     </span>
@@ -215,42 +245,42 @@ export default function ActivationPage() {
 
           {/* SUCCESS VIEW */}
           {view === 'success' && receipt && (
-            <div className="w-full flex flex-col items-center animate-in zoom-in-95 fade-in duration-500">
-              <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 text-emerald-500">
-                <CheckCircle2 className="w-10 h-10" />
+            <div className="w-full flex flex-col items-center animate-in zoom-in-95 fade-in duration-500 py-2">
+              <div className="w-16 h-16 flex items-center justify-center mb-5 text-emerald-400">
+                <CheckCircle2 className="w-12 h-12" />
               </div>
               
-              <h1 className="text-2xl font-bold mb-1 tracking-tight text-emerald-600">License activated</h1>
-              <p className="text-muted-foreground mb-8 text-sm">Your software is ready to use.</p>
+              <h1 className="text-2xl font-bold mb-2 tracking-tight text-white">License activated</h1>
+              <p className="text-emerald-100/70 mb-8 text-sm">Your software is ready to use.</p>
               
-              <div className="w-full bg-muted/50 rounded-xl p-5 space-y-4 text-sm mb-8 text-left border border-border">
-                <div className="flex justify-between items-center border-b border-border/50 pb-3">
-                  <span className="text-muted-foreground">Plan</span>
-                  <span className="font-semibold text-foreground capitalize">{receipt.plan || 'Professional'}</span>
+              <div className="w-full bg-white/5 rounded-2xl p-6 space-y-4 text-[13.5px] mb-8 text-left border border-white/10">
+                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                  <span className="text-emerald-100/60">Plan</span>
+                  <span className="font-semibold text-white capitalize">{receipt.plan || 'Professional'}</span>
                 </div>
-                <div className="flex justify-between items-center border-b border-border/50 pb-3">
-                  <span className="text-muted-foreground">License</span>
-                  <span className="font-mono text-foreground">{maskKey(receipt.licenseKey)}</span>
+                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                  <span className="text-emerald-100/60">License</span>
+                  <span className="font-mono text-white">{maskKey(receipt.licenseKey)}</span>
                 </div>
-                <div className="flex justify-between items-center border-b border-border/50 pb-3">
-                  <span className="text-muted-foreground">Activated</span>
-                  <span className="font-medium text-foreground">{formatDate(receipt.activatedAt || receipt.validUntil)}</span>
+                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                  <span className="text-emerald-100/60">Activated</span>
+                  <span className="font-medium text-white">{formatDate(receipt.activatedAt || receipt.validUntil)}</span>
                 </div>
-                <div className="flex justify-between items-center border-b border-border/50 pb-3">
-                  <span className="text-muted-foreground">Expires</span>
-                  <span className="font-medium text-foreground">{formatDate(receipt.expiresAt || receipt.validUntil)}</span>
+                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                  <span className="text-emerald-100/60">Expires</span>
+                  <span className="font-medium text-white">{formatDate(receipt.expiresAt || receipt.validUntil)}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Device</span>
-                  <span className="font-medium text-foreground flex items-center gap-2">
-                    <MonitorSmartphone className="w-4 h-4 opacity-50" />
-                    This computer
+                <div className="flex justify-between items-center pt-1">
+                  <span className="text-emerald-100/60">Device</span>
+                  <span className="font-medium text-white flex items-center gap-2">
+                    <MonitorSmartphone className="w-4 h-4 text-emerald-300/60" />
+                    This terminal
                   </span>
                 </div>
               </div>
 
               <Button 
-                className="w-full h-12 text-md font-semibold shadow-lg shadow-emerald-500/20 bg-emerald-500 hover:bg-emerald-600 text-white transition-all hover:-translate-y-0.5 active:scale-95" 
+                className="w-full h-14 text-[15px] font-semibold shadow-lg shadow-emerald-950/60 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-all" 
                 onClick={finishActivation}
               >
                 Continue to OmniTrack

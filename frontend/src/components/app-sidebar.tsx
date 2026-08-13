@@ -20,16 +20,20 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
+const LogoIcon = ({ className }: { className?: string }) => (
+  <img src="/logo.png" alt="Logo" className={`w-full h-full object-contain bg-transparent scale-150 ${className || ''}`} />
+);
+
 const teams = [
   {
     name: "Omnitrack",
-    logo: Building,
-    plan: "Enterprise",
+    logo: LogoIcon,
+    plan: "",
   },
   {
     name: "Branch 1 (Downtown)",
-    logo: Building,
-    plan: "Standard",
+    logo: LogoIcon,
+    plan: "",
   }
 ];
 
@@ -50,6 +54,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   const isManager = currentUser?.role?.toLowerCase() === "manager";
+  const isCashier = currentUser?.role?.toLowerCase() === "cashier";
   
   const navMain = [
     {
@@ -61,17 +66,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Dashboard", url: `/${currentUser?.role?.toLowerCase() || 'owner'}` },
         { title: "Orders (POS)", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/pos` },
         { title: "Tables", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/tables` },
-        ...(isKitchenActive ? [{ title: "Kitchen", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/kitchen` }] : []),
+        ...(isKitchenActive && !isCashier ? [{ title: "Kitchen", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/kitchen` }] : []),
       ],
     },
     {
       title: "Finance & Sales",
       url: "#",
       icon: Wallet,
-      items: isManager ? [
+      items: (isManager || isCashier) ? [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
         { title: "Transactions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/transactions` },
-        { title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses`, badge: unpaidCounts.expenses },
+        ...(!isCashier ? [{ title: "Expenses", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/expenses`, badge: unpaidCounts.expenses }] : []),
         { title: "Reports", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/reports` },
       ] : [
         { title: "Sales", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sales` },
@@ -80,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Reports", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/reports` },
       ],
     },
-    {
+    ...(!isCashier ? [{
       title: "Inventory & Products",
       url: "#",
       icon: Package,
@@ -89,8 +94,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Products", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/products` },
         { title: "Suppliers", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/suppliers` },
       ],
-    },
-    {
+    }] : []),
+    ...(!isCashier ? [{
       title: "HR & Admin",
       url: "#",
       icon: Users,
@@ -100,8 +105,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
         { title: "Account & Permissions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/account-permissions` },
       ],
-    },
-    ...(isManager ? [] : [{
+    }] : []),
+    ...((isManager || isCashier) ? [] : [{
       title: "System",
       url: "#",
       icon: Settings,
