@@ -90,6 +90,7 @@ router.post('/login', async (req, res) => {
         username: user.username,
         firstName: user.employee.first_name,
         lastName: user.employee.last_name,
+        email: user.employee.email,
         role: user.role.name,
         business_id: user.employee.business_id,
         employee_id: user.employee.id
@@ -103,7 +104,7 @@ router.post('/login', async (req, res) => {
 });
 router.put('/update-profile', async (req, res) => {
   try {
-    const { userId, firstName, lastName, currentPin, newPin } = req.body;
+    const { userId, firstName, lastName, currentPin, newPin, email } = req.body;
     
     if (!userId) {
       return res.status(400).json({ success: false, message: 'User ID is required.' });
@@ -118,13 +119,14 @@ router.put('/update-profile', async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
-    // Update Employee Name
-    if (firstName || lastName) {
+    // Update Employee Name & Email
+    if (firstName !== undefined || lastName !== undefined || email !== undefined) {
       await prisma.employee.update({
         where: { id: user.employee_id },
         data: {
-          first_name: firstName || user.employee.first_name,
-          last_name: lastName || user.employee.last_name
+          first_name: firstName !== undefined ? firstName : user.employee.first_name,
+          last_name: lastName !== undefined ? lastName : user.employee.last_name,
+          email: email !== undefined ? email : user.employee.email
         }
       });
     }
@@ -159,6 +161,7 @@ router.put('/update-profile', async (req, res) => {
         username: updatedUser!.username,
         firstName: updatedUser!.employee.first_name,
         lastName: updatedUser!.employee.last_name,
+        email: updatedUser!.employee.email,
         role: updatedUser!.role.name,
         business_id: updatedUser!.employee.business_id,
         employee_id: updatedUser!.employee.id

@@ -12,6 +12,7 @@ export default function AccountPermissionsPage() {
   
   const [firstName, setFirstName] = useState(currentUser?.firstName || '');
   const [lastName, setLastName] = useState(currentUser?.lastName || '');
+  const [email, setEmail] = useState((currentUser as any)?.email || '');
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState('');
 
@@ -43,11 +44,27 @@ export default function AccountPermissionsPage() {
       const res = await axios.put('/api/auth/update-profile', {
         userId: currentUser?.id,
         firstName,
-        lastName
+        lastName,
+        email
       });
       
       if (res.data.success) {
         login(res.data.user); // Update the global store with the new user object
+        
+        // If the user is an owner, sync the business owner_name as well
+        if (currentUser?.role?.toLowerCase() === 'owner' || currentUser?.role?.toLowerCase() === 'admin') {
+          try {
+            const { businessSettings, updateBusinessSettings } = useAppStore.getState();
+            if (businessSettings) {
+              const updatedSettings = { ...businessSettings, owner_name: `${firstName} ${lastName}` };
+              await axios.put('/api/business/settings', updatedSettings);
+              updateBusinessSettings(updatedSettings);
+            }
+          } catch (e) {
+            console.error("Failed to sync business owner name", e);
+          }
+        }
+        
         setProfileMsg('Profile updated successfully!');
         setTimeout(() => setProfileMsg(''), 3000);
       }
@@ -111,6 +128,10 @@ export default function AccountPermissionsPage() {
               <div className="space-y-2">
                 <Label>Last Name</Label>
                 <Input value={lastName} onChange={e => setLastName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" />
               </div>
               <div className="space-y-2">
                 <Label>Role</Label>
