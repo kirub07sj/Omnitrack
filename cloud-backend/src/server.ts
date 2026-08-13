@@ -13,8 +13,13 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // Basic health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', database: 'connected (Neon)' });
+app.get('/api/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', database: 'connected (Neon)' });
+  } catch (error) {
+    res.status(503).json({ status: 'error', database: 'disconnected' });
+  }
 });
 
 // The core endpoint for offline-first sync

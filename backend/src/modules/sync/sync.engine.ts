@@ -4,8 +4,15 @@ import axios from 'axios';
 class SyncEngine {
   private isSyncing = false;
   private intervalId: NodeJS.Timeout | null = null;
-  private cloudApiUrl = process.env.CLOUD_API_URL || 'https://api.omnitrack.com'; // Placeholder
-  private installationId = process.env.INSTALLATION_ID || 'INSTALLATION-LOCAL';
+  
+  // Read dynamically at runtime to ensure dotenv has loaded
+  private get cloudApiUrl() {
+    return process.env.CLOUD_API_URL || 'https://api.omnitrack.com';
+  }
+  
+  private get installationId() {
+    return process.env.INSTALLATION_ID || 'INSTALLATION-LOCAL';
+  }
 
   public start(intervalMs: number = 60000) {
     if (this.intervalId) {
@@ -49,8 +56,7 @@ class SyncEngine {
     // 1. Find all pending changes
     const pendingChanges = await prisma.syncChange.findMany({
       where: {
-        status: { in: ['PENDING', 'FAILED'] },
-        retry_count: { lt: 5 } // Max 5 retries
+        status: { in: ['PENDING', 'FAILED'] }
       },
       orderBy: { created_at: 'asc' },
       take: 50 // Batch size
@@ -68,8 +74,6 @@ class SyncEngine {
 
     try {
       // 2. We need to fetch the actual entity data for these changes
-      // For a real implementation, we'd query each table based on entity_type and entity_id
-      // to construct the payload. For now, we simulate the structure.
       const payloads = await Promise.all(pendingChanges.map(async (change) => {
         let entityData = null;
         
@@ -89,14 +93,13 @@ class SyncEngine {
           entityId: change.entity_id,
           operation: change.operation,
           deviceId: change.device_id,
-          installationId: change.installation_id,
+          installationId: this.installationId,
           timestamp: change.created_at,
           data: entityData
         };
       }));
 
       // 3. Send to Cloud API (Mock implementation if CLOUD_API_URL is local or not set)
-      // Since we don't have the real cloud deployed yet, we mock a success if no real URL.
       if (this.cloudApiUrl === 'https://api.omnitrack.com' || process.env.MOCK_SYNC === 'true') {
         console.log(`[SYNC ENGINE] Mock mode: Successfully synced ${payloads.length} changes`);
         await this.markAsSynced(pendingChanges.map(c => c.id));
@@ -107,7 +110,7 @@ class SyncEngine {
           changes: payloads
         }, {
           headers: {
-            'Authorization': `Bearer ${process.env.SYNC_SECRET}`
+            'Authorization': `Bearer ${process.env.SYNC_SECRET || 'secret'}`
           }
         });
 
@@ -116,11 +119,13 @@ class SyncEngine {
           
           if (response.data.errors && response.data.errors.length > 0) {
             console.error('[SYNC ENGINE] Some items failed on cloud:', response.data.errors);
-            // Optionally update their status back to FAILED
             const failedIds = response.data.errors.map((e: any) => e.changeId);
             await prisma.syncChange.updateMany({
               where: { id: { in: failedIds } },
-              data: { status: 'FAILED' }
+              data: { 
+                status: 'FAILED',
+                retry_count: { increment: 1 } 
+              }
             });
           }
         } else {
@@ -171,6 +176,15 @@ class SyncEngine {
     else if (pendingCount > 0) statusStr = 'PENDING';
     else statusStr = 'SYNCED';
 
+    let isOnline = false;
+    try {
+      // Fast check to see if cloud is reachable
+      await axios.get(`${this.cloudApiUrl}/api/health`, { timeout: 2000 });
+      isOnline = true;
+    } catch (e) {
+      isOnline = false;
+    }
+
     return {
       status: statusStr,
       pendingCount,
@@ -178,7 +192,7 @@ class SyncEngine {
       lastSync: lastSuccess?.processed_at || null,
       installationId: this.installationId,
       deviceId: process.env.DEVICE_ID || 'SERVER-MAIN',
-      isOnline: true // Assuming true for now, can be improved with a ping check
+      isOnline
     };
   }
 }
