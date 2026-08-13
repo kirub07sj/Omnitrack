@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { AlertCircle } from 'lucide-react';
 
 export default function Login() {
   const { login } = useAppStore();
@@ -8,14 +9,6 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mounted, setMounted] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Trigger entrance animations
-    const timer = setTimeout(() => setMounted(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,630 +36,141 @@ export default function Login() {
   };
 
   return (
-    <>
+    <div className="min-h-screen w-full flex bg-[#0A0A0A] text-white overflow-hidden font-sans">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-        .login-page {
-          font-family: 'Inter', system-ui, -apple-system, sans-serif;
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          overflow: hidden;
-          background: hsl(153, 50%, 3%);
+        @keyframes float-slow {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
         }
-
-        /* ── Mesh gradient background ── */
-        .login-bg-mesh {
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(ellipse 80% 50% at 20% 80%, hsla(153, 60%, 25%, 0.15), transparent),
-            radial-gradient(ellipse 60% 60% at 80% 20%, hsla(170, 50%, 20%, 0.12), transparent),
-            radial-gradient(ellipse 50% 80% at 50% 50%, hsla(140, 40%, 15%, 0.08), transparent);
+        @keyframes float-slow-reverse {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(-30px, 50px) scale(1.1); }
+          66% { transform: translate(20px, -20px) scale(0.9); }
         }
-
-        /* ── Grid lines ── */
-        .login-grid {
-          position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(hsla(153, 60%, 45%, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, hsla(153, 60%, 45%, 0.03) 1px, transparent 1px);
-          background-size: 60px 60px;
-          mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
-          -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
+        .animate-orb-1 {
+          animation: float-slow 15s ease-in-out infinite;
         }
-
-        /* ── Floating orbs ── */
-        .login-orb {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(80px);
-          opacity: 0;
-          animation: orbFloat 20s ease-in-out infinite, orbFadeIn 1.5s ease-out forwards;
-        }
-        .login-orb-1 {
-          width: 400px;
-          height: 400px;
-          background: hsla(153, 70%, 40%, 0.12);
-          top: -10%;
-          right: -5%;
-          animation-delay: 0s;
-        }
-        .login-orb-2 {
-          width: 300px;
-          height: 300px;
-          background: hsla(170, 60%, 35%, 0.10);
-          bottom: -5%;
-          left: -5%;
-          animation-delay: -7s;
-        }
-        .login-orb-3 {
-          width: 200px;
-          height: 200px;
-          background: hsla(140, 50%, 50%, 0.08);
-          top: 40%;
-          left: 60%;
-          animation-delay: -14s;
-        }
-
-        @keyframes orbFloat {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(30px, -40px) scale(1.1); }
-          50% { transform: translate(-20px, 20px) scale(0.95); }
-          75% { transform: translate(15px, 30px) scale(1.05); }
-        }
-        @keyframes orbFadeIn {
-          to { opacity: 1; }
-        }
-
-        /* ── Particles ── */
-        .login-particle {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: hsla(153, 60%, 50%, 0.4);
-          border-radius: 50%;
-          animation: particleRise linear infinite;
-        }
-        @keyframes particleRise {
-          0% { transform: translateY(0) scale(1); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(-100vh) scale(0); opacity: 0; }
-        }
-
-        /* ── Card ── */
-        .login-card {
-          position: relative;
-          z-index: 10;
-          width: 100%;
-          max-width: 440px;
-          margin: 0 1rem;
-          background: hsla(153, 40%, 6%, 0.65);
-          backdrop-filter: blur(40px) saturate(1.5);
-          -webkit-backdrop-filter: blur(40px) saturate(1.5);
-          border: 1px solid hsla(153, 40%, 30%, 0.15);
-          border-radius: 24px;
-          padding: 48px 40px 40px;
-          box-shadow:
-            0 0 0 1px hsla(153, 40%, 30%, 0.05),
-            0 20px 60px -15px hsla(153, 50%, 10%, 0.5),
-            0 0 100px -20px hsla(153, 60%, 40%, 0.08);
-          transform: translateY(40px) scale(0.95);
-          opacity: 0;
-          transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .login-card.mounted {
-          transform: translateY(0) scale(1);
-          opacity: 1;
-        }
-
-        /* ── Card glow border on hover ── */
-        .login-card::before {
-          content: '';
-          position: absolute;
-          inset: -1px;
-          border-radius: 25px;
-          background: linear-gradient(
-            135deg,
-            hsla(153, 60%, 45%, 0.2),
-            transparent 40%,
-            transparent 60%,
-            hsla(170, 50%, 45%, 0.15)
-          );
-          z-index: -1;
-          opacity: 0;
-          transition: opacity 0.6s ease;
-        }
-        .login-card:hover::before {
-          opacity: 1;
-        }
-
-        /* ── Brand logo ── */
-        .login-brand {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 36px;
-          transform: translateY(20px);
-          opacity: 0;
-          transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
-        }
-        .login-brand.mounted {
-          transform: translateY(0);
-          opacity: 1;
-        }
-
-        .login-logo-wrap {
-          position: relative;
-          width: 64px;
-          height: 64px;
-          margin-bottom: 20px;
-        }
-        .login-logo-ring {
-          position: absolute;
-          inset: -4px;
-          border-radius: 20px;
-          border: 2px solid transparent;
-          background: linear-gradient(135deg, hsla(153, 60%, 45%, 0.3), hsla(170, 50%, 45%, 0.1)) border-box;
-          -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-          mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          animation: logoRingSpin 8s linear infinite;
-        }
-        @keyframes logoRingSpin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        .login-logo-bg {
-          width: 64px;
-          height: 64px;
-          border-radius: 18px;
-          background: linear-gradient(135deg, hsla(153, 60%, 40%, 0.2), hsla(170, 50%, 35%, 0.1));
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .login-logo-bg svg {
-          color: hsl(153, 60%, 50%);
-        }
-
-        .login-title {
-          font-size: 1.625rem;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          color: hsl(153, 20%, 95%);
-          margin-bottom: 6px;
-        }
-        .login-subtitle {
-          font-size: 0.875rem;
-          color: hsl(153, 15%, 50%);
-          font-weight: 400;
-        }
-
-        /* ── Form fields ── */
-        .login-field {
-          margin-bottom: 20px;
-          transform: translateY(20px);
-          opacity: 0;
-          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .login-field.mounted {
-          transform: translateY(0);
-          opacity: 1;
-        }
-        .login-field:nth-child(1) { transition-delay: 0.35s; }
-        .login-field:nth-child(2) { transition-delay: 0.45s; }
-
-        .login-label {
-          display: block;
-          font-size: 0.8125rem;
-          font-weight: 500;
-          color: hsl(153, 15%, 60%);
-          margin-bottom: 8px;
-          letter-spacing: 0.02em;
-          transition: color 0.3s ease;
-        }
-        .login-label.focused {
-          color: hsl(153, 60%, 55%);
-        }
-
-        .login-input-wrap {
-          position: relative;
-        }
-        .login-input-wrap .login-input-icon {
-          position: absolute;
-          left: 14px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: hsl(153, 15%, 35%);
-          transition: color 0.3s ease;
-          pointer-events: none;
-          z-index: 2;
-        }
-        .login-input-wrap.focused .login-input-icon {
-          color: hsl(153, 60%, 50%);
-        }
-
-        .login-input {
-          width: 100%;
-          height: 48px;
-          padding: 0 16px 0 44px;
-          border-radius: 14px;
-          border: 1.5px solid hsla(153, 30%, 25%, 0.3);
-          background: hsla(153, 40%, 8%, 0.5);
-          color: hsl(153, 20%, 92%);
-          font-size: 0.9375rem;
-          font-family: 'Inter', system-ui, sans-serif;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          outline: none;
-          box-sizing: border-box;
-        }
-        .login-input::placeholder {
-          color: hsl(153, 15%, 32%);
-        }
-        .login-input:hover {
-          border-color: hsla(153, 40%, 35%, 0.4);
-          background: hsla(153, 40%, 8%, 0.7);
-        }
-        .login-input:focus {
-          border-color: hsla(153, 60%, 45%, 0.5);
-          background: hsla(153, 40%, 8%, 0.8);
-          box-shadow:
-            0 0 0 4px hsla(153, 60%, 45%, 0.08),
-            0 0 20px -5px hsla(153, 60%, 45%, 0.15);
-        }
-
-        /* ── Animated focus glow line ── */
-        .login-input-glow {
-          position: absolute;
-          bottom: -1px;
-          left: 50%;
-          transform: translateX(-50%) scaleX(0);
-          width: 80%;
-          height: 2px;
-          background: linear-gradient(90deg, transparent, hsl(153, 60%, 45%), transparent);
-          border-radius: 2px;
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .login-input-wrap.focused .login-input-glow {
-          transform: translateX(-50%) scaleX(1);
-        }
-
-        /* ── Error message ── */
-        .login-error {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 16px;
-          border-radius: 12px;
-          background: hsla(0, 60%, 20%, 0.2);
-          border: 1px solid hsla(0, 50%, 40%, 0.2);
-          color: hsl(0, 80%, 68%);
-          font-size: 0.8125rem;
-          margin-bottom: 20px;
-          animation: errorShake 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes errorShake {
-          0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-8px); }
-          40% { transform: translateX(6px); }
-          60% { transform: translateX(-4px); }
-          80% { transform: translateX(2px); }
-        }
-
-        /* ── Submit button ── */
-        .login-btn-wrap {
-          transform: translateY(20px);
-          opacity: 0;
-          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.55s;
-        }
-        .login-btn-wrap.mounted {
-          transform: translateY(0);
-          opacity: 1;
-        }
-        .login-btn {
-          position: relative;
-          width: 100%;
-          height: 50px;
-          border: none;
-          border-radius: 14px;
-          background: linear-gradient(135deg, hsl(153, 60%, 38%), hsl(160, 55%, 32%));
-          color: hsl(0, 0%, 100%);
-          font-size: 0.9375rem;
-          font-weight: 600;
-          font-family: 'Inter', system-ui, sans-serif;
-          cursor: pointer;
-          overflow: hidden;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          letter-spacing: 0.01em;
-        }
-        .login-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow:
-            0 8px 30px -8px hsla(153, 60%, 40%, 0.4),
-            0 0 0 1px hsla(153, 60%, 45%, 0.2);
-          background: linear-gradient(135deg, hsl(153, 65%, 42%), hsl(160, 60%, 36%));
-        }
-        .login-btn:active:not(:disabled) {
-          transform: translateY(0);
-        }
-        .login-btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        /* ── Button shimmer ── */
-        .login-btn::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            105deg,
-            transparent 40%,
-            hsla(0, 0%, 100%, 0.12) 45%,
-            hsla(0, 0%, 100%, 0.15) 50%,
-            hsla(0, 0%, 100%, 0.12) 55%,
-            transparent 60%
-          );
-          transform: translateX(-100%);
-          animation: btnShimmer 3s ease-in-out infinite;
-        }
-        @keyframes btnShimmer {
-          0% { transform: translateX(-100%); }
-          60%, 100% { transform: translateX(200%); }
-        }
-
-        /* ── Loading spinner ── */
-        .login-spinner {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .login-spinner-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: white;
-          animation: spinnerPulse 1.2s ease-in-out infinite;
-        }
-        .login-spinner-dot:nth-child(2) { animation-delay: 0.15s; }
-        .login-spinner-dot:nth-child(3) { animation-delay: 0.3s; }
-        @keyframes spinnerPulse {
-          0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-          40% { transform: scale(1); opacity: 1; }
-        }
-
-        /* ── Footer ── */
-        .login-footer {
-          text-align: center;
-          margin-top: 28px;
-          padding-top: 24px;
-          border-top: 1px solid hsla(153, 30%, 25%, 0.15);
-          transform: translateY(20px);
-          opacity: 0;
-          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.65s;
-        }
-        .login-footer.mounted {
-          transform: translateY(0);
-          opacity: 1;
-        }
-        .login-footer-text {
-          font-size: 0.75rem;
-          color: hsl(153, 15%, 35%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-        }
-        .login-footer-dot {
-          width: 4px;
-          height: 4px;
-          border-radius: 50%;
-          background: hsl(153, 60%, 45%);
-          animation: footerDotPulse 2s ease-in-out infinite;
-        }
-        @keyframes footerDotPulse {
-          0%, 100% { opacity: 0.4; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 480px) {
-          .login-card {
-            padding: 36px 24px 28px;
-            border-radius: 20px;
-            margin: 0 0.75rem;
-          }
-          .login-title { font-size: 1.375rem; }
+        .animate-orb-2 {
+          animation: float-slow-reverse 18s ease-in-out infinite;
         }
       `}</style>
+      
+      {/* Left Panel - Emerald Brand Area */}
+      <div className="hidden lg:flex flex-col justify-between w-1/2 relative p-14 overflow-hidden">
+        {/* Deep Emerald Background with Glows */}
+        <div className="absolute inset-0 z-0 bg-[#063322]" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#0B4A34] via-[#052619] to-[#02130C] opacity-90" />
+        <div className="absolute -top-[20%] -left-[20%] w-[80%] h-[80%] bg-[#0FA369] blur-[150px] rounded-full opacity-25 pointer-events-none animate-orb-1" />
+        <div className="absolute bottom-[10%] right-[10%] w-[60%] h-[60%] bg-[#086343] blur-[120px] rounded-full opacity-35 pointer-events-none animate-orb-2" />
 
-      <div className="login-page">
-        {/* Background layers */}
-        <div className="login-bg-mesh" />
-        <div className="login-grid" />
-
-        {/* Floating orbs */}
-        <div className="login-orb login-orb-1" />
-        <div className="login-orb login-orb-2" />
-        <div className="login-orb login-orb-3" />
-
-        {/* Particles */}
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="login-particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${60 + Math.random() * 40}%`,
-              animationDuration: `${6 + Math.random() * 10}s`,
-              animationDelay: `${Math.random() * 8}s`,
-              width: `${1 + Math.random() * 2}px`,
-              height: `${1 + Math.random() * 2}px`,
-            }}
-          />
-        ))}
-
-        {/* Login card */}
-        <div className={`login-card ${mounted ? 'mounted' : ''}`}>
-          {/* Brand */}
-          <div className={`login-brand ${mounted ? 'mounted' : ''}`}>
-            <div className="login-logo-wrap">
-              <div className="login-logo-ring" />
-              <div className="login-logo-bg">
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5Z" />
-                  <path d="m2 17 10 5 10-5" />
-                  <path d="m2 12 10 5 10-5" />
-                </svg>
-              </div>
-            </div>
-            <h1 className="login-title">Welcome back</h1>
-            <p className="login-subtitle">Sign in to your Omnitrack account</p>
+        <div className="relative z-10 flex flex-col h-full">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 flex items-center justify-center bg-none">
+               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain scale-150" />
+             </div>
+             <span className="text-lg font-semibold tracking-tight text-white">Omnitrack</span>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleLogin}>
-            {/* Username field */}
-            <div className={`login-field ${mounted ? 'mounted' : ''}`}>
-              <label
-                htmlFor="login-username"
-                className={`login-label ${focusedField === 'username' ? 'focused' : ''}`}
-              >
-                Username
-              </label>
-              <div className={`login-input-wrap ${focusedField === 'username' ? 'focused' : ''}`}>
-                <svg
-                  className="login-input-icon"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="8" r="5" />
-                  <path d="M20 21a8 8 0 0 0-16 0" />
-                </svg>
-                <input
-                  id="login-username"
-                  className="login-input"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  onFocus={() => setFocusedField('username')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="Enter your username"
-                  required
-                  autoComplete="username"
-                />
-                <div className="login-input-glow" />
-              </div>
-            </div>
-
-            {/* Password field */}
-            <div className={`login-field ${mounted ? 'mounted' : ''}`}>
-              <label
-                htmlFor="login-password"
-                className={`login-label ${focusedField === 'password' ? 'focused' : ''}`}
-              >
-                Password
-              </label>
-              <div className={`login-input-wrap ${focusedField === 'password' ? 'focused' : ''}`}>
-                <svg
-                  className="login-input-icon"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                <input
-                  id="login-password"
-                  className="login-input"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                />
-                <div className="login-input-glow" />
-              </div>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="login-error">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                {error}
-              </div>
-            )}
-
-            {/* Submit button */}
-            <div className={`login-btn-wrap ${mounted ? 'mounted' : ''}`}>
-              <button type="submit" className="login-btn" disabled={loading}>
-                {loading ? (
-                  <span className="login-spinner">
-                    <span className="login-spinner-dot" />
-                    <span className="login-spinner-dot" />
-                    <span className="login-spinner-dot" />
-                    <span style={{ marginLeft: 4 }}>Authenticating</span>
-                  </span>
-                ) : (
-                  'Sign In'
-                )}
-              </button>
-            </div>
-          </form>
-
-          {/* Footer */}
-          <div className={`login-footer ${mounted ? 'mounted' : ''}`}>
-            <p className="login-footer-text">
-              <span className="login-footer-dot" />
-              Omnitrack Hotel Management System
+          <div className="flex-1 flex flex-col justify-center">
+            <h1 className="text-[3.5rem] font-medium leading-[1.1] tracking-tight mb-5 text-white">
+              Manage your<br/>hotel seamlessly.
+            </h1>
+            <p className="text-[#84C3A6] text-base leading-relaxed max-w-sm mb-12">
+              The all-in-one, offline-first management system designed exclusively for modern hospitality and seamless service.
             </p>
+          </div>
+
+          {/* The 3 Cards matching the reference image */}
+          <div className="flex gap-4 pb-6 w-full max-w-xl">
+             {/* Card 1 */}
+             <div className="flex-1 bg-white rounded-2xl p-5 shadow-2xl flex flex-col justify-between aspect-square max-h-[140px]">
+               <div className="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center text-xs font-semibold mb-3">1</div>
+               <h3 className="text-black font-medium text-sm leading-snug">Process<br/>reservations</h3>
+             </div>
+             
+             {/* Card 2 */}
+             <div className="flex-1 bg-white/5 backdrop-blur-lg rounded-2xl p-5 border border-white/10 flex flex-col justify-between aspect-square max-h-[140px]">
+               <div className="w-7 h-7 rounded-full bg-white/10 text-white/90 flex items-center justify-center text-xs font-semibold mb-3">2</div>
+               <h3 className="text-white font-medium text-sm leading-snug text-white/90">Track your<br/>inventory</h3>
+             </div>
+             
+             {/* Card 3 */}
+             <div className="flex-1 bg-white/5 backdrop-blur-lg rounded-2xl p-5 border border-white/10 flex flex-col justify-between aspect-square max-h-[140px]">
+               <div className="w-7 h-7 rounded-full bg-white/10 text-white/90 flex items-center justify-center text-xs font-semibold mb-3">3</div>
+               <h3 className="text-white font-medium text-sm leading-snug text-white/90">Offline-first<br/>syncing</h3>
+             </div>
           </div>
         </div>
       </div>
-    </>
+
+      {/* Right Panel - Form Area */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white relative px-6 sm:px-12 shadow-[-20px_0_50px_rgba(0,0,0,0.05)] z-20">
+        <div className="w-full max-w-[420px]">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Log In Account</h2>
+            <p className="text-gray-500 text-sm">Enter your personal data to access your account.</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-gray-700 pl-1">Username</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                  placeholder="eg. johnfrans"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-gray-700 pl-1">Password</label>
+              <div className="relative">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all pr-10"
+                  placeholder="Enter your password"
+                  required
+                />
+                <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-start gap-2.5 mt-2">
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                <span className="leading-tight">{error}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#06402B] text-white font-semibold rounded-xl py-3.5 text-[15px] hover:bg-[#042F1F] transition-colors disabled:opacity-70 disabled:cursor-not-allowed mt-6 flex items-center justify-center shadow-md shadow-[#06402B]/30"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-[2.5px] border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Signing in...</span>
+                </div>
+              ) : (
+                'Log In'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -39,10 +39,16 @@ import ExpensesPage from '../modules/expenses/pages/ExpensesPage';
 import AddExpensePage from '../modules/expenses/pages/AddExpensePage';
 import ReportsPage from '../modules/reports/pages/ReportsPage';
 
+import Login from '../modules/auth/Login';
+
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />, // We'll update this later to Dashboard/Auth based on state
+  },
+  {
+    path: '/login',
+    element: <Login />
   },
   {
     path: '/waiter',

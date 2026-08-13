@@ -20,16 +20,20 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
+const LogoIcon = ({ className }: { className?: string }) => (
+  <img src="/logo.png" alt="Logo" className={`w-full h-full object-contain bg-transparent scale-150 ${className || ''}`} />
+);
+
 const teams = [
   {
     name: "Omnitrack",
-    logo: Building,
-    plan: "Enterprise",
+    logo: LogoIcon,
+    plan: "",
   },
   {
     name: "Branch 1 (Downtown)",
-    logo: Building,
-    plan: "Standard",
+    logo: LogoIcon,
+    plan: "",
   }
 ];
 
