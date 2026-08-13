@@ -4,7 +4,6 @@ import {
   Settings,
   Users,
   Wallet,
-  Building,
   Package,
 } from "lucide-react"
 
