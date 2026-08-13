@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Building, Wallet, ShoppingCart, Package, Receipt, Settings as SettingsIcon, Percent } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 // We'll export the individual tab components from here
 
@@ -356,6 +357,17 @@ export function ReceiptSettingsTab({ data, onChange }: { data: any, onChange: (d
 }
 
 export function SystemSettingsTab({ data, onChange }: { data: any, onChange: (d: any) => void }) {
+  const [syncStatus, setSyncStatus] = useState<any>(null);
+  
+  useEffect(() => {
+    // Fetch sync status on mount
+    axios.get('/api/sync/status').then(res => {
+      if (res.data.success) {
+        setSyncStatus(res.data.data);
+      }
+    }).catch(err => console.error("Failed to fetch sync status:", err));
+  }, []);
+
   const settings = data.system_settings || {
     language: 'English',
     dateFormat: 'DD/MM/YYYY',
@@ -446,20 +458,51 @@ export function SystemSettingsTab({ data, onChange }: { data: any, onChange: (d:
             )}
 
             <div className="mt-6 border rounded-xl overflow-hidden">
-              <div className="bg-muted p-3 border-b"><h4 className="font-medium text-sm">Synchronization Status</h4></div>
+              <div className="bg-muted p-3 border-b flex justify-between items-center">
+                <h4 className="font-medium text-sm">Synchronization Status</h4>
+                <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
+                  axios.post('/api/sync/now').then(() => {
+                    // Refetch status
+                    axios.get('/api/sync/status').then(res => setSyncStatus(res.data.data));
+                  });
+                }}>Sync Now</Button>
+              </div>
               <div className="p-4 space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status</span>
-                  <span className="flex items-center text-emerald-600 font-medium"><span className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>Online</span>
+                  {syncStatus ? (
+                    <span className={`flex items-center font-medium ${
+                      syncStatus.status === 'SYNCED' ? 'text-emerald-600' : 
+                      syncStatus.status === 'SYNCING' ? 'text-blue-600' : 
+                      syncStatus.status === 'ERROR' ? 'text-destructive' : 'text-amber-600'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full mr-2 ${
+                        syncStatus.status === 'SYNCED' ? 'bg-emerald-500' : 
+                        syncStatus.status === 'SYNCING' ? 'bg-blue-500 animate-pulse' : 
+                        syncStatus.status === 'ERROR' ? 'bg-destructive' : 'bg-amber-500'
+                      }`}></span>
+                      {syncStatus.status}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Loading...</span>
+                  )}
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Last Sync</span>
-                  <span className="font-medium">10:42 PM</span>
+                  <span className="font-medium">
+                    {syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : 'Never'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Pending Sync</span>
-                  <span className="font-medium">0 records</span>
+                  <span className="font-medium">{syncStatus?.pendingCount || 0} records</span>
                 </div>
+                {syncStatus?.failedCount > 0 && (
+                  <div className="flex justify-between text-destructive">
+                    <span className="font-medium">Failed Syncs</span>
+                    <span className="font-bold">{syncStatus.failedCount} records</span>
+                  </div>
+                )}
               </div>
             </div>
 
