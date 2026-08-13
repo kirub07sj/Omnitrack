@@ -15,9 +15,8 @@ function startBackend() {
   const userDataPath = app.getPath('userData');
   const dbPath = join(userDataPath, 'omnitrack.db');
   
-  // If db doesn't exist, copy template from resources
   if (!fs.existsSync(dbPath)) {
-    const templateDb = join(__dirname, '../../resources/backend/prisma/dev.db');
+    const templateDb = join(__dirname, '../../resources/backend/prisma/empty.db');
     if (fs.existsSync(templateDb)) {
       fs.copyFileSync(templateDb, dbPath);
     }
@@ -25,10 +24,16 @@ function startBackend() {
 
   const serverPath = join(__dirname, '../../resources/backend/dist/server.js');
   if (fs.existsSync(serverPath)) {
+    const uploadDir = join(userDataPath, 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
     backendProcess = fork(serverPath, [], {
       env: {
         ...process.env,
-        LOCAL_DATABASE_URL: `file:${dbPath}`,
+        DATABASE_URL: `file:${dbPath}`,
+        UPLOAD_DIR: uploadDir,
         NODE_ENV: 'production'
       }
     });

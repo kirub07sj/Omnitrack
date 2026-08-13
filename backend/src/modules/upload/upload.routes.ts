@@ -6,7 +6,10 @@ import fs from 'fs';
 const router = Router();
 
 // Ensure upload directory exists relative to process.cwd() (backend root)
-const uploadDir = path.join(process.cwd(), 'uploads/products');
+const baseUploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+const uploadDir = path.join(baseUploadDir, 'products');
+
+// Ensure upload directory exists
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

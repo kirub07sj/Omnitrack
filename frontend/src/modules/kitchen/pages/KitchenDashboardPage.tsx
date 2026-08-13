@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Loader2, ChefHat, CheckCircle2, Clock, Image as ImageIcon, QrCode } from 'lucide-react';
+import { getImageUrl } from '@/utils/image';
 import QRCode from 'react-qr-code';
 
 export default function KitchenDashboardPage() {
@@ -211,7 +212,7 @@ export default function KitchenDashboardPage() {
                 <div className="p-0 flex-1 bg-card">
                   <ul className="divide-y divide-border/50">
                     {order.items?.map((item: any, idx: number) => {
-                      const imageSrc = (item.product?.image_url || item.product?.imageUrl)?.replace(/^https?:\/\/[^\/]+(\/uploads\/)/, '$1');
+                      const imageSrc = getImageUrl(item.product?.image_url || item.product?.imageUrl);
                       return (
                         <li key={idx} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors group">
                           <div className="flex items-center gap-5">

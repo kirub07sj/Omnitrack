@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Search, ArrowLeft, ShoppingCart, Minus, Plus, Trash2, ImageIcon } from 'lucide-react';
+import { getImageUrl } from '@/utils/image';
 import { useNavigate } from 'react-router-dom';
 import {
   Select,
@@ -163,7 +164,7 @@ export default function ManualSalePage() {
                           )}
                           
                           {(product.image_url || product.imageUrl) ? (
-                            <img src={(product.image_url || product.imageUrl)?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" />
+                            <img src={getImageUrl(product.image_url || product.imageUrl)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" />
                           ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/40 group-hover:text-primary/40 group-hover:scale-110 transition-all duration-500">
                               <ImageIcon size={32} />

@@ -12,7 +12,7 @@ interface AppState {
   licenseError: string | null;
   
   setSetupStep: (step: number) => void;
-  checkSetupStatus: () => Promise<void>;
+  checkSetupStatus: (retryCount?: number) => Promise<void>;
   markBusinessCreated: () => void;
   markOwnerCreated: () => void;
   login: (user: any) => void;
@@ -46,10 +46,11 @@ export const useAppStore = create<AppState>((set) => ({
   
   updateBusinessSettings: (settings) => set({ businessSettings: settings }),
 
-  checkSetupStatus: async () => {
+  checkSetupStatus: async (retryCount = 0) => {
     set({ isLoadingStatus: true });
     try {
       const res = await fetch('/api/business/status');
+      if (!res.ok) throw new Error('Backend not ready');
       const data = await res.json();
       
       const licenseRes = await fetch('/api/license/status').catch(() => null);
@@ -79,8 +80,12 @@ export const useAppStore = create<AppState>((set) => ({
         set({ isLoadingStatus: false });
       }
     } catch (e) {
-      console.error("Failed to fetch setup status", e);
-      set({ isLoadingStatus: false });
+      if (retryCount < 10) {
+        setTimeout(() => useAppStore.getState().checkSetupStatus(retryCount + 1), 1000);
+      } else {
+        console.error("Failed to fetch setup status", e);
+        set({ isLoadingStatus: false });
+      }
     }
   },
 

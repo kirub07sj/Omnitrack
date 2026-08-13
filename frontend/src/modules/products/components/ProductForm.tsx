@@ -8,6 +8,7 @@ import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getImageUrl } from '@/utils/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -161,9 +162,9 @@ export function ProductForm({ initialData, onSubmit, isLoading, onCancel, catego
                       {field.value ? (
                         <div className="relative w-full h-full flex flex-col items-center justify-center">
                           <img 
-                            src={field.value?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} 
+                            src={getImageUrl(field.value)} 
                             alt="Preview" 
-                            className="max-h-[200px] w-auto max-w-full object-contain rounded-md shadow-sm mb-4"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                           />
                           <Button 
                             type="button" 

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sidebar"
 
 const LogoIcon = ({ className }: { className?: string }) => (
-  <img src="/logo.png" alt="Logo" className={`w-full h-full object-contain bg-transparent scale-150 ${className || ''}`} />
+  <img src="./logo.png" alt="Logo" className={`w-full h-full object-contain bg-transparent scale-150 ${className || ''}`} />
 );
 
 const teams = [

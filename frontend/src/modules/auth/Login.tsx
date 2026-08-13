@@ -67,7 +67,7 @@ export default function Login() {
         <div className="relative z-10 flex flex-col h-full">
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 flex items-center justify-center bg-none">
-               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain scale-150" />
+               <img src="./logo.png" alt="Logo" className="w-full h-full object-contain scale-150" />
              </div>
              <span className="text-lg font-semibold tracking-tight text-white">Omnitrack</span>
           </div>
