@@ -1,626 +1,483 @@
-Build the OFFLINE-FIRST SYNCHRONIZATION SYSTEM for our Restaurant Management System.
+Build the CASHIER DASHBOARD for the Omnitrack Restaurant Management System.
 
-IMPORTANT ARCHITECTURE:
+IMPORTANT:
+The cashier has a different role from Owner and Manager.
 
-The restaurant operates primarily on a LOCAL PostgreSQL database.
+The cashier's primary responsibility is handling customer payments, completing sales, viewing orders needed for payment, and monitoring their own cash/transaction activity.
 
-Multiple devices inside the restaurant connect through the local network/Wi-Fi to the local backend/server.
+Do NOT give the cashier access to owner/manager functionality such as:
 
-The cloud system uses:
+- Employee management
+- Supplier management
+- Purchase management
+- Inventory management
+- Expense management
+- Business settings
+- User/role management
+- License management
+- Advanced financial reports
+- Profit analysis
+- System administration
 
-- Cloud Backend API
-- Neon PostgreSQL
+Reuse the existing database, APIs, authentication, components, styling system, and business logic.
 
-The frontend/devices MUST NOT connect directly to Neon.
-
-The architecture is:
-
-CLIENT DEVICES
-    ↓
-LOCAL BACKEND
-    ↓
-LOCAL POSTGRESQL
-    ↕
-SYNC ENGINE
-    ↕
-CLOUD BACKEND API
-    ↓
-NEON POSTGRESQL
-
-The local system must continue operating when the internet is unavailable.
+Do not create duplicate functionality that already exists.
 
 ==================================================
-PRIMARY REQUIREMENT
+CASHIER SIDEBAR
 ==================================================
 
-Build synchronization so that:
-
-1. All normal restaurant operations happen locally.
-2. Changes are saved to local PostgreSQL first.
-3. Changes are placed into a local sync/change queue.
-4. When internet is available, the sync engine uploads changes to the cloud.
-5. Cloud changes that need to be downloaded are pulled into the local database.
-6. Failed synchronization attempts are retried automatically.
-7. The application never blocks normal restaurant operations because the internet is unavailable.
-8. Synchronization must be idempotent so the same change cannot create duplicate records.
-9. Do not expose Neon credentials to frontend clients.
-
-==================================================
-DATABASE / SYNC METADATA
-==================================================
-
-Inspect the existing PostgreSQL schema before making changes.
-
-Do not duplicate existing business models.
-
-Create a synchronization/change-log mechanism.
-
-Suggested table:
-
-sync_changes
-
-Fields:
-
-id
-entity_type
-entity_id
-operation
-device_id
-installation_id
-created_at
-processed_at
-status
-retry_count
-last_error
-
-Suggested operations:
-
-CREATE
-UPDATE
-DELETE
-
-Suggested statuses:
-
-PENDING
-SYNCING
-SYNCED
-FAILED
-
-Use UUIDs where the existing system already uses UUIDs.
-
-Do not blindly add sync_status columns to every business table if a centralized change log is more appropriate.
-
-==================================================
-INSTALLATION ID
-==================================================
-
-Every deployed restaurant installation must have a unique installation ID.
-
-Example:
-
-INSTALLATION-xxxxxxxx
-
-This identifies one restaurant installation.
-
-Every device should also have a unique device ID.
-
-Example:
-
-SERVER-xxxxxxxx
-CASHIER-xxxxxxxx
-WAITER-xxxxxxxx
-KITCHEN-xxxxxxxx
-
-Do not use usernames as device IDs.
-
-Store installation/device identity securely.
-
-==================================================
-LOCAL-FIRST WRITE FLOW
-==================================================
-
-Every business operation must follow:
-
-User action
-    ↓
-Local backend
-    ↓
-Local PostgreSQL transaction
-    ↓
-Business data saved
-    ↓
-Sync change recorded
-    ↓
-Response returned immediately
-
-The cloud must NOT be required for the operation to succeed.
-
-Example:
-
-Waiter creates order
-
-1. Create order locally.
-2. Create order items locally.
-3. Commit database transaction.
-4. Create sync change.
-5. Return success to waiter.
-6. Sync engine later sends the change to the cloud.
-
-If the internet is unavailable, steps 1-5 still succeed.
-
-==================================================
-SYNC ENGINE
-==================================================
-
-Create a dedicated synchronization service.
-
-Responsibilities:
-
-- Detect internet/cloud availability.
-- Read pending sync changes.
-- Send changes to cloud API.
-- Process acknowledgements.
-- Mark successful changes as SYNCED.
-- Retry failed changes.
-- Use exponential backoff.
-- Prevent duplicate processing.
-- Record errors.
-- Pull remote changes when required.
-- Update local database safely.
-
-Do not run unlimited retry loops.
-
-Suggested retry delays:
-
-5 seconds
-15 seconds
-30 seconds
-1 minute
-5 minutes
-15 minutes
-
-Adapt this to the existing application architecture.
-
-==================================================
-CLOUD API
-==================================================
-
-Create a secure cloud synchronization API.
-
-The local system should communicate with:
-
-Cloud Backend
-    ↓
-Neon PostgreSQL
-
-Do NOT allow clients to connect directly to Neon.
-
-Create appropriate endpoints such as:
-
-POST /sync/push
-POST /sync/pull
-
-or adapt to the existing backend architecture.
-
-The API must authenticate the restaurant installation/device.
-
-Do not use the user's normal login password as synchronization credentials.
-
-==================================================
-IDEMPOTENCY
-==================================================
-
-This is critical.
-
-Every synchronization event must have a unique identifier.
-
-If the local system sends the same event twice because of a timeout:
-
-The cloud must recognize that the event was already processed.
-
-Example:
-
-Change ID:
-CHANGE-123
-
-First request:
-processed successfully.
-
-Second request:
-return already processed / success.
-
-Never create duplicate:
-
-- Orders
-- Sales
-- Expenses
-- Transactions
-- Products
-- Inventory movements
-- Employees
-- Purchases
-
-==================================================
-CONFLICT HANDLING
-==================================================
-
-The restaurant's local server is the primary operational source for devices inside the same restaurant.
-
-Multiple local devices should NOT synchronize independently with the cloud.
-
-Instead:
-
-Waiter
-Cashier
-Kitchen
-Manager
-    ↓
-LOCAL SERVER
-    ↓
-LOCAL DATABASE
-    ↓
-CLOUD SYNC
-
-This minimizes conflicts.
-
-For cloud/local conflicts, create a deterministic conflict strategy.
-
-Do not silently overwrite important financial records.
-
-For conflicts involving:
-
-Sales
+Create this sidebar:
+
+Dashboard
+Orders
+Sales / Checkout
 Transactions
-Expenses
-Purchases
-Inventory movements
+Tables
+Reports
 
-log the conflict and preserve the original records.
+----------------
 
-Do not delete financial history automatically.
-
-==================================================
-SOFT DELETES
-==================================================
-
-Do not physically delete synchronized business records where doing so could break references or financial history.
-
-Use soft deletion where appropriate:
-
-deleted_at
-
-Synchronization must propagate deletions correctly.
-
-==================================================
-FINANCIAL DATA
-==================================================
-
-Financial records require special handling.
-
-Do not synchronize financial operations by simply replacing rows.
-
-Sales, transactions, expenses, purchases and inventory movements should be treated as historical events.
-
-Never silently overwrite financial history.
-
-==================================================
-OFFLINE OPERATION
-==================================================
-
-The restaurant must continue working without internet.
-
-Offline functionality includes:
-
-- Orders
-- Sales
-- Tables
-- Kitchen
-- Inventory
-- Purchases
-- Expenses
-- Transactions
-- Employees
-- Reports
-
-Do not disable modules because the internet is unavailable.
-
-==================================================
-SYNC STATUS UI
-==================================================
-
-Add a small global synchronization indicator to the application header.
-
-Possible states:
-
-ONLINE + SYNCED
-ONLINE + SYNCING
-OFFLINE
-PENDING SYNC
-SYNC ERROR
-
-Examples:
-
-🟢 Synced
-
-🟡 Syncing...
-
-🔴 Offline
-24 changes waiting
-
-⚠ Sync issue
-3 changes failed
-
-Do not make this indicator intrusive.
-
-==================================================
-SETTINGS → SYNCHRONIZATION
-==================================================
-
-Create:
-
+Notifications
 Settings
-    ↓
-Synchronization
+
+The sidebar must only display items the cashier is authorized to access.
+
+==================================================
+1. CASHIER DASHBOARD
+==================================================
+
+Create a clean, practical cashier dashboard.
+
+The dashboard should prioritize information needed during a working shift.
 
 Display:
 
-Connection:
-Online / Offline
+Today's Sales
+Today's Transactions
+Pending Payments
+Cash Collected
+Card Payments
+Mobile/Digital Payments
 
-Sync status:
-Synced / Syncing / Pending / Error
+Also display:
 
-Last successful sync:
-Date and time
+Current Shift Status
+Recent Transactions
+Pending/Unpaid Orders
+Quick Actions
 
-Pending changes:
-Number
+Do NOT fill the dashboard with unnecessary charts.
 
-Failed changes:
-Number
+The cashier needs useful information, not decorative analytics.
 
-Installation ID:
-Masked/read-only
+Example layout:
 
-Device ID:
-Masked/read-only
+Today's Sales
+12,450 ETB
 
-Provide:
+Transactions
+48
 
-[ Sync Now ]
+Pending Payments
+3
 
-The Sync Now button should manually trigger a sync attempt.
+Cash
+7,200 ETB
 
-Normal synchronization must happen automatically.
+Card
+3,250 ETB
+
+Mobile
+2,000 ETB
+
+Current Shift
+Active
+Started 08:00 AM
+
+Quick Actions:
+
+[ New Sale ]
+[ View Orders ]
+[ Transactions ]
+[ Close Shift ]
 
 ==================================================
-SYNC DETAILS
+2. ORDERS
 ==================================================
 
-Allow the owner/authorized manager to inspect synchronization problems.
+The cashier must be able to view orders that require payment.
+
+Display:
+
+Order Number
+Table Number
+Waiter
+Items
+Total
+Order Status
+Payment Status
+Created Time
+
+Allow:
+
+Search by order number
+Search by table
+Filter by status
+Filter by payment status
+
+Important restaurant workflow:
+
+A waiter may create an order using the system.
+
+When the customer is ready to pay:
+
+Waiter → Cashier
+Cashier finds order
+Cashier reviews order
+Cashier completes payment
+Sale is recorded
+
+The cashier must also be able to create a completed/finished order manually when the restaurant did not use the order system.
 
 Example:
 
-Sync Issues
+The waiter verbally gives the cashier:
 
-Order #1042
-Failed
-Reason: temporary server error
-Retrying automatically
+Table 4
+2 Burgers
+1 Pizza
+2 Coke
 
-Expense #EXP-104
-Failed
-Reason: network timeout
+The cashier can create the finished order directly in the checkout flow and immediately proceed to payment.
 
-Do not expose technical stack traces to normal users.
-
-Provide a user-friendly message.
+Do not force the order through an artificial pending/kitchen workflow when the kitchen did not use the system.
 
 ==================================================
-CLOUD DATABASE: NEON
+3. SALES / CHECKOUT
 ==================================================
 
-Prepare the cloud backend for Neon PostgreSQL.
+This is the cashier's primary working page.
 
-Use an environment variable such as:
+Create a fast checkout interface.
 
-DATABASE_URL
+The cashier should be able to:
 
-The Neon connection string must exist ONLY on the cloud backend/server.
+1. Select an existing unpaid order
+2. Review items
+3. Adjust allowed quantities if authorized
+4. Calculate subtotal
+5. Apply supported discounts if the existing system supports them
+6. Calculate total
+7. Select payment method
+8. Complete payment
+9. Generate transaction
+10. Mark sale as paid
+11. Print or preview receipt
 
-Never expose:
+Payment methods should support the methods already defined by the system, such as:
 
-DATABASE_URL
-Neon password
-Neon credentials
+Cash
+Card
+Mobile/Digital
 
-to React/frontend code.
+Do not invent unsupported payment providers.
 
-Use SSL as required by Neon.
+After successful payment:
 
-Create proper database migrations so the Neon database can be created from the existing schema.
+Show:
 
-Do not manually create random tables in Neon that differ from the application's schema.
+Payment Successful
+
+Transaction Number
+Order Number
+Table
+Total
+Payment Method
+Date/Time
+
+Actions:
+
+[ Print Receipt ]
+[ New Sale ]
 
 ==================================================
-ENVIRONMENTS
+4. TRANSACTIONS
 ==================================================
+
+Create a transaction history page.
+
+Display:
+
+Transaction Number
+Date/Time
+Order Number
+Table
+Amount
+Payment Method
+Cashier
+Status
 
 Support:
 
-Development
-Local
-Production
+Search
+Date filtering
+Payment-method filtering
+Status filtering
 
-Example environment variables:
+The cashier can view transaction history but should not be able to freely modify historical financial transactions.
 
-LOCAL_DATABASE_URL
-CLOUD_API_URL
-SYNC_ENABLED
-INSTALLATION_ID
+If refunds/voids already exist in the system, expose only the actions the cashier's permissions allow.
 
-Cloud backend:
-
-DATABASE_URL
-JWT_SECRET
-etc.
-
-Do not commit secrets.
-
-Update .env.example with placeholders only.
+Do not allow the cashier to delete financial history.
 
 ==================================================
-PERFORMANCE
+5. TABLES
 ==================================================
 
-Do not continuously poll the cloud every second.
+Create a simple table-status view.
 
-Use a reasonable sync interval.
+Show:
 
-Also trigger synchronization when:
+Available
+Occupied
+Waiting for Payment
+Completed
 
-- Internet becomes available
-- Application starts
-- Significant local changes are queued
-- User presses Sync Now
+The cashier should be able to click a table and see:
 
-Use batching where appropriate.
+Table number
+Current order
+Order total
+Payment status
+
+The cashier should NOT manage waiter assignments here.
+
+Waiter/table assignment remains under the appropriate management workflow.
+
+==================================================
+6. REPORTS
+==================================================
+
+Create a limited cashier report page.
+
+Show only information relevant to the cashier.
+
+Examples:
+
+Today's sales
+Number of transactions
+Cash collected
+Card collected
+Mobile/digital collected
+Refunds if applicable
+
+Allow date filtering where appropriate.
+
+Do NOT expose:
+
+Profit
+Payroll
+Employee salaries
+Business expenses
+Supplier costs
+Inventory valuation
+Owner financial analytics
+
+unless explicitly permitted by the existing role/permission system.
+
+==================================================
+7. CASHIER SHIFT
+==================================================
+
+Implement or integrate cashier shift functionality if it does not already exist.
+
+At the beginning of a shift:
+
+Cashier enters opening cash amount.
 
 Example:
 
-Instead of:
+Opening Cash
+1,000 ETB
 
-1 change → 1 HTTP request
+[ Start Shift ]
 
-prefer:
+During the shift show:
 
-50 pending changes → 1 sync batch
+Shift Started
+Opening Cash
+Total Sales
+Cash Sales
+Card Sales
+Mobile Sales
+Refunds
+Expected Cash
 
-when appropriate.
+At the end:
 
-==================================================
-SECURITY
-==================================================
+Cashier selects:
 
-Never trust client-provided installation IDs or device identities without validation.
+[ Close Shift ]
 
-Authenticate sync requests.
+Show:
 
-Validate:
-
-- Installation
-- Device
-- Request signature/token
-- Change IDs
-- Entity IDs
-- Payloads
-
-Rate-limit cloud synchronization endpoints.
-
-Do not allow one restaurant installation to access another restaurant's data.
-
-Every cloud query must be scoped to the correct business/tenant.
-
-==================================================
-MULTI-TENANCY
-==================================================
-
-The cloud database will eventually contain multiple restaurant businesses.
-
-Every cloud business record must be associated with the correct business/tenant.
+Opening Cash
+Cash Sales
+Cash Refunds
+Expected Cash
+Actual Cash
+Difference
 
 Example:
 
-business_id
+Opening Cash: 1,000 ETB
+Cash Sales: 7,200 ETB
+Cash Refunds: 0 ETB
+Expected Cash: 8,200 ETB
+Actual Cash: 8,150 ETB
+Difference: -50 ETB
 
-Never allow:
+Require confirmation before closing.
 
-Business A
-    ↓
-access
-    ↓
-Business B data
-
-This is critical.
-
-==================================================
-BACKUP
-==================================================
-
-Do not treat synchronization as the same thing as backup.
-
-Synchronization keeps cloud/local data aligned.
-
-Backups are a separate concern.
-
-Design the system so cloud database backups can be configured independently.
+Do not allow the cashier to silently change the expected amount.
 
 ==================================================
-IMPLEMENTATION RULES
+8. PERMISSIONS
 ==================================================
 
-Before implementation:
+Enforce cashier permissions at both:
 
-1. Inspect the existing database schema.
-2. Inspect authentication.
-3. Inspect business/tenant relationships.
-4. Inspect all major modules.
-5. Inspect existing API architecture.
-6. Determine whether local PostgreSQL is already configured.
-7. Determine the current backend entry point.
-8. Reuse existing database utilities.
-9. Do not rewrite working modules unnecessarily.
-10. Do not introduce a second ORM/database abstraction without a reason.
-11. Do not break offline functionality.
-12. Do not replace existing business logic.
+Frontend
+AND
+Backend/API
 
-Build synchronization incrementally.
+Do not rely only on hiding sidebar items.
 
-First implement:
+A cashier must not be able to access protected owner/manager endpoints by manually entering URLs or API requests.
 
-1. Installation/device identity
-2. Sync change log
-3. Local change recording
-4. Cloud authentication
-5. Push synchronization
-6. Idempotency
-7. Retry system
-8. Pull synchronization
-9. Conflict handling
-10. Sync status UI
-11. Settings synchronization page
-12. Error handling
-13. Production configuration
-
-Test each stage before moving to the next.
+Use the existing role/permission system.
 
 ==================================================
-ACCEPTANCE TESTS
+9. USER EXPERIENCE
 ==================================================
 
-Test:
+The cashier interface must prioritize speed.
 
-1. Create order while online.
-2. Confirm local database receives it.
-3. Confirm cloud receives it.
-4. Disconnect internet.
-5. Create several orders.
-6. Confirm they work normally.
-7. Confirm changes become pending.
-8. Reconnect internet.
-9. Confirm automatic synchronization.
-10. Confirm no duplicate orders.
-11. Repeat with sales.
-12. Repeat with expenses.
-13. Repeat with inventory.
-14. Repeat with transactions.
-15. Simulate failed cloud requests.
-16. Confirm retry behavior.
-17. Simulate duplicate sync request.
-18. Confirm idempotency.
-19. Test multiple devices through local network.
-20. Confirm one restaurant cannot access another restaurant's cloud data.
+Cashiers may be handling many customers continuously.
 
-The final result must feel invisible to normal users.
+Therefore:
 
-The system should simply work whether the restaurant is online or offline.
+- Minimal clicks
+- Large clear payment actions
+- Fast search
+- Keyboard-friendly where appropriate
+- Clear totals
+- Clear payment status
+- Clear success/error feedback
+- No unnecessary charts
+- No unnecessary configuration
+
+The main workflow should be:
+
+Existing Order:
+
+Order
+ ↓
+Review
+ ↓
+Payment
+ ↓
+Complete Sale
+ ↓
+Receipt
+
+Manual Order:
+
+New Sale
+ ↓
+Add Items
+ ↓
+Select Table/Order information if required
+ ↓
+Payment
+ ↓
+Complete Sale
+ ↓
+Receipt
+
+==================================================
+10. RESPONSIVE DESIGN
+==================================================
+
+The cashier dashboard will primarily be used on a desktop computer.
+
+Optimize for desktop first.
+
+It should still work on smaller screens where practical.
+
+==================================================
+11. DESIGN
+==================================================
+
+Use the existing Omnitrack design system.
+
+Keep the interface:
+
+Minimal
+Modern
+Professional
+Fast
+Easy to scan
+
+Do not introduce a completely different visual language.
+
+Avoid filling the page with cards, graphs, and decorative elements.
+
+Every component should have a practical purpose.
+
+==================================================
+12. IMPLEMENTATION
+==================================================
+
+Before coding:
+
+1. Inspect the existing cashier-related APIs.
+2. Inspect the orders module.
+3. Inspect the sales module.
+4. Inspect the transactions module.
+5. Inspect the tables module.
+6. Inspect authentication and roles.
+7. Inspect the existing dashboard components.
+8. Reuse existing components and APIs.
+9. Do not duplicate business logic.
+10. Do not break the existing Owner or Manager dashboards.
+
+Then implement the cashier dashboard.
+
+Finally test:
+
+- Cashier login
+- Dashboard data
+- Existing order checkout
+- Manual finished order checkout
+- Cash payment
+- Card payment
+- Mobile/digital payment
+- Transaction creation
+- Receipt flow
+- Table status viewing
+- Shift opening
+- Shift closing
+- Permission restrictions
+- Unauthorized API access
+- Offline operation
+- Sync to cloud
+
+The final cashier experience should be extremely simple:
+
+SEE WHAT NEEDS PAYMENT
+→ TAKE PAYMENT
+→ RECORD SALE
+→ PRINT RECEIPT
+→ CONTINUE
