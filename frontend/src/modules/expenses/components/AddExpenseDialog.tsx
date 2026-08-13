@@ -8,9 +8,11 @@ import { format } from 'date-fns';
 import axios from 'axios';
 import { Switch } from '@/components/ui/switch';
 import { useAppStore } from '@/store/useAppStore';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any) {
   const { currentUser } = useAppStore();
+  const { currency, enabledPaymentMethods } = useSettings();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<any>({
     category: '',
@@ -51,7 +53,7 @@ export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any)
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/expenses', {
+      await axios.post('/api/expenses', {
         ...formData,
         amount: parseFloat(formData.amount),
         business_id: currentUser.business_id,
@@ -93,7 +95,7 @@ export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any)
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Amount (ETB) *</Label>
+              <Label>Amount ({currency}) *</Label>
               <Input 
                 type="number" 
                 step="0.01" 
@@ -147,10 +149,9 @@ export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any)
                   <SelectValue placeholder="Select method" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Mobile Banking">Mobile Banking</SelectItem>
-                  <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                  <SelectItem value="Card">Card</SelectItem>
+                  {enabledPaymentMethods.map((m) => (
+                    <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

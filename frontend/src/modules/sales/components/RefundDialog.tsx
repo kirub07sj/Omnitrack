@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, RotateCcw } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
+import { useSettings } from '@/hooks/useSettings';
 
 interface RefundDialogProps {
   sale: any | null;
@@ -15,6 +16,7 @@ interface RefundDialogProps {
 
 export default function RefundDialog({ sale, open, onOpenChange, onSuccess }: RefundDialogProps) {
   const { currentUser } = useAppStore();
+  const { currency } = useSettings();
   const [reason, setReason] = useState('');
   const [amount, setAmount] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -72,13 +74,13 @@ export default function RefundDialog({ sale, open, onOpenChange, onSuccess }: Re
             Refund Sale #{sale.id.split('-')[0]}
           </DialogTitle>
           <DialogDescription>
-            Original Total: <span className="font-bold text-foreground">{parseFloat(sale.total).toFixed(2)} ETB</span>
+            Original Total: <span className="font-bold text-foreground">{parseFloat(sale.total).toFixed(2)} {currency}</span>
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label>Refund Amount (ETB)</Label>
+            <Label>Refund Amount ({currency})</Label>
             <Input 
               type="number" 
               placeholder={`Max: ${parseFloat(sale.total).toFixed(2)} (Leave empty for full refund)`} 

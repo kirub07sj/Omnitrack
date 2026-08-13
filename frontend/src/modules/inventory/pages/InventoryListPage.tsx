@@ -13,8 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, FileText, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useSettings } from '@/hooks/useSettings';
 
 export default function InventoryListPage() {
+  const { currency } = useSettings();
   const [data, setData] = useState<InventoryItem[]>([]);
   const [purchases, setPurchases] = useState<any[]>([]);
   const [movements, setMovements] = useState<any[]>([]);
@@ -130,7 +132,7 @@ export default function InventoryListPage() {
                       <TableCell className="font-medium">{format(new Date(p.created_at), 'MMM dd, yyyy')}</TableCell>
                       <TableCell>{p.supplier?.name || 'Unknown'}</TableCell>
                       <TableCell>{p.items?.length || 0} items</TableCell>
-                      <TableCell className="font-bold">{parseFloat(p.total).toLocaleString()} ETB</TableCell>
+                      <TableCell className="font-bold">{parseFloat(p.total).toLocaleString()} {currency}</TableCell>
                       <TableCell>
                         <Badge variant={p.status === 'Paid' ? 'default' : 'secondary'} className={p.status === 'Paid' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}>
                           {p.status || 'Unpaid'}
@@ -233,9 +235,9 @@ export default function InventoryListPage() {
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.inventory_item?.name || 'Unknown'}</TableCell>
                         <TableCell>{item.quantity} {item.inventory_item?.unit || ''}</TableCell>
-                        <TableCell>{parseFloat(item.cost).toLocaleString()} ETB</TableCell>
+                        <TableCell>{parseFloat(item.cost).toLocaleString()} {currency}</TableCell>
                         <TableCell className="text-right font-medium">
-                          {(parseFloat(item.quantity) * parseFloat(item.cost)).toLocaleString()} ETB
+                          {(parseFloat(item.quantity) * parseFloat(item.cost)).toLocaleString()} {currency}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -244,7 +246,7 @@ export default function InventoryListPage() {
               </div>
               <div className="flex justify-between items-center bg-muted/20 p-4 rounded-xl border border-muted/50">
                 <div className="font-medium">Status: <Badge variant={selectedPurchase.status === 'Paid' ? 'default' : 'secondary'} className={selectedPurchase.status === 'Paid' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}>{selectedPurchase.status || 'Unpaid'}</Badge></div>
-                <div className="text-2xl font-black text-primary">Total: {parseFloat(selectedPurchase.total).toLocaleString()} ETB</div>
+                <div className="text-2xl font-black text-primary">Total: {parseFloat(selectedPurchase.total).toLocaleString()} {currency}</div>
               </div>
             </div>
           )}

@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useOrderStore } from '@/store/useOrderStore';
 import { useProductStore } from '@/store/useProductStore';
 import { useSSE } from '@/hooks/useSSE';
+import { useSettings } from '@/hooks/useSettings';
 import QRCode from 'react-qr-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,8 +20,8 @@ import {
 } from "@/components/ui/select";
 
 export default function POSPage() {
-  const { currentUser, businessSettings } = useAppStore();
-  const isKitchenActive = businessSettings?.is_kitchen_active ?? true;
+  const { currentUser } = useAppStore();
+  const { currency, taxSettings, calculateTotal, isKitchenActive } = useSettings();
   const { orders, tables, fetchOrders, fetchTables, createOrder, updateOrder } = useOrderStore();
   const { products: allProducts, fetchProducts } = useProductStore();
   
@@ -266,7 +267,7 @@ export default function POSPage() {
                           </div>
                           <div className="p-4 flex flex-col flex-1 text-center items-center justify-between">
                             <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">{product.name}</h3>
-                            <p className="text-primary font-bold mt-2 text-lg"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">ETB</span> {Number(product.price).toFixed(2)}</p>
+                            <p className="text-primary font-bold mt-2 text-lg"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">{currency}</span> {Number(product.price).toFixed(2)}</p>
                           </div>
                         </div>
                       )
@@ -311,7 +312,7 @@ export default function POSPage() {
                         <div key={item.id} className="flex justify-between text-sm items-center">
                           <span className="text-foreground"><span className="text-primary font-bold mr-2">{item.quantity}x</span> {item.product?.name}</span>
                           <div className="text-right">
-                          <span className="text-muted-foreground font-medium"><span className="text-[0.75em] opacity-80 mr-0.5">ETB</span> {(Number(item.price) * Number(item.quantity)).toFixed(2)}</span>
+                          <span className="text-muted-foreground font-medium"><span className="text-[0.75em] opacity-80 mr-0.5">{currency}</span> {(Number(item.price) * Number(item.quantity)).toFixed(2)}</span>
                           </div>
                         </div>
                       ))}
@@ -375,11 +376,11 @@ export default function POSPage() {
                       <div className="flex-1 pr-3">
                         <h4 className="font-semibold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{item.product.name}</h4>
                         <div className="flex justify-between items-center mt-1">
-                          <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-md"><span className="opacity-80 font-normal mr-0.5">ETB</span> {Number(item.product.price).toFixed(2)} each</span>
+                          <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-md"><span className="opacity-80 font-normal mr-0.5">{currency}</span> {Number(item.product.price).toFixed(2)} each</span>
                         </div>
                       </div>
                       <span className="text-base font-bold text-foreground">
-                        <span className="text-[0.65em] font-medium opacity-80 mr-0.5 text-muted-foreground">ETB</span> {(Number(item.product.price) * item.quantity).toFixed(2)}
+                        <span className="text-[0.65em] font-medium opacity-80 mr-0.5 text-muted-foreground">{currency}</span> {(Number(item.product.price) * item.quantity).toFixed(2)}
                       </span>
                     </div>
                     
@@ -413,15 +414,23 @@ export default function POSPage() {
           <div className="pt-5 pb-4 space-y-2">
             <div className="flex justify-between items-center text-sm text-muted-foreground">
               <span>Subtotal</span>
-              <span><span className="text-[0.8em] opacity-80 mr-0.5">ETB</span> {cartTotal.toFixed(2)}</span>
+              <span><span className="text-[0.8em] opacity-80 mr-0.5">{currency}</span> {cartTotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center text-sm text-muted-foreground">
-              <span>Tax (0%)</span>
-              <span><span className="text-[0.8em] opacity-80 mr-0.5">ETB</span> 0.00</span>
-            </div>
+            {taxSettings.enableTax && (
+              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                <span>{taxSettings.taxName} ({taxSettings.taxRate}%)</span>
+                <span><span className="text-[0.8em] opacity-80 mr-0.5">{currency}</span> {calculateTotal(cartTotal).tax.toFixed(2)}</span>
+              </div>
+            )}
+            {taxSettings.enableServiceCharge && (
+              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                <span>Service Charge ({taxSettings.serviceChargeRate}%)</span>
+                <span><span className="text-[0.8em] opacity-80 mr-0.5">{currency}</span> {calculateTotal(cartTotal).serviceCharge.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between items-center pt-2">
               <span className="text-base font-medium text-foreground">Total</span>
-              <span className="text-3xl font-black text-primary tracking-tight"><span className="text-[0.5em] font-medium opacity-70 mr-1 relative -top-1">ETB</span> {cartTotal.toFixed(2)}</span>
+              <span className="text-3xl font-black text-primary tracking-tight"><span className="text-[0.5em] font-medium opacity-70 mr-1 relative -top-1">{currency}</span> {calculateTotal(cartTotal).total.toFixed(2)}</span>
             </div>
           </div>
           

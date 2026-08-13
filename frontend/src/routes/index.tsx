@@ -26,6 +26,8 @@ import POSPage from '../modules/orders/pages/POSPage';
 import WaiterAppPage from '../modules/orders/pages/WaiterAppPage';
 import TableManagementPage from '../modules/tables/pages/TableManagementPage';
 import SettingsPage from '../modules/settings/pages/SettingsPage';
+import AccountPermissionsPage from '../modules/settings/pages/AccountPermissionsPage';
+import SyncBackupPage from '../modules/settings/pages/SyncBackupPage';
 import KitchenAppPage from '../modules/kitchen/pages/KitchenAppPage';
 import KitchenDashboardPage from '../modules/kitchen/pages/KitchenDashboardPage';
 import SalesLayout from '../modules/sales/SalesLayout';
@@ -145,6 +147,14 @@ export const router = createBrowserRouter([
         element: <SettingsPage />
       },
       {
+        path: 'account-permissions',
+        element: <AccountPermissionsPage />
+      },
+      {
+        path: 'sync',
+        element: <SyncBackupPage />
+      },
+      {
         path: 'kitchen',
         element: <KitchenDashboardPage />
       },
@@ -254,6 +264,14 @@ export const router = createBrowserRouter([
       {
         path: 'settings',
         element: <SettingsPage />
+      },
+      {
+        path: 'account-permissions',
+        element: <AccountPermissionsPage />
+      },
+      {
+        path: 'sync',
+        element: <SyncBackupPage />
       },
       {
         path: 'kitchen',

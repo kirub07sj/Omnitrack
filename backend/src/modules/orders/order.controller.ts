@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../database';
+import { checkStockAvailability } from '../../utils/settings.utils';
 
-const prisma = new PrismaClient();
 
 // Store SSE clients
 const clients: { id: string; business_id: string; res: Response }[] = [];
@@ -76,6 +76,20 @@ export const getOrders = async (req: Request, res: Response) => {
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const { business_id, table_id, waiter_id, notes, items, status } = req.body;
+
+    // Check stock availability for tracked products (respects allowNegativeStock setting)
+    for (const reqItem of items) {
+      const product = await prisma.product.findUnique({ where: { id: reqItem.product_id } });
+      if (product?.track_inventory && product?.inventory_item_id) {
+        const stockCheck = await checkStockAvailability(business_id, product.inventory_item_id, reqItem.quantity);
+        if (!stockCheck.allowed) {
+          res.status(400).json({
+            message: `Insufficient stock for "${stockCheck.itemName}". Available: ${stockCheck.currentStock}, Requested: ${stockCheck.requestedQty}`,
+          });
+          return;
+        }
+      }
+    }
 
     // Check if there is an existing active order for this table
     if (table_id) {

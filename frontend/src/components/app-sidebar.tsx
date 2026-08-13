@@ -98,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
       ] : [
         { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
-        { title: "Accounts & Permissions", url: "#" },
+        { title: "Account & Permissions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/account-permissions` },
       ],
     },
     ...(isManager ? [] : [{
@@ -106,9 +106,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "#",
       icon: Settings,
       items: [
-        { title: "Synchronization", url: "#" },
+        { title: "Synchronization", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sync` },
         { title: "Settings", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/settings` },
-        { title: "License & Subscription", url: "#" },
       ],
     }]),
   ];

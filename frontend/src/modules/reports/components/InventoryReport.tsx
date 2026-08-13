@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Download, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useSettings } from '@/hooks/useSettings';
 
 export function InventoryReport({ refreshTrigger = 0 }: { refreshTrigger?: number }) {
+  const { currency } = useSettings();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,7 +107,7 @@ export function InventoryReport({ refreshTrigger = 0 }: { refreshTrigger?: numbe
                     </td>
                     <td className="px-6 py-4 text-right">{parseFloat(row.cost_per_unit || '0').toLocaleString()}</td>
                     <td className="px-6 py-4 text-right font-bold text-gray-700">
-                      {(parseFloat(row.quantity) * parseFloat(row.cost_per_unit || '0')).toLocaleString()} ETB
+                      {(parseFloat(row.quantity) * parseFloat(row.cost_per_unit || '0')).toLocaleString()} {currency}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === 'Active' ? 'bg-primary/20 text-emerald-800' : 'bg-gray-100 text-gray-800'}`}>
@@ -121,7 +123,7 @@ export function InventoryReport({ refreshTrigger = 0 }: { refreshTrigger?: numbe
                 <tr>
                   <td colSpan={4} className="px-6 py-4 text-right">Total Inventory Value:</td>
                   <td className="px-6 py-4 text-right text-emerald-700">
-                    {filteredData.reduce((acc, row) => acc + (parseFloat(row.quantity) * parseFloat(row.cost_per_unit || '0')), 0).toLocaleString()} ETB
+                    {filteredData.reduce((acc, row) => acc + (parseFloat(row.quantity) * parseFloat(row.cost_per_unit || '0')), 0).toLocaleString()} {currency}
                   </td>
                   <td></td>
                 </tr>

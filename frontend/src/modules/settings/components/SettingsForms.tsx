@@ -5,6 +5,8 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building, Wallet, ShoppingCart, Package, Receipt, Settings as SettingsIcon, Percent } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 // We'll export the individual tab components from here
 
@@ -355,6 +357,17 @@ export function ReceiptSettingsTab({ data, onChange }: { data: any, onChange: (d
 }
 
 export function SystemSettingsTab({ data, onChange }: { data: any, onChange: (d: any) => void }) {
+  const [syncStatus, setSyncStatus] = useState<any>(null);
+  
+  useEffect(() => {
+    // Fetch sync status on mount
+    axios.get('/api/sync/status').then(res => {
+      if (res.data.success) {
+        setSyncStatus(res.data.data);
+      }
+    }).catch(err => console.error("Failed to fetch sync status:", err));
+  }, []);
+
   const settings = data.system_settings || {
     language: 'English',
     dateFormat: 'DD/MM/YYYY',
@@ -445,39 +458,153 @@ export function SystemSettingsTab({ data, onChange }: { data: any, onChange: (d:
             )}
 
             <div className="mt-6 border rounded-xl overflow-hidden">
-              <div className="bg-muted p-3 border-b"><h4 className="font-medium text-sm">Synchronization Status</h4></div>
+              <div className="bg-muted p-3 border-b flex justify-between items-center">
+                <h4 className="font-medium text-sm">Synchronization Status</h4>
+                <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
+                  axios.post('/api/sync/now').then(() => {
+                    // Refetch status
+                    axios.get('/api/sync/status').then(res => setSyncStatus(res.data.data));
+                  });
+                }}>Sync Now</Button>
+              </div>
               <div className="p-4 space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status</span>
-                  <span className="flex items-center text-emerald-600 font-medium"><span className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>Online</span>
+                  {syncStatus ? (
+                    <span className={`flex items-center font-medium ${
+                      syncStatus.status === 'SYNCED' ? 'text-emerald-600' : 
+                      syncStatus.status === 'SYNCING' ? 'text-blue-600' : 
+                      syncStatus.status === 'ERROR' ? 'text-destructive' : 'text-amber-600'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full mr-2 ${
+                        syncStatus.status === 'SYNCED' ? 'bg-emerald-500' : 
+                        syncStatus.status === 'SYNCING' ? 'bg-blue-500 animate-pulse' : 
+                        syncStatus.status === 'ERROR' ? 'bg-destructive' : 'bg-amber-500'
+                      }`}></span>
+                      {syncStatus.status}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Loading...</span>
+                  )}
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Last Sync</span>
-                  <span className="font-medium">10:42 PM</span>
+                  <span className="font-medium">
+                    {syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : 'Never'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Pending Sync</span>
-                  <span className="font-medium">0 records</span>
+                  <span className="font-medium">{syncStatus?.pendingCount || 0} records</span>
                 </div>
-              </div>
-            </div>
-
-            <div className="mt-4 border rounded-xl overflow-hidden">
-              <div className="bg-muted p-3 border-b"><h4 className="font-medium text-sm">License</h4></div>
-              <div className="p-4 space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Status</span>
-                  <span className="flex items-center text-emerald-600 font-medium"><span className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>Active</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Valid Until</span>
-                  <span className="font-medium">August 10, 2027</span>
-                </div>
+                {syncStatus?.failedCount > 0 && (
+                  <div className="flex justify-between text-destructive">
+                    <span className="font-medium">Failed Syncs</span>
+                    <span className="font-bold">{syncStatus.failedCount} records</span>
+                  </div>
+                )}
               </div>
             </div>
 
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function LicenseSettingsTab() {
+  const [info, setInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/license/info')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setInfo(d.data);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const maskKey = (k: string) => {
+    if (!k || k.length < 4) return k;
+    const last4 = k.slice(-4);
+    return `••••-••••-••••-${last4}`;
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'N/A';
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2"><SettingsIcon className="w-5 h-5 text-primary" /> License</CardTitle>
+        <CardDescription>Manage your product activation and view license details.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {loading ? (
+          <div className="flex items-center justify-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : !info ? (
+          <div className="p-4 text-destructive bg-destructive/10 rounded-lg">
+            No active license found.
+          </div>
+        ) : (
+          <div className="space-y-6 max-w-2xl">
+            <div className="flex items-center text-emerald-600 font-semibold gap-2 mb-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              Active
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 p-6 rounded-xl border bg-muted/20">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Plan</p>
+                <p className="font-semibold text-lg capitalize">{info.plan || 'Professional'}</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">License Key</p>
+                <p className="font-mono text-lg">{maskKey(info.licenseKey)}</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Activated</p>
+                <p className="font-medium text-md">{formatDate(info.activatedAt || info.validUntil)}</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Expires</p>
+                <p className="font-medium text-md">{formatDate(info.expiresAt)}</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Device</p>
+                <p className="font-medium text-md flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  This computer
+                </p>
+              </div>
+              
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Status</p>
+                <p className="font-medium text-md capitalize">{info.status || 'Active'}</p>
+              </div>
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              Last verified: {new Date().toLocaleDateString('en-US', { hour: 'numeric', minute: 'numeric' })}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

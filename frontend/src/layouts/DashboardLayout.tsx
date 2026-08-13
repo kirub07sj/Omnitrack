@@ -4,16 +4,48 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { useAppStore } from "@/store/useAppStore";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function DashboardLayout() {
   const { currentUser, isLoadingStatus, checkSetupStatus } = useAppStore();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
     if (isLoadingStatus) {
       checkSetupStatus().catch(console.error);
     }
   }, [isLoadingStatus, checkSetupStatus]);
+
+  useEffect(() => {
+    // Check network status
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Ping backend for actual cloud connectivity
+    const checkCloudStatus = async () => {
+      try {
+        const res = await axios.get('/api/sync/status', { timeout: 3000 });
+        if (res.data.success && res.data.data.isOnline !== undefined) {
+          setIsOnline(res.data.data.isOnline);
+        }
+      } catch (e) {
+        // If the local backend is down or returns error, we might be offline
+        setIsOnline(false);
+      }
+    };
+
+    checkCloudStatus();
+    const interval = setInterval(checkCloudStatus, 15000); // Check every 15s
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      clearInterval(interval);
+    };
+  }, []);
 
   if (isLoadingStatus) {
     return (
@@ -49,8 +81,10 @@ export default function DashboardLayout() {
           </div>
           {/* Header right-side glow accent */}
           <div className="ml-auto pr-4 flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs text-muted-foreground hidden sm:inline">System Online</span>
+            <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-primary animate-pulse' : 'bg-destructive'}`} />
+            <span className={`text-xs hidden sm:inline ${isOnline ? 'text-muted-foreground' : 'text-destructive font-medium'}`}>
+              {isOnline ? 'System Online' : 'System Offline (Local Mode)'}
+            </span>
           </div>
         </header>
         <div className="flex flex-1 flex-col bg-background text-foreground relative overflow-hidden">

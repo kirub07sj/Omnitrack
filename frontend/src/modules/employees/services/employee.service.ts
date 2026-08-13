@@ -23,7 +23,8 @@ export const EmployeeService = {
       employeeNumber: emp.employee_number,
       employmentType: emp.employment_type,
       hireDate: emp.hire_date,
-      hasLoginAccount: emp.users && emp.users.length > 0
+      hasLoginAccount: emp.users && emp.users.length > 0,
+      role: emp.users && emp.users.length > 0 && emp.users[0].role ? emp.users[0].role.name : undefined
     }));
   },
   

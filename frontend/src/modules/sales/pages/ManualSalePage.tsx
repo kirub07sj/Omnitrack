@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/select";
 import CheckoutDialog from '../components/CheckoutDialog';
 import ReceiptDialog from '../components/ReceiptDialog';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function ManualSalePage() {
   const { currentUser } = useAppStore();
+  const { currency } = useSettings();
   const navigate = useNavigate();
   
   const [products, setProducts] = useState<any[]>([]);
@@ -170,7 +172,7 @@ export default function ManualSalePage() {
                         </div>
                         <div className="p-4 flex flex-col flex-1 text-center items-center justify-between">
                           <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">{product.name}</h3>
-                          <p className="text-primary font-bold mt-2 text-lg"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">ETB</span> {Number(product.price).toFixed(2)}</p>
+                          <p className="text-primary font-bold mt-2 text-lg"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">{currency}</span> {Number(product.price).toFixed(2)}</p>
                         </div>
                       </div>
                     );
@@ -216,7 +218,7 @@ export default function ManualSalePage() {
                     <div key={item.product_id} className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="font-bold text-sm">{item.product.name}</div>
-                        <div className="text-xs text-muted-foreground">{(item.price * item.quantity).toFixed(2)} ETB</div>
+                        <div className="text-xs text-muted-foreground">{(item.price * item.quantity).toFixed(2)} {currency}</div>
                       </div>
                       <div className="flex items-center gap-2 ml-2">
                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.product_id, -1)}>
@@ -238,7 +240,7 @@ export default function ManualSalePage() {
               <div className="pt-4 mt-auto">
                 <div className="flex justify-between font-bold text-xl mb-4">
                   <span>Total</span>
-                  <span className="text-primary">{total.toFixed(2)} ETB</span>
+                  <span className="text-primary">{total.toFixed(2)} {currency}</span>
                 </div>
                 <Button 
                   className="w-full font-bold h-12" 

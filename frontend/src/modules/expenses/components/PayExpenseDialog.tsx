@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import axios from 'axios';
+import { useSettings } from '@/hooks/useSettings';
 
 interface PayExpenseDialogProps {
   expense: any;
@@ -14,6 +15,7 @@ interface PayExpenseDialogProps {
 }
 
 export default function PayExpenseDialog({ expense, open, onOpenChange, onSuccess }: PayExpenseDialogProps) {
+  const { currency, enabledPaymentMethods } = useSettings();
   const [loading, setLoading] = useState(false);
   const [method, setMethod] = useState('Cash');
   const [reference, setReference] = useState('');
@@ -24,7 +26,7 @@ export default function PayExpenseDialog({ expense, open, onOpenChange, onSucces
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`http://localhost:5000/api/expenses/${expense.id}/pay`, {
+      await axios.post(`/api/expenses/${expense.id}/pay`, {
         method,
         reference
       });
@@ -47,7 +49,7 @@ export default function PayExpenseDialog({ expense, open, onOpenChange, onSucces
 
         <div className="py-4">
           <p className="text-sm text-muted-foreground mb-1">Amount Due</p>
-          <p className="text-2xl font-bold">{parseFloat(expense.amount).toLocaleString()} <span className="text-sm font-normal">ETB</span></p>
+          <p className="text-2xl font-bold">{parseFloat(expense.amount).toLocaleString()} <span className="text-sm font-normal">{currency}</span></p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -58,10 +60,9 @@ export default function PayExpenseDialog({ expense, open, onOpenChange, onSucces
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Cash">Cash</SelectItem>
-                <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                <SelectItem value="Card">Card</SelectItem>
-                <SelectItem value="Mobile Banking">Mobile Banking</SelectItem>
+                {enabledPaymentMethods.map((m) => (
+                  <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

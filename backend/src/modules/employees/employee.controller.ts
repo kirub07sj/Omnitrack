@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../database';
 import bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
 
 export const getEmployees = async (req: Request, res: Response) => {
   try {
@@ -14,8 +13,17 @@ export const getEmployees = async (req: Request, res: Response) => {
     }
 
     const employees = await prisma.employee.findMany({
-      where: { business_id: String(business_id) },
-      include: { users: true }
+      where: { 
+        business_id: String(business_id),
+        users: {
+          none: {
+            role: {
+              name: 'Owner'
+            }
+          }
+        }
+      },
+      include: { users: { include: { role: true } } }
     });
     
     res.json(employees);

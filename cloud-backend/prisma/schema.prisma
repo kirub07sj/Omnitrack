@@ -1,0 +1,340 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Business {
+  id         String   @id @default(uuid())
+  name       String
+  phone      String?
+  email      String?
+  address    String?
+  logo       String?
+  currency   String?
+  is_kitchen_active Boolean @default(true)
+  tax_rate   Decimal?
+  owner_name String?
+  settings   String? // JSON string for all other settings
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  employees  Employee[]
+  users      User[]
+  tables     RestaurantTable[]
+  categories Category[]
+  products        Product[]
+  inventory_items InventoryItem[]
+  movements       InventoryMovement[]
+  suppliers  Supplier[]
+  purchases  Purchase[]
+  orders     Order[]
+  transactions Transaction[]
+  sales      Sale[]
+  expenses   Expense[]
+  sync_changes SyncChange[]
+
+  @@map("businesses")
+}
+
+model Role {
+  id   String @id @default(uuid())
+  name String
+
+  users User[]
+
+  @@map("roles")
+}
+
+model Employee {
+  id               String    @id @default(uuid())
+  business_id      String
+  first_name       String
+  last_name        String
+  gender           String?
+  age              Int?
+  phone            String?
+  email            String?
+  address          String?
+  national_id      String?
+  emergency_contact String?
+  employee_number  String?   @unique
+  position         String?
+  department       String?
+  salary           Decimal?
+  employment_type  String?
+  hire_date        DateTime?
+  status           String?
+
+  business Business @relation(fields: [business_id], references: [id])
+  users    User[]
+  orders   Order[]
+  sales    Sale[]
+  assigned_tables RestaurantTable[] @relation("AssignedTables")
+
+  @@map("employees")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  business_id   String
+  employee_id   String
+  role_id       String
+  username      String    @unique
+  password_hash String
+  status        String?
+  last_login    DateTime?
+
+  business Business @relation(fields: [business_id], references: [id])
+  employee Employee @relation(fields: [employee_id], references: [id])
+  role     Role     @relation(fields: [role_id], references: [id])
+
+  @@map("users")
+}
+
+model RestaurantTable {
+  id           String  @id @default(uuid())
+  business_id  String
+  table_number String
+  capacity     Int?
+  status       String?
+  waiter_id    String?
+
+  business Business  @relation(fields: [business_id], references: [id])
+  waiter   Employee? @relation("AssignedTables", fields: [waiter_id], references: [id])
+  orders   Order[]
+
+  @@map("restaurant_tables")
+}
+
+model Category {
+  id          String  @id @default(uuid())
+  business_id String
+  name        String
+  description String?
+  status      String  @default("Active") // Active, Inactive
+
+  business Business  @relation(fields: [business_id], references: [id])
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id              String   @id @default(uuid())
+  business_id       String
+  category_id       String
+  inventory_item_id String?
+  name              String
+  sku             String?  @unique
+  barcode         String?
+  description     String?
+  price           Decimal
+  cost            Decimal?
+  unit            String?
+  track_inventory Boolean  @default(false)
+  min_stock       Decimal?
+  image_url       String?
+  status          String   @default("Active") // Active, Inactive
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  business       Business       @relation(fields: [business_id], references: [id])
+  category       Category       @relation(fields: [category_id], references: [id])
+  inventory_item InventoryItem? @relation(fields: [inventory_item_id], references: [id])
+  orders         OrderItem[]
+
+  @@map("products")
+}
+
+model InventoryItem {
+  id               String   @id @default(uuid())
+  business_id      String
+  name             String
+  sku              String?  @unique
+  unit             String
+  quantity         Decimal  @default(0)
+  minimum_quantity Decimal  @default(0)
+  cost_per_unit    Decimal?
+  supplier_id      String?
+  status           String   @default("Active")
+
+  business  Business            @relation(fields: [business_id], references: [id])
+  supplier  Supplier?           @relation(fields: [supplier_id], references: [id])
+  products  Product[]
+  movements InventoryMovement[]
+  purchases PurchaseItem[]
+
+  @@map("inventory_items")
+}
+
+model InventoryMovement {
+  id                String   @id @default(uuid())
+  business_id       String
+  inventory_item_id String
+  type              String
+  quantity          Decimal
+  reference_type    String?
+  reference_id      String?
+  created_at        DateTime @default(now())
+
+  business       Business      @relation(fields: [business_id], references: [id])
+  inventory_item InventoryItem @relation(fields: [inventory_item_id], references: [id])
+
+  @@map("inventory_movements")
+}
+
+model Supplier {
+  id          String  @id @default(uuid())
+  business_id String
+  name        String
+  phone       String?
+  email       String?
+  address     String?
+
+  business  Business   @relation(fields: [business_id], references: [id])
+  purchases Purchase[]
+  inventory_items InventoryItem[]
+
+  @@map("suppliers")
+}
+
+model Purchase {
+  id          String   @id @default(uuid())
+  business_id String
+  supplier_id String
+  total       Decimal
+  status      String?
+  created_at  DateTime @default(now())
+
+  business Business       @relation(fields: [business_id], references: [id])
+  supplier Supplier       @relation(fields: [supplier_id], references: [id])
+  items    PurchaseItem[]
+  transactions Transaction[]
+
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id                String  @id @default(uuid())
+  purchase_id       String
+  inventory_item_id String
+  quantity          Decimal
+  cost              Decimal
+
+  purchase       Purchase      @relation(fields: [purchase_id], references: [id])
+  inventory_item InventoryItem @relation(fields: [inventory_item_id], references: [id])
+
+  @@map("purchase_items")
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  business_id String
+  table_id    String?
+  waiter_id   String?
+  status      String?
+  notes       String?
+  created_at  DateTime @default(now())
+
+  business Business        @relation(fields: [business_id], references: [id])
+  table    RestaurantTable? @relation(fields: [table_id], references: [id])
+  waiter   Employee?       @relation(fields: [waiter_id], references: [id])
+  items    OrderItem[]
+  transactions Transaction[]
+  sales    Sale[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  order_id   String
+  product_id String
+  quantity   Decimal
+  price      Decimal
+
+  order   Order   @relation(fields: [order_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("order_items")
+}
+
+model Transaction {
+  id          String    @id @default(uuid())
+  business_id String
+  order_id    String?
+  purchase_id String?
+  expense_id  String?
+  type        String    // "INCOME" or "EXPENSE"
+  amount      Decimal
+  method      String?
+  status      String?
+  proof_image String?
+  date        DateTime  @default(now())
+
+  business Business  @relation(fields: [business_id], references: [id])
+  order    Order?    @relation(fields: [order_id], references: [id])
+  purchase Purchase? @relation(fields: [purchase_id], references: [id])
+  expense  Expense?  @relation(fields: [expense_id], references: [id])
+
+  @@map("transactions")
+}
+
+model Sale {
+  id          String   @id @default(uuid())
+  business_id String
+  order_id    String
+  cashier_id  String
+  subtotal    Decimal
+  tax         Decimal
+  discount    Decimal?
+  total       Decimal
+  created_at  DateTime @default(now())
+
+  business Business @relation(fields: [business_id], references: [id])
+  order    Order    @relation(fields: [order_id], references: [id])
+  cashier  Employee @relation(fields: [cashier_id], references: [id])
+
+  @@map("sales")
+}
+
+model Expense {
+  id            String   @id @default(uuid())
+  business_id   String
+  category      String
+  amount        Decimal
+  description   String?
+  paid_to       String?
+  status        String   @default("PAID")
+  receipt_image String?
+  date          DateTime @default(now())
+  created_at    DateTime @default(now())
+
+  business Business @relation(fields: [business_id], references: [id])
+  transactions Transaction[]
+
+  @@map("expenses")
+}
+
+model SyncChange {
+  id              String   @id @default(uuid())
+  business_id     String
+  entity_type     String
+  entity_id       String
+  operation       String
+  device_id       String?
+  installation_id String?
+  created_at      DateTime @default(now())
+  processed_at    DateTime?
+  status          String   @default("PENDING") // PENDING, SYNCING, SYNCED, FAILED
+  retry_count     Int      @default(0)
+  last_error      String?
+
+  business Business @relation(fields: [business_id], references: [id])
+
+  @@map("sync_changes")
+}

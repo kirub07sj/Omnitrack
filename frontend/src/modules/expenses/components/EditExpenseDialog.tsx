@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
-import axios from 'axios';
 import { Switch } from '@/components/ui/switch';
+import axios from 'axios';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function EditExpenseDialog({ expense, open, onOpenChange, onSuccess }: any) {
+  const { currency, enabledPaymentMethods } = useSettings();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<any>({
     category: '',
@@ -43,7 +45,7 @@ export default function EditExpenseDialog({ expense, open, onOpenChange, onSucce
 
     setLoading(true);
     try {
-      await axios.put(`http://localhost:5000/api/expenses/${expense.id}`, {
+      await axios.put(`/api/expenses/${expense.id}`, {
         ...formData,
         amount: parseFloat(formData.amount)
       });
@@ -84,7 +86,7 @@ export default function EditExpenseDialog({ expense, open, onOpenChange, onSucce
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Amount (ETB) *</Label>
+              <Label>Amount ({currency}) *</Label>
               <Input 
                 type="number" 
                 step="0.01" 
@@ -138,10 +140,9 @@ export default function EditExpenseDialog({ expense, open, onOpenChange, onSucce
                   <SelectValue placeholder="Select method" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Mobile Banking">Mobile Banking</SelectItem>
-                  <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                  <SelectItem value="Card">Card</SelectItem>
+                  {enabledPaymentMethods.map((m) => (
+                    <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

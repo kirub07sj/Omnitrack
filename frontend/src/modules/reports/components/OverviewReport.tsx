@@ -5,10 +5,12 @@ import { Download, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { startOfWeek, startOfMonth, format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSettings } from '@/hooks/useSettings';
 
 const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#047857', '#a7f3d0'];
 
 export function OverviewReport({ dateRange, refreshTrigger = 0 }: { dateRange: { startDate: string, endDate: string }, refreshTrigger?: number }) {
+  const { currency } = useSettings();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month'>('day');
@@ -35,7 +37,7 @@ export function OverviewReport({ dateRange, refreshTrigger = 0 }: { dateRange: {
   const handleExport = () => {
     if (!data) return;
     const csvContent = "data:text/csv;charset=utf-8," 
-      + "Metric,Amount (ETB)\n"
+      + `Metric,Amount (${currency})\n`
       + `Total Income,${data.totalIncome}\n`
       + `Total Expenses,${data.totalExpense}\n`
       + `Net Cash Flow,${data.netCashFlow}\n`;
@@ -101,7 +103,7 @@ export function OverviewReport({ dateRange, refreshTrigger = 0 }: { dateRange: {
                 <p className="text-sm font-medium text-emerald-50">Total Income (Money In)</p>
                 <TrendingUp className="w-4 h-4 text-emerald-100" />
               </div>
-              <p className="text-2xl font-bold mt-2 text-white">+{data.totalIncome?.toLocaleString() || 0} ETB</p>
+              <p className="text-2xl font-bold mt-2 text-white">+{data.totalIncome?.toLocaleString() || 0} {currency}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
@@ -110,7 +112,7 @@ export function OverviewReport({ dateRange, refreshTrigger = 0 }: { dateRange: {
                 <p className="text-sm font-medium text-muted-foreground">Total Expenses (Money Out)</p>
                 <TrendingDown className="w-4 h-4 text-red-500" />
               </div>
-              <p className="text-2xl font-bold mt-2 text-red-600">-{data.totalExpense?.toLocaleString() || 0} ETB</p>
+              <p className="text-2xl font-bold mt-2 text-red-600">-{data.totalExpense?.toLocaleString() || 0} {currency}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm bg-primary/5">
@@ -120,7 +122,7 @@ export function OverviewReport({ dateRange, refreshTrigger = 0 }: { dateRange: {
                 <DollarSign className="w-4 h-4 text-primary" />
               </div>
               <p className={`text-2xl font-bold mt-2 ${data.netCashFlow >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                {data.netCashFlow > 0 ? '+' : ''}{data.netCashFlow?.toLocaleString() || 0} ETB
+                {data.netCashFlow > 0 ? '+' : ''}{data.netCashFlow?.toLocaleString() || 0} {currency}
               </p>
             </CardContent>
           </Card>
@@ -163,7 +165,7 @@ export function OverviewReport({ dateRange, refreshTrigger = 0 }: { dateRange: {
                     />
                     <Tooltip 
                       contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                      formatter={(value: number) => [`${value.toLocaleString()} ETB`, undefined]}
+                      formatter={(value: number) => [`${value.toLocaleString()} ${currency}`, undefined]}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
                     <Line 

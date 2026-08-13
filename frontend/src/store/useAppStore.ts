@@ -8,6 +8,8 @@ interface AppState {
   isLoadingStatus: boolean;
   currentUser: { id: string; username: string; firstName: string; lastName: string; role: string; business_id: string; employee_id: string } | null;
   businessSettings: any | null;
+  isLicensed: boolean;
+  licenseError: string | null;
   
   setSetupStep: (step: number) => void;
   checkSetupStatus: () => Promise<void>;
@@ -29,6 +31,8 @@ export const useAppStore = create<AppState>((set) => ({
   isLoadingStatus: true,
   currentUser: null,
   businessSettings: null,
+  isLicensed: true,
+  licenseError: null,
 
   setSetupStep: (step) => set({ currentSetupStep: step }),
 
@@ -48,6 +52,14 @@ export const useAppStore = create<AppState>((set) => ({
       const res = await fetch('/api/business/status');
       const data = await res.json();
       
+      const licenseRes = await fetch('/api/license/status').catch(() => null);
+      let licenseData = { allowed: true, reason: null };
+      if (licenseRes && licenseRes.ok) {
+        try {
+          licenseData = await licenseRes.json();
+        } catch (e) {}
+      }
+
       if (data.success) {
         let step = 1;
         if (data.hasBusiness && !data.hasOwner) step = 3;
@@ -59,7 +71,9 @@ export const useAppStore = create<AppState>((set) => ({
           hasOwner: data.hasOwner,
           currentSetupStep: step,
           isLoadingStatus: false,
-          businessSettings: data.business || null
+          businessSettings: data.business || null,
+          isLicensed: licenseData.allowed,
+          licenseError: licenseData.reason
         });
       } else {
         set({ isLoadingStatus: false });
@@ -73,14 +87,13 @@ export const useAppStore = create<AppState>((set) => ({
   unpaidCounts: { sales: 0, expenses: 0, purchases: 0 },
   
   fetchUnpaidCounts: async () => {
-    const state = set as any; // Using getState would be better but we can use the stored currentUser
     // We can't access currentUser directly without get(), so we update the store creator to use (set, get)
     // We'll rewrite the create call in a separate edit if needed, or just use useAppStore.getState()
     const currentUser = useAppStore.getState().currentUser;
     if (!currentUser?.business_id) return;
     
     try {
-      const res = await fetch(`http://localhost:5000/api/dashboard/unpaid-counts?business_id=${currentUser.business_id}`);
+      const res = await fetch(`/api/dashboard/unpaid-counts?business_id=${currentUser.business_id}`);
       const data = await res.json();
       if (data.success) {
         set({

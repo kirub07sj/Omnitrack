@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { format } from 'date-fns';
+import { useSettings } from '@/hooks/useSettings';
 
 interface ReceiptDialogProps {
   sale: any | null;
@@ -10,6 +11,8 @@ interface ReceiptDialogProps {
 }
 
 export default function ReceiptDialog({ sale, open, onOpenChange }: ReceiptDialogProps) {
+  const { currency, receiptSettings, businessName, phone, address, taxSettings } = useSettings();
+
   if (!sale) return null;
 
   const handlePrint = () => {
@@ -25,23 +28,29 @@ export default function ReceiptDialog({ sale, open, onOpenChange }: ReceiptDialo
           <DialogTitle>Receipt Preview</DialogTitle>
         </DialogHeader>
 
-        <div className="font-mono text-sm mx-auto w-full max-w-sm bg-white text-black p-6 rounded-lg shadow-sm border print:shadow-none print:border-none print:p-0">
+        <div className="font-mono text-sm mx-auto w-full max-w-sm bg-white text-black p-6 rounded-lg shadow-sm border max-h-[60vh] overflow-y-auto print:max-h-none print:overflow-visible print:shadow-none print:border-none print:p-0">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold uppercase mb-1">OmniTrack</h2>
+            {receiptSettings.showBusinessName && <h2 className="text-2xl font-bold uppercase mb-1">{businessName || 'OmniTrack'}</h2>}
             <p className="text-xs">Restaurant Management System</p>
-            <p className="text-xs mt-2">Sale #: {sale.id.split('-')[0].toUpperCase()}</p>
+            {receiptSettings.showAddress && address && <p className="text-xs mt-1">{address}</p>}
+            {receiptSettings.showPhone && phone && <p className="text-xs">{phone}</p>}
+            {receiptSettings.showOrderNumber && <p className="text-xs mt-2">Sale #: {sale.id.split('-')[0].toUpperCase()}</p>}
             <p className="text-xs">Date: {format(new Date(sale.created_at), 'dd/MM/yyyy HH:mm')}</p>
           </div>
 
           <div className="border-t border-b border-dashed border-gray-300 py-3 mb-4 space-y-1">
-            <div className="flex justify-between">
-              <span>Cashier:</span>
-              <span>{sale.cashier?.first_name || 'System'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Table:</span>
-              <span>{sale.order?.table ? sale.order.table.table_number : 'Walk-in'}</span>
-            </div>
+            {receiptSettings.showCashier && (
+              <div className="flex justify-between">
+                <span>Cashier:</span>
+                <span>{sale.cashier?.first_name || 'System'}</span>
+              </div>
+            )}
+            {receiptSettings.showTableNumber && (
+              <div className="flex justify-between">
+                <span>Table:</span>
+                <span>{sale.order?.table ? sale.order.table.table_number : 'Walk-in'}</span>
+              </div>
+            )}
             {sale.order?.waiter && (
               <div className="flex justify-between">
                 <span>Waiter:</span>
@@ -76,8 +85,14 @@ export default function ReceiptDialog({ sale, open, onOpenChange }: ReceiptDialo
             </div>
             {parseFloat(sale.tax) > 0 && (
               <div className="flex justify-between">
-                <span>Tax:</span>
+                <span>{taxSettings.taxName || 'Tax'}:</span>
                 <span>{parseFloat(sale.tax).toFixed(2)}</span>
+              </div>
+            )}
+            {sale.serviceCharge && parseFloat(sale.serviceCharge) > 0 && (
+              <div className="flex justify-between">
+                <span>Service Charge:</span>
+                <span>{parseFloat(sale.serviceCharge).toFixed(2)}</span>
               </div>
             )}
             {parseFloat(sale.discount) > 0 && (
@@ -88,7 +103,7 @@ export default function ReceiptDialog({ sale, open, onOpenChange }: ReceiptDialo
             )}
             <div className="flex justify-between font-bold text-lg pt-2 mt-2 border-t border-dashed border-gray-300">
               <span>TOTAL:</span>
-              <span>{parseFloat(sale.total).toFixed(2)} ETB</span>
+              <span>{parseFloat(sale.total).toFixed(2)} {currency}</span>
             </div>
           </div>
 
@@ -108,7 +123,7 @@ export default function ReceiptDialog({ sale, open, onOpenChange }: ReceiptDialo
           </div>
 
           <div className="text-center mt-8 text-xs font-medium">
-            <p>Thank you for your visit!</p>
+            <p>{receiptSettings.footerMessage || 'Thank you for your visit!'}</p>
             <p className="mt-1 opacity-70">Powered by OmniTrack</p>
           </div>
         </div>

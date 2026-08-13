@@ -1,914 +1,626 @@
-Build the complete Reports module for our existing offline-first Restaurant ERP.
+Build the OFFLINE-FIRST SYNCHRONIZATION SYSTEM for our Restaurant Management System.
 
-IMPORTANT:
-Before writing code, inspect the existing project and understand:
+IMPORTANT ARCHITECTURE:
 
-- Database schema
-- API structure
-- Existing modules
-- Existing business logic
-- Existing authentication/authorization
-- Existing UI/design system
-- Existing state management
-- Existing chart/table components
-- Existing Sales, Expenses, Transactions, Inventory, Products, Employees, Orders, and Tables implementations
+The restaurant operates primarily on a LOCAL PostgreSQL database.
 
-DO NOT rewrite existing modules.
+Multiple devices inside the restaurant connect through the local network/Wi-Fi to the local backend/server.
 
-DO NOT create duplicate data models for reports.
+The cloud system uses:
 
-Reports must read and aggregate data from the existing system.
+- Cloud Backend API
+- Neon PostgreSQL
+
+The frontend/devices MUST NOT connect directly to Neon.
+
+The architecture is:
+
+CLIENT DEVICES
+    ↓
+LOCAL BACKEND
+    ↓
+LOCAL POSTGRESQL
+    ↕
+SYNC ENGINE
+    ↕
+CLOUD BACKEND API
+    ↓
+NEON POSTGRESQL
+
+The local system must continue operating when the internet is unavailable.
 
 ==================================================
-REPORTS MODULE
+PRIMARY REQUIREMENT
+==================================================
+
+Build synchronization so that:
+
+1. All normal restaurant operations happen locally.
+2. Changes are saved to local PostgreSQL first.
+3. Changes are placed into a local sync/change queue.
+4. When internet is available, the sync engine uploads changes to the cloud.
+5. Cloud changes that need to be downloaded are pulled into the local database.
+6. Failed synchronization attempts are retried automatically.
+7. The application never blocks normal restaurant operations because the internet is unavailable.
+8. Synchronization must be idempotent so the same change cannot create duplicate records.
+9. Do not expose Neon credentials to frontend clients.
+
+==================================================
+DATABASE / SYNC METADATA
+==================================================
+
+Inspect the existing PostgreSQL schema before making changes.
+
+Do not duplicate existing business models.
+
+Create a synchronization/change-log mechanism.
+
+Suggested table:
+
+sync_changes
+
+Fields:
+
+id
+entity_type
+entity_id
+operation
+device_id
+installation_id
+created_at
+processed_at
+status
+retry_count
+last_error
+
+Suggested operations:
+
+CREATE
+UPDATE
+DELETE
+
+Suggested statuses:
+
+PENDING
+SYNCING
+SYNCED
+FAILED
+
+Use UUIDs where the existing system already uses UUIDs.
+
+Do not blindly add sync_status columns to every business table if a centralized change log is more appropriate.
+
+==================================================
+INSTALLATION ID
+==================================================
+
+Every deployed restaurant installation must have a unique installation ID.
+
+Example:
+
+INSTALLATION-xxxxxxxx
+
+This identifies one restaurant installation.
+
+Every device should also have a unique device ID.
+
+Example:
+
+SERVER-xxxxxxxx
+CASHIER-xxxxxxxx
+WAITER-xxxxxxxx
+KITCHEN-xxxxxxxx
+
+Do not use usernames as device IDs.
+
+Store installation/device identity securely.
+
+==================================================
+LOCAL-FIRST WRITE FLOW
+==================================================
+
+Every business operation must follow:
+
+User action
+    ↓
+Local backend
+    ↓
+Local PostgreSQL transaction
+    ↓
+Business data saved
+    ↓
+Sync change recorded
+    ↓
+Response returned immediately
+
+The cloud must NOT be required for the operation to succeed.
+
+Example:
+
+Waiter creates order
+
+1. Create order locally.
+2. Create order items locally.
+3. Commit database transaction.
+4. Create sync change.
+5. Return success to waiter.
+6. Sync engine later sends the change to the cloud.
+
+If the internet is unavailable, steps 1-5 still succeed.
+
+==================================================
+SYNC ENGINE
+==================================================
+
+Create a dedicated synchronization service.
+
+Responsibilities:
+
+- Detect internet/cloud availability.
+- Read pending sync changes.
+- Send changes to cloud API.
+- Process acknowledgements.
+- Mark successful changes as SYNCED.
+- Retry failed changes.
+- Use exponential backoff.
+- Prevent duplicate processing.
+- Record errors.
+- Pull remote changes when required.
+- Update local database safely.
+
+Do not run unlimited retry loops.
+
+Suggested retry delays:
+
+5 seconds
+15 seconds
+30 seconds
+1 minute
+5 minutes
+15 minutes
+
+Adapt this to the existing application architecture.
+
+==================================================
+CLOUD API
+==================================================
+
+Create a secure cloud synchronization API.
+
+The local system should communicate with:
+
+Cloud Backend
+    ↓
+Neon PostgreSQL
+
+Do NOT allow clients to connect directly to Neon.
+
+Create appropriate endpoints such as:
+
+POST /sync/push
+POST /sync/pull
+
+or adapt to the existing backend architecture.
+
+The API must authenticate the restaurant installation/device.
+
+Do not use the user's normal login password as synchronization credentials.
+
+==================================================
+IDEMPOTENCY
+==================================================
+
+This is critical.
+
+Every synchronization event must have a unique identifier.
+
+If the local system sends the same event twice because of a timeout:
+
+The cloud must recognize that the event was already processed.
+
+Example:
+
+Change ID:
+CHANGE-123
+
+First request:
+processed successfully.
+
+Second request:
+return already processed / success.
+
+Never create duplicate:
+
+- Orders
+- Sales
+- Expenses
+- Transactions
+- Products
+- Inventory movements
+- Employees
+- Purchases
+
+==================================================
+CONFLICT HANDLING
+==================================================
+
+The restaurant's local server is the primary operational source for devices inside the same restaurant.
+
+Multiple local devices should NOT synchronize independently with the cloud.
+
+Instead:
+
+Waiter
+Cashier
+Kitchen
+Manager
+    ↓
+LOCAL SERVER
+    ↓
+LOCAL DATABASE
+    ↓
+CLOUD SYNC
+
+This minimizes conflicts.
+
+For cloud/local conflicts, create a deterministic conflict strategy.
+
+Do not silently overwrite important financial records.
+
+For conflicts involving:
+
+Sales
+Transactions
+Expenses
+Purchases
+Inventory movements
+
+log the conflict and preserve the original records.
+
+Do not delete financial history automatically.
+
+==================================================
+SOFT DELETES
+==================================================
+
+Do not physically delete synchronized business records where doing so could break references or financial history.
+
+Use soft deletion where appropriate:
+
+deleted_at
+
+Synchronization must propagate deletions correctly.
+
+==================================================
+FINANCIAL DATA
+==================================================
+
+Financial records require special handling.
+
+Do not synchronize financial operations by simply replacing rows.
+
+Sales, transactions, expenses, purchases and inventory movements should be treated as historical events.
+
+Never silently overwrite financial history.
+
+==================================================
+OFFLINE OPERATION
+==================================================
+
+The restaurant must continue working without internet.
+
+Offline functionality includes:
+
+- Orders
+- Sales
+- Tables
+- Kitchen
+- Inventory
+- Purchases
+- Expenses
+- Transactions
+- Employees
+- Reports
+
+Do not disable modules because the internet is unavailable.
+
+==================================================
+SYNC STATUS UI
+==================================================
+
+Add a small global synchronization indicator to the application header.
+
+Possible states:
+
+ONLINE + SYNCED
+ONLINE + SYNCING
+OFFLINE
+PENDING SYNC
+SYNC ERROR
+
+Examples:
+
+🟢 Synced
+
+🟡 Syncing...
+
+🔴 Offline
+24 changes waiting
+
+⚠ Sync issue
+3 changes failed
+
+Do not make this indicator intrusive.
+
+==================================================
+SETTINGS → SYNCHRONIZATION
 ==================================================
 
 Create:
 
-Reports
-├── Overview
-├── Sales
-├── Expenses
-├── Transactions
-├── Inventory
-├── Products
-├── Employees
-└── Financial Summary
+Settings
+    ↓
+Synchronization
 
-The Reports module is primarily READ-ONLY.
+Display:
 
-Users should not create, edit, or delete business records from Reports.
+Connection:
+Online / Offline
 
-==================================================
-1. GLOBAL REPORT FILTERS
-==================================================
+Sync status:
+Synced / Syncing / Pending / Error
 
-Every report should support a common date range filter.
+Last successful sync:
+Date and time
+
+Pending changes:
+Number
+
+Failed changes:
+Number
+
+Installation ID:
+Masked/read-only
+
+Device ID:
+Masked/read-only
 
 Provide:
 
-- Today
-- Yesterday
-- This Week
-- This Month
-- Last Month
-- This Year
-- Custom Range
+[ Sync Now ]
+
+The Sync Now button should manually trigger a sync attempt.
+
+Normal synchronization must happen automatically.
+
+==================================================
+SYNC DETAILS
+==================================================
+
+Allow the owner/authorized manager to inspect synchronization problems.
 
 Example:
 
-Date Range
-[ This Month ▼ ]
+Sync Issues
 
-[ From ] [ To ]
+Order #1042
+Failed
+Reason: temporary server error
+Retrying automatically
 
-Reports should update automatically when filters change.
+Expense #EXP-104
+Failed
+Reason: network timeout
 
-Do not require users to click a separate "Generate Report" button unless the existing architecture requires it.
+Do not expose technical stack traces to normal users.
 
-Add appropriate loading states while report data is being calculated.
+Provide a user-friendly message.
 
 ==================================================
-2. REPORT OVERVIEW
+CLOUD DATABASE: NEON
 ==================================================
 
-Create a dashboard-style Overview report.
+Prepare the cloud backend for Neon PostgreSQL.
 
-It should answer:
+Use an environment variable such as:
 
-"How is the business doing?"
+DATABASE_URL
 
-Display:
+The Neon connection string must exist ONLY on the cloud backend/server.
 
-- Total Sales
-- Total Expenses
-- Total Money In
-- Total Money Out
-- Net Cash Flow
-- Number of Orders
-- Number of Completed Sales
-- Average Sale Value
-- Top-Selling Product
-- Low-Stock Item Count
+Never expose:
+
+DATABASE_URL
+Neon password
+Neon credentials
+
+to React/frontend code.
+
+Use SSL as required by Neon.
+
+Create proper database migrations so the Neon database can be created from the existing schema.
+
+Do not manually create random tables in Neon that differ from the application's schema.
+
+==================================================
+ENVIRONMENTS
+==================================================
+
+Support:
+
+Development
+Local
+Production
+
+Example environment variables:
+
+LOCAL_DATABASE_URL
+CLOUD_API_URL
+SYNC_ENABLED
+INSTALLATION_ID
+
+Cloud backend:
+
+DATABASE_URL
+JWT_SECRET
+etc.
+
+Do not commit secrets.
+
+Update .env.example with placeholders only.
+
+==================================================
+PERFORMANCE
+==================================================
+
+Do not continuously poll the cloud every second.
+
+Use a reasonable sync interval.
+
+Also trigger synchronization when:
+
+- Internet becomes available
+- Application starts
+- Significant local changes are queued
+- User presses Sync Now
+
+Use batching where appropriate.
 
 Example:
 
-REPORTS
+Instead of:
 
-[ This Month ▼ ]
+1 change → 1 HTTP request
 
---------------------------------
+prefer:
 
-Total Sales
-450,000 ETB
+50 pending changes → 1 sync batch
 
-Total Expenses
-120,000 ETB
-
-Money In
-450,000 ETB
-
-Money Out
-270,000 ETB
-
-Net Cash Flow
-180,000 ETB
-
-Orders
-1,245
-
-Average Sale
-361 ETB
-
---------------------------------
-
-Sales Trend
-[ Chart ]
-
-Payment Methods
-[ Chart ]
-
-Top Products
-[ List ]
-
-Low Stock
-[ List ]
+when appropriate.
 
 ==================================================
-3. SALES REPORT
+SECURITY
 ==================================================
 
-Create a Sales report.
+Never trust client-provided installation IDs or device identities without validation.
 
-It should answer:
+Authenticate sync requests.
 
-"What did we sell?"
+Validate:
 
-Display:
+- Installation
+- Device
+- Request signature/token
+- Change IDs
+- Entity IDs
+- Payloads
 
-- Gross sales
-- Discounts
-- Taxes
-- Service charges
-- Net sales
-- Number of completed sales
-- Average sale value
-- Sales by date
-- Sales by payment method
-- Sales by product
-- Sales by category
-- Sales by waiter
-- Sales by cashier
+Rate-limit cloud synchronization endpoints.
 
-Use the actual stored values from historical sales.
+Do not allow one restaurant installation to access another restaurant's data.
 
-IMPORTANT:
-
-Do NOT calculate historical tax/service charges using the current Settings configuration.
-
-Historical sales must use the values stored when the sale occurred.
-
-Provide:
-
-- Summary cards
-- Sales trend chart
-- Payment method breakdown
-- Product/category table
-- Optional employee performance table
-
-Example table:
-
-Date | Sales | Orders | Average Sale
---------------------------------------
-Aug 1 | 25,000 | 72 | 347
-Aug 2 | 31,500 | 89 | 354
+Every cloud query must be scoped to the correct business/tenant.
 
 ==================================================
-4. EXPENSE REPORT
+MULTI-TENANCY
 ==================================================
 
-Create an Expenses report.
+The cloud database will eventually contain multiple restaurant businesses.
 
-It should answer:
-
-"Where is the business spending money?"
-
-Display:
-
-- Total expenses
-- Paid expenses
-- Unpaid expenses
-- Expenses by category
-- Expenses by date
-- Top expense categories
-- Expense trend
+Every cloud business record must be associated with the correct business/tenant.
 
 Example:
 
-Category | Amount | Percentage
---------------------------------
-Rent | 50,000 | 42%
-Utilities | 15,000 | 13%
-Maintenance | 8,000 | 7%
+business_id
 
-Provide:
+Never allow:
 
-- Summary cards
-- Expense trend chart
-- Category breakdown
-- Expense history table
+Business A
+    ↓
+access
+    ↓
+Business B data
 
-Respect the existing distinction between:
-
-Expense record
-and
-actual cash transaction.
-
-Do not treat unpaid expenses as money-out transactions until they are actually paid.
+This is critical.
 
 ==================================================
-5. TRANSACTIONS REPORT
+BACKUP
 ==================================================
 
-Create a Transactions report.
+Do not treat synchronization as the same thing as backup.
 
-It should answer:
+Synchronization keeps cloud/local data aligned.
 
-"Where did the business's money move?"
+Backups are a separate concern.
 
-Display:
-
-- Total money in
-- Total money out
-- Net cash flow
-- Cash transactions
-- Mobile banking transactions
-- Card transactions
-- Bank transfer transactions
-
-Provide filters:
-
-- Date
-- Money In / Money Out
-- Transaction type
-- Payment method
-- User/cashier
-- Search
-
-Transaction types may include:
-
-- Sale
-- Inventory Purchase
-- Expense
-- Salary
-- Refund
-- Other
-
-Use the existing Transactions data.
-
-DO NOT create a second transaction system.
+Design the system so cloud database backups can be configured independently.
 
 ==================================================
-6. INVENTORY REPORT
+IMPLEMENTATION RULES
 ==================================================
 
-Create an Inventory report.
+Before implementation:
 
-It should answer:
+1. Inspect the existing database schema.
+2. Inspect authentication.
+3. Inspect business/tenant relationships.
+4. Inspect all major modules.
+5. Inspect existing API architecture.
+6. Determine whether local PostgreSQL is already configured.
+7. Determine the current backend entry point.
+8. Reuse existing database utilities.
+9. Do not rewrite working modules unnecessarily.
+10. Do not introduce a second ORM/database abstraction without a reason.
+11. Do not break offline functionality.
+12. Do not replace existing business logic.
 
-"What is happening with our stock?"
+Build synchronization incrementally.
 
-Display:
+First implement:
 
-- Total inventory items
-- Current stock value
-- Low-stock items
-- Out-of-stock items
-- Stock received
-- Stock adjustments
-- Purchase totals
-- Supplier purchase totals
+1. Installation/device identity
+2. Sync change log
+3. Local change recording
+4. Cloud authentication
+5. Push synchronization
+6. Idempotency
+7. Retry system
+8. Pull synchronization
+9. Conflict handling
+10. Sync status UI
+11. Settings synchronization page
+12. Error handling
+13. Production configuration
 
-Provide:
-
-Low Stock table:
-
-Product | Current Stock | Threshold | Status
-
-Stock movement summary:
-
-Product | Received | Used/Sold | Adjusted | Current
-
-Purchase summary:
-
-Supplier | Purchases | Amount
-
-IMPORTANT:
-
-Use the existing Inventory and stock movement logic.
-
-Do not create a second inventory calculation system.
-
-If inventory costing already uses weighted average, use the existing calculated values.
+Test each stage before moving to the next.
 
 ==================================================
-7. PRODUCT REPORT
+ACCEPTANCE TESTS
 ==================================================
-
-Create a Products report.
-
-It should answer:
-
-"Which products are performing well?"
-
-Display:
-
-- Best-selling products
-- Lowest-selling products
-- Quantity sold
-- Revenue by product
-- Revenue by category
-- Product sales trend
-
-Example:
-
-Product | Qty Sold | Revenue
---------------------------------
-Chicken Tibs | 820 | 164,000
-Burger | 610 | 122,000
-Pasta | 420 | 84,000
-
-Allow sorting by:
-
-- Quantity sold
-- Revenue
-- Product name
-
-Add category filtering.
-
-Do not modify product records from Reports.
-
-==================================================
-8. EMPLOYEE REPORT
-==================================================
-
-Create an Employees report.
-
-It should answer:
-
-"How are employees contributing to operations?"
-
-Depending on existing data and permissions, display:
-
-- Sales handled by cashier
-- Orders handled by waiter
-- Number of orders
-- Sales amount
-- Cancellations
-- Discounts applied
-- Activity summary
-
-Example:
-
-Employee | Orders | Sales | Cancellations
--------------------------------------------
-Hana | 120 | 45,000 | 2
-Dawit | 98 | 38,000 | 1
-
-IMPORTANT:
-
-Only show metrics that can be accurately derived from existing records.
-
-Do not invent employee performance data.
-
-Do not create surveillance-style metrics that aren't useful to the business.
-
-==================================================
-9. FINANCIAL SUMMARY
-==================================================
-
-Create a Financial Summary report.
-
-IMPORTANT:
-
-This is NOT a full accounting system.
-
-Clearly distinguish between:
-
-- Revenue/Sales
-- Expenses
-- Inventory Purchases
-- Money In
-- Money Out
-- Net Cash Flow
-
-Example:
-
-Financial Summary
-
-Sales
-+450,000 ETB
-
-Expenses Paid
--120,000 ETB
-
-Inventory Purchases Paid
--150,000 ETB
-
-Other Money Out
--0 ETB
-
---------------------------------
-
-Net Cash Flow
-180,000 ETB
-
-IMPORTANT:
-
-Do not incorrectly label cash flow as accounting profit.
-
-If the system does not have enough accounting data to calculate true profit, label the metric as:
-
-"Net Cash Flow"
-
-not:
-
-"Net Profit"
-
-==================================================
-10. CHARTS
-==================================================
-
-Use charts only where they improve understanding.
-
-Recommended charts:
-
-Overview:
-- Sales trend
-- Money in vs money out
-- Payment methods
-
-Sales:
-- Sales over time
-- Sales by payment method
-- Sales by category
-
-Expenses:
-- Expenses over time
-- Expenses by category
-
-Inventory:
-- Stock status
-- Purchase trends
-
-Products:
-- Top products
-
-Do not create charts just for decoration.
-
-Charts must use real backend data.
-
-Use the existing chart library if one already exists.
-
-Do not introduce another charting library unnecessarily.
-
-==================================================
-11. TABLES
-==================================================
-
-All report tables should support where appropriate:
-
-- Sorting
-- Search
-- Filtering
-- Pagination
-- Empty state
-- Loading state
-
-Use the existing table component/design system.
-
-Do not create a new table component if one already exists.
-
-==================================================
-12. EXPORT
-==================================================
-
-Reports should support:
-
-- CSV export
-- Print-friendly view
-
-CSV exports must contain the actual filtered report data.
-
-Example:
-
-User selects:
-
-August 1 → August 10
-Category: Food
-
-Export CSV
-
-→ Only export the filtered report data.
-
-Do not generate fake or hard-coded export data.
-
-If PDF generation already exists in the project, integrate with it.
-
-Otherwise, do not introduce a large PDF system unless necessary.
-
-==================================================
-13. REPORT SOURCE OF TRUTH
-==================================================
-
-This is extremely important.
-
-Reports must use existing modules as the source of truth.
-
-Example:
-
-Sales:
-
-Sales records
-      ↓
-Reports
-
-Expenses:
-
-Expense records
-      ↓
-Reports
-
-Transactions:
-
-Transaction records
-      ↓
-Reports
-
-Inventory:
-
-Inventory + Stock Movements + Purchases
-      ↓
-Reports
-
-Products:
-
-Products + Sales/Sale Items
-      ↓
-Reports
-
-Employees:
-
-Employees + Orders + Sales
-      ↓
-Reports
-
-DO NOT duplicate business data inside the Reports module.
-
-==================================================
-14. HISTORICAL DATA
-==================================================
-
-Reports must preserve historical values.
-
-Example:
-
-VAT was 15% when a sale happened.
-
-Later:
-
-VAT is changed to 10%.
-
-The old sale must still report:
-
-VAT = 15%
-
-Do not recalculate historical sales using current Settings.
-
-The same principle applies to:
-
-- Service charges
-- Product prices
-- Discounts
-- Payment methods
-- Business information where historical snapshots exist
-
-==================================================
-15. CASH FLOW LOGIC
-==================================================
-
-Use the existing Transactions module as the source for actual cash-flow calculations.
-
-Money In:
-
-- Completed customer sales
-- Other valid incoming transactions
-
-Money Out:
-
-- Paid expenses
-- Paid inventory purchases
-- Salaries
-- Refunds
-- Other valid outgoing transactions
-
-UNPAID records must NOT be counted as actual cash-out until payment occurs.
-
-Example:
-
-Expense:
-Electricity
-4,500 ETB
-UNPAID
-
-→ Expense report: included as unpaid expense
-
-→ Cash flow report: NOT money out yet
-
-After payment:
-
-→ Expense becomes PAID
-
-→ Transaction is created
-
-→ Cash flow report includes -4,500 ETB
-
-==================================================
-16. PERMISSIONS
-==================================================
-
-Reports must respect the existing authentication/authorization architecture.
-
-Do not create a new permission system inside Reports.
-
-Prepare the module so permissions can control:
-
-- View reports
-- View financial reports
-- View employee reports
-- Export reports
-
-Recommended access:
-
-Owner:
-- All reports
-
-Manager:
-- Operational reports
-- Sales
-- Inventory
-- Employees
-- Expenses according to permission
-
-Cashier:
-- Only permitted sales/payment reports
-
-Waiter:
-- Only permitted personal/operational reports
-
-Kitchen:
-- No financial reports unless explicitly permitted
-
-IMPORTANT:
-
-Do not hard-code role names throughout components.
-
-Use the existing permission system.
-
-==================================================
-17. PERFORMANCE
-==================================================
-
-Reports may process large amounts of data.
-
-Do not load every transaction/order/sale into the browser and calculate everything client-side if the dataset can become large.
-
-Prefer server-side aggregation where appropriate.
-
-Use:
-
-- Database aggregation
-- Indexed queries
-- Date filtering
-- Pagination
-- Cached summaries where appropriate
-
-Inspect the existing backend architecture and follow its patterns.
-
-Do not prematurely introduce a complex analytics infrastructure.
-
-==================================================
-18. OFFLINE-FIRST REQUIREMENTS
-==================================================
-
-The Restaurant ERP is designed to work without internet.
-
-Reports must work from the local database while offline.
-
-Example:
-
-Internet:
-OFFLINE
-
-Local sales:
-1,250
-
-Reports should still show:
-
-Today's Sales
-45,800 ETB
-
-Do not require cloud connectivity for basic reports.
-
-When synchronization occurs, reports should eventually reflect synchronized data according to the existing sync architecture.
-
-Do not create a fake cloud-sync implementation.
-
-==================================================
-19. EMPTY STATES
-==================================================
-
-If there is no data for the selected date range:
-
-Show something like:
-
-"No sales found for this period."
-
-Do not display:
-
-0 charts
-broken charts
-NaN
-undefined
-negative-looking empty states
-
-Give the user a useful message and optionally:
-
-[ Change Date Range ]
-
-==================================================
-20. ERROR HANDLING
-==================================================
-
-If report generation fails:
-
-Show:
-
-"Unable to load this report."
-
-[ Try Again ]
-
-Do not silently fail.
-
-Do not show raw database errors to users.
-
-==================================================
-21. UX PRINCIPLES
-==================================================
-
-The users are not accountants or data analysts.
-
-Reports must be easy to understand.
-
-Use:
-
-- Clear labels
-- ETB/currency formatting
-- Human-readable dates
-- Simple charts
-- Summary cards
-- Useful defaults
-- Consistent terminology
-
-Avoid:
-
-- Technical database terms
-- Internal IDs unless useful
-- Excessive configuration
-- Unnecessary charts
-- Complex accounting terminology
-
-The owner should be able to open Reports and understand the business within a few seconds.
-
-==================================================
-22. RESPONSIVE DESIGN
-==================================================
-
-Reports should work on:
-
-- Desktop
-- Tablet
-- Mobile
-
-Desktop is the priority because reports are mainly used by owners/managers.
-
-Charts should resize properly.
-
-Tables should have appropriate horizontal scrolling on small screens.
-
-Do not destroy usability on mobile just to fit tables.
-
-==================================================
-23. AUDIT / READ-ONLY BEHAVIOR
-==================================================
-
-Reports must not modify:
-
-- Sales
-- Orders
-- Inventory
-- Expenses
-- Transactions
-- Employees
-- Products
-
-Opening a report should never change business data.
-
-Exporting a report should never change business data.
-
-Filtering a report should never change business data.
-
-==================================================
-24. TESTING
-==================================================
-
-Test Reports against realistic data.
 
 Test:
 
-1. Sales report matches Sales module totals.
+1. Create order while online.
+2. Confirm local database receives it.
+3. Confirm cloud receives it.
+4. Disconnect internet.
+5. Create several orders.
+6. Confirm they work normally.
+7. Confirm changes become pending.
+8. Reconnect internet.
+9. Confirm automatic synchronization.
+10. Confirm no duplicate orders.
+11. Repeat with sales.
+12. Repeat with expenses.
+13. Repeat with inventory.
+14. Repeat with transactions.
+15. Simulate failed cloud requests.
+16. Confirm retry behavior.
+17. Simulate duplicate sync request.
+18. Confirm idempotency.
+19. Test multiple devices through local network.
+20. Confirm one restaurant cannot access another restaurant's cloud data.
 
-2. Expense report matches Expenses module totals.
+The final result must feel invisible to normal users.
 
-3. Transaction report matches Transactions module totals.
-
-4. Inventory report matches Inventory stock.
-
-5. Product report matches actual sale items.
-
-6. Employee report uses real order/sale data.
-
-7. Date filters correctly exclude records outside the selected period.
-
-8. Today filter works correctly.
-
-9. This month filter works correctly.
-
-10. Custom date range works correctly.
-
-11. Paid expenses appear in cash-flow calculations.
-
-12. Unpaid expenses do not appear as money-out.
-
-13. Paid inventory purchases appear as money-out.
-
-14. Historical tax values remain unchanged when Settings change.
-
-15. Reports work while offline.
-
-16. CSV export respects active filters.
-
-17. Empty date ranges display correctly.
-
-18. Unauthorized users cannot access restricted reports.
-
-19. Large datasets do not cause the UI to freeze unnecessarily.
-
-20. Refreshing/restarting the application does not break report functionality.
-
-==================================================
-25. FINAL IMPLEMENTATION REQUIREMENTS
-==================================================
-
-Before finishing:
-
-1. Inspect the existing project first.
-2. Reuse existing components.
-3. Reuse existing APIs.
-4. Reuse existing authentication.
-5. Reuse existing permissions.
-6. Reuse existing database models.
-7. Do not duplicate business logic.
-8. Do not create fake/mock report data.
-9. Do not create duplicate transaction/inventory/sales data.
-10. Use real database aggregation.
-11. Ensure reports work offline.
-12. Ensure date filtering is accurate.
-13. Ensure historical data remains historically accurate.
-14. Add proper loading states.
-15. Add proper empty states.
-16. Add proper error states.
-17. Add CSV export.
-18. Add print-friendly report views.
-19. Ensure responsive design.
-20. Test every report against the existing modules.
-
-The final Reports module should feel like a natural part of the existing Restaurant ERP.
-
-The core principle is:
-
-MODULES RECORD WHAT HAPPENED.
-
-REPORTS EXPLAIN WHAT HAPPENED.
-
-Do not turn Reports into another data-entry module.
+The system should simply work whether the restaurant is online or offline.

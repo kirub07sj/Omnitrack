@@ -152,6 +152,27 @@ router.put('/settings', async (req, res) => {
         ...(settings !== undefined && { settings })
       }
     });
+
+    // Sync owner_name back to the actual Owner employee account if present
+    if (owner_name) {
+      const ownerUser = await prisma.user.findFirst({
+        where: { role: { name: 'Owner' } },
+        include: { employee: true }
+      });
+      if (ownerUser && ownerUser.employee_id) {
+        const parts = owner_name.trim().split(' ');
+        const firstName = parts[0];
+        const lastName = parts.slice(1).join(' ') || '.'; // Keep something if no last name
+        await prisma.employee.update({
+          where: { id: ownerUser.employee_id },
+          data: {
+            first_name: firstName,
+            last_name: lastName
+          }
+        });
+      }
+    }
+
     res.json({ success: true, business: updated });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update settings' });

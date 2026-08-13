@@ -35,7 +35,7 @@ model Business {
   transactions Transaction[]
   sales      Sale[]
   expenses   Expense[]
-  sync_queue SyncQueue[]
+  sync_changes SyncChange[]
 
   @@map("businesses")
 }
@@ -320,16 +320,21 @@ model Expense {
   @@map("expenses")
 }
 
-model SyncQueue {
-  id          String   @id @default(uuid())
-  business_id String
-  entity      String
-  entity_id   String
-  operation   String
-  status      String
-  created_at  DateTime @default(now())
+model SyncChange {
+  id              String   @id @default(uuid())
+  business_id     String
+  entity_type     String
+  entity_id       String
+  operation       String
+  device_id       String?
+  installation_id String?
+  created_at      DateTime @default(now())
+  processed_at    DateTime?
+  status          String   @default("PENDING") // PENDING, SYNCING, SYNCED, FAILED
+  retry_count     Int      @default(0)
+  last_error      String?
 
   business Business @relation(fields: [business_id], references: [id])
 
-  @@map("sync_queue")
+  @@map("sync_changes")
 }

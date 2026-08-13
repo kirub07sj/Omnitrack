@@ -1,5 +1,6 @@
 //@ts-nocheck
 import { useState } from "react";
+import { useSettings } from '@/hooks/useSettings';
 import {
   ColumnDef,
   flexRender,
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export function ProductTable({ data, onView, onEdit, onToggleStatus, onDelete }: Props) {
+  const { currency } = useSettings();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -78,7 +80,7 @@ export function ProductTable({ data, onView, onEdit, onToggleStatus, onDelete }:
     {
       accessorKey: "price",
       header: "Price",
-      cell: ({ row }) => <div className="font-semibold text-primary">{row.getValue("price")} ETB</div>,
+      cell: ({ row }) => <div className="font-semibold text-primary">{row.getValue("price")} {currency}</div>,
     },
     {
       accessorKey: "unit",

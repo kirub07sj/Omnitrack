@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useProductStore } from '@/store/useProductStore';
+import { useSettings } from '@/hooks/useSettings';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Bell, Search, UtensilsCrossed, Settings, Clock, Check, X, ChevronRight, Hash, LogOut, Minus, Plus, Loader2, ShoppingCart, CheckCircle2, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { X, Minus, Plus, Loader2, ShoppingCart, CheckCircle2, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -15,6 +16,7 @@ import {
 export default function WaiterAppPage() {
   const [searchParams] = useSearchParams();
   const businessId = searchParams.get('business_id');
+  const { currency } = useSettings();
 
   const { products: allProducts, fetchProducts, isLoading: productsLoading } = useProductStore();
   
@@ -311,7 +313,7 @@ export default function WaiterAppPage() {
                   <div className="p-3 w-full flex flex-col items-center justify-between flex-1">
                     <h3 className="text-sm text-center font-semibold line-clamp-2 mb-2 text-slate-800 leading-tight">{product.name}</h3>
                     <div className="mt-auto bg-slate-50 rounded-lg px-3 py-1 w-full text-center border border-slate-100">
-                      <span className="text-emerald-600 font-bold"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">ETB</span> {Number(product.price).toFixed(2)}</span>
+                      <span className="text-emerald-600 font-bold"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">{currency}</span> {Number(product.price).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -338,7 +340,7 @@ export default function WaiterAppPage() {
                   <span className="font-bold text-lg leading-none">{cartCount} {cartCount === 1 ? 'Item' : 'Items'}</span>
                 </div>
               </div>
-              <span className="font-bold text-xl"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">ETB</span> {cartTotal.toFixed(2)}</span>
+              <span className="font-bold text-xl"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">{currency}</span> {cartTotal.toFixed(2)}</span>
             </button>
           </div>
         </div>
@@ -374,7 +376,7 @@ export default function WaiterAppPage() {
                   
                   <div className="flex-1 pr-4">
                     <h4 className="font-semibold text-sm leading-tight text-slate-900">{item.product.name}</h4>
-                    <div className="text-emerald-600 font-bold mt-1"><span className="text-[0.7em] font-medium opacity-80 mr-0.5">ETB</span> {Number(item.product.price).toFixed(2)}</div>
+                    <div className="text-emerald-600 font-bold mt-1"><span className="text-[0.7em] font-medium opacity-80 mr-0.5">{currency}</span> {Number(item.product.price).toFixed(2)}</div>
                   </div>
                   
                   <div className="flex items-center bg-slate-100 rounded-lg p-1">
@@ -400,7 +402,7 @@ export default function WaiterAppPage() {
           <div className="p-4 bg-white border-t border-slate-200 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
             <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
               <span className="font-semibold text-slate-500 text-sm uppercase tracking-wider">Total</span>
-              <span className="font-bold text-xl"><span className="text-[0.65em] font-medium opacity-80 mr-0.5 relative -top-0.5">ETB</span> {cartTotal.toFixed(2)}</span>
+              <span className="font-bold text-xl"><span className="text-[0.65em] font-medium opacity-80 mr-0.5 relative -top-0.5">{currency}</span> {cartTotal.toFixed(2)}</span>
             </div>
             
             <Button 
@@ -483,13 +485,13 @@ export default function WaiterAppPage() {
                       {order.items?.map((item: any) => (
                         <div key={item.id} className="flex justify-between text-sm items-center">
                           <span className="text-slate-700 font-medium"><span className="text-emerald-600 font-bold mr-1">{item.quantity}x</span> {item.product?.name}</span>
-                          <span className="font-semibold text-slate-900">ETB {Number(item.price * item.quantity).toFixed(2)}</span>
+                          <span className="font-semibold text-slate-900">{currency} {Number(item.price * item.quantity).toFixed(2)}</span>
                         </div>
                       ))}
                     </div>
                     <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center font-bold">
                       <span className="text-slate-500">Total</span>
-                      <span className="text-lg text-emerald-600">ETB {order.items?.reduce((sum: number, item: any) => sum + (Number(item.price) * item.quantity), 0).toFixed(2)}</span>
+                      <span className="text-lg text-emerald-600">{currency} {order.items?.reduce((sum: number, item: any) => sum + (Number(item.price) * item.quantity), 0).toFixed(2)}</span>
                     </div>
                   </div>
                 ))
