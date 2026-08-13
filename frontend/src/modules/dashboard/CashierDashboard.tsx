@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Play, Square, Wallet, ArrowRightLeft, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,33 +15,38 @@ export default function CashierDashboard() {
   const { currentUser } = useAppStore();
   const { currency } = useSettings();
   const navigate = useNavigate();
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Basic Shift State implementation
-  const [isShiftActive, setIsShiftActive] = useState(false);
-  const [shiftStartTime, setShiftStartTime] = useState<Date | null>(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!currentUser?.business_id) return;
+      setLoading(true);
+      try {
+        const res = await axios.get(`/api/dashboard/owner?business_id=${currentUser.business_id}&dateRange=today`);
+        if (res.data.success) {
+          setData(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch cashier dashboard data', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const startShift = () => {
-    setIsShiftActive(true);
-    setShiftStartTime(new Date());
-  };
+    fetchData();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, [currentUser?.business_id]);
 
-  const endShift = () => {
-    setIsShiftActive(false);
-    setShiftStartTime(null);
-  };
-
-  // Mock data for Cashier Dashboard stats & transactions
   const shiftStats = {
-    totalSales: 1250.00,
-    transactionCount: 34,
-    cashInDrawer: 1500.00
+    totalSales: data?.financialSummary?.totalIncome || 0,
+    transactionCount: data?.financialSummary?.transactions || 0,
+    cashInDrawer: data?.financialSummary?.cashIncome || 0
   };
 
-  const recentTransactions = [
-    { id: 1, type: 'INCOME', description: 'Order #1042', method: 'Cash', date: new Date().toISOString(), amount: 45.00 },
-    { id: 2, type: 'INCOME', description: 'Order #1043', method: 'Card', date: new Date(Date.now() - 1000 * 60 * 15).toISOString(), amount: 120.50 },
-    { id: 3, type: 'INCOME', description: 'Order #1044', method: 'Card', date: new Date(Date.now() - 1000 * 60 * 30).toISOString(), amount: 32.00 }
-  ];
+  const recentTransactions = data?.recentTransactions?.slice(0, 5) || [];
 
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
@@ -50,46 +56,16 @@ export default function CashierDashboard() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 omni-stagger-1">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Cashier Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Manage shift, transactions, and daily sales</p>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-2">
-            {!isShiftActive ? (
-              <Button onClick={startShift} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Play className="w-4 h-4 mr-2" /> Start Shift
-              </Button>
-            ) : (
-              <Button onClick={endShift} variant="destructive">
-                <Square className="w-4 h-4 mr-2" /> End Shift
-              </Button>
-            )}
+            <p className="text-muted-foreground mt-1">Manage transactions and daily sales</p>
           </div>
         </div>
 
-        {/* Shift Info & Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 omni-stagger-2">
-          <Card className="bg-card border-border omni-kpi-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Shift Status</CardTitle>
-              <Clock className="w-4 h-4 text-emerald-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {isShiftActive ? (
-                  <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white">Active</Badge>
-                ) : (
-                  <Badge variant="outline" className="text-muted-foreground">Inactive</Badge>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {isShiftActive && shiftStartTime ? `Started at ${format(shiftStartTime, 'HH:mm a')}` : 'Start shift to record sales'}
-              </p>
-            </CardContent>
-          </Card>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 omni-stagger-2">
 
           <Card className="bg-gradient-to-r from-emerald-500 to-emerald-800 text-white border-0 shadow-sm omni-kpi-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-xs font-medium text-emerald-50">Shift Sales</CardTitle>
+              <CardTitle className="text-xs font-medium text-emerald-50">Today's Sales</CardTitle>
               <Wallet className="w-4 h-4 text-white" />
             </CardHeader>
             <CardContent>
@@ -131,7 +107,7 @@ export default function CashierDashboard() {
               <CardTitle className="text-base text-foreground">Recent Transactions</CardTitle>
               <Button variant="link" className="text-primary h-auto p-0" onClick={() => navigate('/cashier/transactions')}>View All</Button>
             </CardHeader>
-            <CardContent className="p-0 flex-1">
+            <CardContent className="px-6 pb-6 pt-2 flex-1 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-border hover:bg-transparent">
@@ -143,18 +119,29 @@ export default function CashierDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {recentTransactions.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                        No transactions today
+                      </TableCell>
+                    </TableRow>
+                  )}
                   {recentTransactions.map((tx: any, i: number) => (
-                    <TableRow key={i} className="border-border/50 hover:bg-muted/50">
+                    <TableRow key={tx.id || i} className="border-border/50 hover:bg-muted/50">
                       <TableCell>
                         <Badge variant="outline" className="bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 w-fit rounded-full px-2.5 py-0.5">
-                          Income
+                          {tx.type || 'Income'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-medium text-card-foreground">{tx.description}</TableCell>
-                      <TableCell className="text-muted-foreground">{tx.method}</TableCell>
-                      <TableCell className="text-muted-foreground">{format(new Date(tx.date), 'HH:mm a')}</TableCell>
+                      <TableCell className="font-medium text-card-foreground">
+                        {tx.order_id ? `Order #${tx.order_id.split('-')[0]}` : tx.description || 'Sale'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{tx.payment_method || tx.method || 'Cash'}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {tx.created_at ? format(new Date(tx.created_at), 'HH:mm a') : format(new Date(tx.date || Date.now()), 'HH:mm a')}
+                      </TableCell>
                       <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400">
-                        +{tx.amount.toLocaleString()}
+                        +{Number(tx.amount || tx.total || 0).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))}

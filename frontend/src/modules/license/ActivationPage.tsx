@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { KeyRound, Loader2, AlertCircle, ShieldCheck, CheckCircle2, MonitorSmartphone } from 'lucide-react';
+import { KeyRound, Loader2, AlertCircle, CheckCircle2, MonitorSmartphone } from 'lucide-react';
 import axios from 'axios';
 
 type StepStatus = 'pending' | 'loading' | 'done' | 'error';

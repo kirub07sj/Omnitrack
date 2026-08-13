@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,16 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (open) {
+      setMethod('Cash');
+      setReceived('');
+      setReference('');
+      setError(null);
+      setLoading(false);
+    }
+  }, [open]);
+
   if (!order) return null;
 
   const rawSubtotal = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * parseFloat(item.quantity)), 0);
@@ -32,6 +42,8 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
   const change = method === 'Cash' && received ? parseFloat(received) - total : 0;
 
   const handleCheckout = async () => {
+    if (loading) return;
+    
     if (method === 'Cash') {
       if (!received || parseFloat(received) < total) {
         setError('Received amount must be greater than or equal to total');
