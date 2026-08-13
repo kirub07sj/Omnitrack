@@ -8,6 +8,8 @@ interface AppState {
   isLoadingStatus: boolean;
   currentUser: { id: string; username: string; firstName: string; lastName: string; role: string; business_id: string; employee_id: string } | null;
   businessSettings: any | null;
+  isLicensed: boolean;
+  licenseError: string | null;
   
   setSetupStep: (step: number) => void;
   checkSetupStatus: () => Promise<void>;
@@ -29,6 +31,8 @@ export const useAppStore = create<AppState>((set) => ({
   isLoadingStatus: true,
   currentUser: null,
   businessSettings: null,
+  isLicensed: true,
+  licenseError: null,
 
   setSetupStep: (step) => set({ currentSetupStep: step }),
 
@@ -48,6 +52,14 @@ export const useAppStore = create<AppState>((set) => ({
       const res = await fetch('/api/business/status');
       const data = await res.json();
       
+      const licenseRes = await fetch('/api/license/status').catch(() => null);
+      let licenseData = { allowed: true, reason: null };
+      if (licenseRes && licenseRes.ok) {
+        try {
+          licenseData = await licenseRes.json();
+        } catch (e) {}
+      }
+
       if (data.success) {
         let step = 1;
         if (data.hasBusiness && !data.hasOwner) step = 3;
@@ -59,7 +71,9 @@ export const useAppStore = create<AppState>((set) => ({
           hasOwner: data.hasOwner,
           currentSetupStep: step,
           isLoadingStatus: false,
-          businessSettings: data.business || null
+          businessSettings: data.business || null,
+          isLicensed: licenseData.allowed,
+          licenseError: licenseData.reason
         });
       } else {
         set({ isLoadingStatus: false });

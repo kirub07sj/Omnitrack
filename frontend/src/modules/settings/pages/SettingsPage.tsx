@@ -10,7 +10,8 @@ import {
   InventorySettingsTab, 
   TaxesSettingsTab, 
   ReceiptSettingsTab, 
-  SystemSettingsTab 
+  SystemSettingsTab,
+  LicenseSettingsTab
 } from '../components/SettingsForms';
 
 export default function SettingsPage() {
@@ -109,6 +110,7 @@ export default function SettingsPage() {
           <TabsTrigger value="taxes" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Taxes & Charges</TabsTrigger>
           <TabsTrigger value="receipts" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Receipts</TabsTrigger>
           <TabsTrigger value="system" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">System</TabsTrigger>
+          <TabsTrigger value="license" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">License</TabsTrigger>
         </TabsList>
         
         <TabsContent value="business" className="animate-in fade-in-50 duration-300">
@@ -131,6 +133,9 @@ export default function SettingsPage() {
         </TabsContent>
         <TabsContent value="system" className="animate-in fade-in-50 duration-300">
           <SystemSettingsTab data={formData} onChange={setFormData} />
+        </TabsContent>
+        <TabsContent value="license" className="animate-in fade-in-50 duration-300">
+          <LicenseSettingsTab />
         </TabsContent>
       </Tabs>
     </div>

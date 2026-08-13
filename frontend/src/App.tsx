@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 import Login from './modules/auth/Login';
+import ActivationPage from './modules/license/ActivationPage';
 
 export default function App() {
   const navigate = useNavigate();
-  const { isSetupComplete, isLoadingStatus, checkSetupStatus, currentUser } = useAppStore();
+  const { isSetupComplete, isLoadingStatus, checkSetupStatus, currentUser, isLicensed } = useAppStore();
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -66,6 +67,10 @@ export default function App() {
         </div>
       </div>
     );
+  }
+
+  if (!isLicensed) {
+    return <ActivationPage />;
   }
 
   if (!currentUser) {
