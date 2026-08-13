@@ -3,23 +3,16 @@ productName: omintrack
 directories:
   buildResources: build
 files:
+  - "**/*"
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-asarUnpack:
-  - resources/**
+  - '!{.npmrc,pnpm-lock.yaml}'
+asar: false
 extraResources:
-  - from: resources/backend
-    to: backend
-  - from: resources/frontend
-    to: frontend
-  - from: resources/splash.html
-    to: splash.html
-  - from: resources/icon.png
-    to: icon.png
+  - from: node_modules/.prisma
+    to: app/node_modules/.prisma
 win:
   executableName: omintrack
 nsis:
@@ -40,8 +33,6 @@ dmg:
 linux:
   target:
     - AppImage
-    - snap
-    - deb
   maintainer: electronjs.org
   category: Utility
 appImage:

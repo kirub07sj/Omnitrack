@@ -1,6 +1,14 @@
 import { Outlet } from 'react-router-dom';
+import { useAppStore } from '@/store/useAppStore';
+import ActivationPage from '@/modules/license/ActivationPage';
 
 export default function SetupLayout() {
+  const { isLicensed } = useAppStore();
+
+  if (!isLicensed) {
+    return <ActivationPage />;
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 relative overflow-hidden flex items-center justify-center">
       {/* Mesh gradient background */}

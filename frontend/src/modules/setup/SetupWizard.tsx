@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/useAppStore';
 
 export default function SetupWizard() {
-  const { currentSetupStep, setSetupStep, checkSetupStatus, markBusinessCreated, markOwnerCreated } = useAppStore();
+  const { currentSetupStep, checkSetupStatus, markBusinessCreated, markOwnerCreated } = useAppStore();
   
-  const [licenseKey, setLicenseKey] = useState('');
   const [businessData, setBusinessData] = useState({ name: '', email: '', phone: '', address: '' });
   const [ownerData, setOwnerData] = useState({ firstName: '', lastName: '', username: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -18,31 +17,6 @@ export default function SetupWizard() {
     // Only check if it's the initial load to prevent unnecessary fetches
     checkSetupStatus();
   }, [checkSetupStatus]);
-
-  const handleActivate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    try {
-      const res = await fetch('/api/license/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ licenseKey })
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        setSetupStep(2);
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError('Connection failed to backend.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCreateBusiness = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,36 +73,7 @@ export default function SetupWizard() {
 
   return (
     <div className="w-full">
-      {currentSetupStep === 1 && (
-        <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl shadow-blue-900/20 animate-in fade-in zoom-in-95 duration-300">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold tracking-tight text-foreground">Activate Omnitrack</CardTitle>
-            <CardDescription className="text-gray-400">Enter your product license key to continue.</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleActivate}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="licenseKey" className="text-gray-300">License Key</Label>
-                <Input 
-                  id="licenseKey" 
-                  value={licenseKey}
-                  onChange={(e) => setLicenseKey(e.target.value)}
-                  placeholder="XXXX-XXXX-XXXX-XXXX" 
-                  required
-                  className="bg-card/80 border-border text-foreground backdrop-blur-xl placeholder:text-gray-600 focus-visible:ring-blue-500"
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <p className="text-xs text-gray-500 italic">Hint: Use OMNITRACK-VALID-KEY</p>
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-foreground border-0" disabled={loading}>
-                {loading ? 'Activating...' : 'Activate License'}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      )}
+      {/* Step 1 moved to ActivationPage */}
 
       {currentSetupStep === 2 && (
         <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl shadow-purple-900/20 animate-in fade-in slide-in-from-bottom-4 duration-500">

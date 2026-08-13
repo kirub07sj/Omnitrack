@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createHashRouter } from 'react-router-dom';
 import SetupLayout from '../layouts/SetupLayout';
 import SetupWizard from '../modules/setup/SetupWizard';
 import App from '../App';
@@ -42,7 +42,7 @@ import ReportsPage from '../modules/reports/pages/ReportsPage';
 
 import Login from '../modules/auth/Login';
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: '/',
     element: <App />, // We'll update this later to Dashboard/Auth based on state

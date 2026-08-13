@@ -39,15 +39,14 @@ if [ -f "$BACKEND_DIR/.env" ]; then
   cp "$BACKEND_DIR/.env" "$BACKEND_RESOURCES/"
 fi
 
-# Install production dependencies for the backend
-echo "      Installing Backend Production Dependencies..."
-cd "$BACKEND_RESOURCES"
-npm install --omit=dev
-npx prisma generate
+# Skip nested npm install since backend dependencies are now in desktop/package.json
 
 # 4. Build the Electron App
 echo "[4/4] Packaging Electron App..."
 cd "$DESKTOP_DIR"
+
+# Generate Prisma Client in the desktop's node_modules
+npx prisma generate --schema=./resources/backend/prisma/schema.prisma
 
 # Ensure the frontend build is accessible to Electron (copy to desktop out/renderer)
 # electron-builder/vite handles renderer if we place it properly, but since frontend 
@@ -55,8 +54,9 @@ cd "$DESKTOP_DIR"
 rm -rf "$RESOURCES_DIR/frontend"
 cp -r "$FRONTEND_DIR/dist" "$RESOURCES_DIR/frontend"
 
-# Run electron builder
-npm run build
+# Run electron builder to package the final executables
+npm run build:linux
+npm run build:win
 
 echo "======================================"
 echo "    Build Complete! Check desktop/dist"

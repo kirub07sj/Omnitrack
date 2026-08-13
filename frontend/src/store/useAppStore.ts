@@ -61,7 +61,7 @@ export const useAppStore = create<AppState>((set) => ({
       }
 
       if (data.success) {
-        let step = 1;
+        let step = 2;
         if (data.hasBusiness && !data.hasOwner) step = 3;
         if (data.hasBusiness && data.hasOwner) step = 4;
 
