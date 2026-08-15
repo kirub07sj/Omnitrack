@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { Category } from '../types/category';
+import { useAppStore } from "@/store/useAppStore";
 
 export const CategoryService = {
   getCategories: async (): Promise<Category[]> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
     
     const response = await axios.get(`/api/categories`, {
@@ -30,8 +31,8 @@ export const CategoryService = {
     }
   },
 
-  createCategory: async (data: any): Promise<Category> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+  createCategory: async (data: Partial<Category>): Promise<Category> => {
+    const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
 
     const payload = { 

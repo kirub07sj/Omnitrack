@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { Product } from '../types/product';
+import { useAppStore } from "@/store/useAppStore";
 
 export const ProductService = {
   getProducts: async (): Promise<Product[]> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
     
     const response = await axios.get(`/api/products`, {
@@ -44,8 +45,8 @@ export const ProductService = {
     }
   },
 
-  createProduct: async (data: any): Promise<Product> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+  createProduct: async (data: Partial<Product>): Promise<Product> => {
+    const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
 
     const payload = { 

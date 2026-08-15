@@ -1,8 +1,9 @@
 import { InventoryItem } from "../types/inventory";
+import { useAppStore } from "@/store/useAppStore";
 
 export const InventoryService = {
   getInventory: async (): Promise<InventoryItem[]> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
     
     const response = await fetch(`/api/inventory?business_id=${businessId}`);
@@ -20,7 +21,7 @@ export const InventoryService = {
   },
 
   createInventory: async (data: any): Promise<InventoryItem> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     const payload = { ...data, business_id: businessId };
 
     const response = await fetch(`/api/inventory`, {
@@ -52,16 +53,14 @@ export const InventoryService = {
   },
 
   getPurchases: async (): Promise<any[]> => {
-    const appStorage = JSON.parse(localStorage.getItem('app-storage') || '{}');
-    const businessId = appStorage.state?.currentUser?.business_id || "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     const response = await fetch(`/api/purchases?business_id=${businessId}`);
     if (!response.ok) throw new Error("Failed to fetch purchases");
     return response.json();
   },
 
   createPurchase: async (data: any): Promise<any> => {
-    const appStorage = JSON.parse(localStorage.getItem('app-storage') || '{}');
-    const businessId = appStorage.state?.currentUser?.business_id || "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     const payload = { ...data, business_id: businessId };
 
     const response = await fetch(`/api/purchases`, {
@@ -86,8 +85,7 @@ export const InventoryService = {
   },
 
   getMovements: async (): Promise<any[]> => {
-    const appStorage = JSON.parse(localStorage.getItem('app-storage') || '{}');
-    const businessId = appStorage.state?.currentUser?.business_id || "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     const response = await fetch(`/api/inventory/movements?business_id=${businessId}`);
     if (!response.ok) throw new Error("Failed to fetch movements");
     return response.json();

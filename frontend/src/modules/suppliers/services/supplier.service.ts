@@ -1,8 +1,9 @@
 import { Supplier } from "../types/supplier";
+import { useAppStore } from "@/store/useAppStore";
 
 export const SupplierService = {
   getSuppliers: async (): Promise<Supplier[]> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
     
     const response = await fetch(`/api/suppliers?business_id=${businessId}`);
@@ -20,7 +21,7 @@ export const SupplierService = {
   },
 
   createSupplier: async (data: any): Promise<Supplier> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     const payload = { ...data, business_id: businessId };
 
     const response = await fetch(`/api/suppliers`, {

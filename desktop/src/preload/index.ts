@@ -1,8 +1,18 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  getBackendInfo: () => ipcRenderer.invoke('get-backend-info'),
+  openLogFile: () => ipcRenderer.invoke('open-log-file'),
+  openLogsDir: () => ipcRenderer.invoke('open-logs-dir'),
+  restartBackend: () => ipcRenderer.invoke('restart-backend'),
+  onBackendStatus: (callback: (data: any) => void) => {
+    const subscription = (_: any, data: any) => callback(data);
+    ipcRenderer.on('backend-status', subscription);
+    return () => ipcRenderer.removeListener('backend-status', subscription);
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

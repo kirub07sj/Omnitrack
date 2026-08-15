@@ -29,7 +29,8 @@ export default function AddEditProductPage() {
         
         // Fetch inventory items
         try {
-          const invRes = await axios.get('/api/inventory', { params: { business_id: "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6" }});
+          const businessId = useAppStore.getState().currentUser?.business_id;
+          const invRes = await axios.get('/api/inventory', { params: { business_id: businessId }});
           setInventoryItems(invRes.data);
         } catch(e) { console.error(e) }
 

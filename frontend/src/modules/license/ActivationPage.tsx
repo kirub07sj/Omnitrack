@@ -201,12 +201,7 @@ export default function ActivationPage() {
                   Activate License
                 </Button>
 
-                <button 
-                  onClick={handleDevBypass}
-                  className="mt-6 text-xs text-emerald-100/40 hover:text-emerald-100/80 transition-colors"
-                >
-                  Bypass for development (Test Mode)
-                </button>
+
               </div>
             </div>
           )}
