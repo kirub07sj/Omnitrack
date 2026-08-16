@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, AlertCircle, Building2, Mail, Phone, MapPin, User, Lock, ChevronRight } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 export default function SetupWizard() {
   const { currentSetupStep, checkSetupStatus, markBusinessCreated, markOwnerCreated } = useAppStore();
@@ -74,7 +75,7 @@ export default function SetupWizard() {
       {currentSetupStep === 1 && (
         <div className="w-full flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-300 py-8">
           <div className="w-16 h-16 flex items-center justify-center mb-6 relative">
-             <img src="./logo.png" alt="Omnitrack Logo" className="w-full h-full object-contain drop-shadow-md animate-pulse" />
+             <img src={logo} alt="Omnitrack Logo" className="w-full h-full object-contain drop-shadow-md animate-pulse" />
           </div>
           <h2 className="text-2xl font-bold mb-2 tracking-tight text-white">Connecting to Services</h2>
           <p className="text-emerald-100/70 mb-8 text-sm max-w-[280px]">

@@ -1,6 +1,7 @@
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
 import ActivationPage from '@/modules/license/ActivationPage';
+import logo from '@/assets/logo.png';
 
 export default function SetupLayout() {
   const { isLicensed, isSetupComplete } = useAppStore();
@@ -43,7 +44,7 @@ export default function SetupLayout() {
       {/* Brand Logo Top Left */}
       <div className="absolute top-8 left-8 z-20 flex items-center gap-3">
         <div className="w-10 h-10 flex items-center justify-center">
-          <img src="./logo.png" alt="Logo" className="w-full h-full object-contain" />
+          <img src={logo} alt="Logo" className="w-full h-full object-contain" />
         </div>
         <span className="text-lg font-semibold tracking-tight text-white">Omnitrack</span>
       </div>

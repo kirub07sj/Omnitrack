@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { KeyRound, Loader2, AlertCircle, CheckCircle2, MonitorSmartphone } from 'lucide-react';
 import axios from 'axios';
+import logo from '@/assets/logo.png';
 
 type StepStatus = 'pending' | 'loading' | 'done' | 'error';
 interface Step {
@@ -103,10 +104,6 @@ export default function ActivationPage() {
     });
   };
 
-  const handleDevBypass = () => {
-    useAppStore.setState({ isLicensed: true });
-  };
-
   const finishActivation = async () => {
     await checkSetupStatus();
   };
@@ -141,7 +138,7 @@ export default function ActivationPage() {
       {/* Brand Logo Top Left */}
       <div className="absolute top-8 left-8 z-20 flex items-center gap-3">
         <div className="w-10 h-10 flex items-center justify-center">
-          <img src="./logo.png" alt="Logo" className="w-full h-full object-contain" />
+          <img src={logo} alt="Logo" className="w-full h-full object-contain" />
         </div>
         <span className="text-lg font-semibold tracking-tight text-white">Omnitrack</span>
       </div>
@@ -153,7 +150,7 @@ export default function ActivationPage() {
           {view === 'input' && (
             <div className="w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
               <div className="w-16 h-16 flex items-center justify-center mb-5">
-                <img src="./logo.png" alt="Omnitrack Logo" className="w-full h-full object-contain drop-shadow-md" />
+                <img src={logo} alt="Omnitrack Logo" className="w-full h-full object-contain drop-shadow-md" />
               </div>
               
               <h1 className="text-2xl font-bold mb-2 tracking-tight text-white">Activate Software</h1>
@@ -210,7 +207,7 @@ export default function ActivationPage() {
           {view === 'activating' && (
             <div className="w-full flex flex-col items-center animate-in slide-in-from-right-8 fade-in duration-500 py-4">
               <div className="w-16 h-16 flex items-center justify-center mb-5 relative">
-                <img src="./logo.png" alt="Omnitrack Logo" className="w-full h-full object-contain drop-shadow-md animate-pulse" />
+                <img src={logo} alt="Omnitrack Logo" className="w-full h-full object-contain drop-shadow-md animate-pulse" />
               </div>
               
               <h1 className="text-2xl font-bold mb-8 tracking-tight text-white">Activating your license</h1>
