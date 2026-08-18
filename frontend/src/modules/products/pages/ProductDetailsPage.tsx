@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ProductService } from "../services/product.service";
 import { ArrowLeft, Edit, DollarSign, Tag, Box, AlertTriangle, Layers, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getImageUrl } from '@/utils/image';
 import { useSettings } from '@/hooks/useSettings';
 
 export default function ProductDetailsPage() {
@@ -74,7 +75,7 @@ export default function ProductDetailsPage() {
           <div className="bg-card border border-border p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row gap-6">
             <div className="w-full sm:w-48 h-48 rounded-xl bg-muted flex items-center justify-center border border-border overflow-hidden shrink-0">
               {product.imageUrl ? (
-                <img src={product.imageUrl?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt={product.name} className="w-full h-full object-cover" />
+                <img src={getImageUrl(product.imageUrl)} alt={product.name} className="w-full h-full object-cover" />
               ) : (
                 <ImageIcon className="w-12 h-12 text-muted-foreground/50" />
               )}

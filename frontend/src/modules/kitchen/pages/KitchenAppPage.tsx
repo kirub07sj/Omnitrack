@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Loader2, ChefHat, CheckCircle2, Clock, Image as ImageIcon } from 'lucide-react';
+import { CheckCircle2, Clock, Image as ImageIcon, Loader2, ChefHat } from 'lucide-react';
+import { getImageUrl } from '@/utils/image';
 
 export default function KitchenAppPage() {
   const [searchParams] = useSearchParams();
@@ -187,7 +188,7 @@ export default function KitchenAppPage() {
                   <div className="p-0 flex-1 bg-muted/10">
                     <ul className="divide-y">
                       {order.items?.map((item: any, idx: number) => {
-                        const imageSrc = (item.product?.image_url || item.product?.imageUrl)?.replace(/^https?:\/\/[^\/]+(\/uploads\/)/, '$1');
+                        const imageSrc = getImageUrl(item.product?.image_url || item.product?.imageUrl);
                         return (
                         <li key={idx} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors group">
                           <div className="flex items-center gap-5">

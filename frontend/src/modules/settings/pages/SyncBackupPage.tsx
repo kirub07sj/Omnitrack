@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Cloud, CloudOff, RefreshCw, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { Cloud, RefreshCw, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 
 export default function SyncBackupPage() {

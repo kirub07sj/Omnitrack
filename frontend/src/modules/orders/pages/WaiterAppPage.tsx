@@ -4,7 +4,8 @@ import { useProductStore } from '@/store/useProductStore';
 import { useSettings } from '@/hooks/useSettings';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { X, Minus, Plus, Loader2, ShoppingCart, CheckCircle2, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Plus, Minus, X, CheckCircle2, Loader2, Image as ImageIcon, ShoppingCart, AlertCircle } from 'lucide-react';
+import { getImageUrl } from '@/utils/image';
 import {
   Select,
   SelectContent,
@@ -303,7 +304,7 @@ export default function WaiterAppPage() {
                   )}
                   <div className="relative h-24 w-full bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100">
                     {(product.image_url || product.imageUrl) ? (
-                      <img src={(product.image_url || product.imageUrl)?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt={product.name} className="w-full h-full object-cover group-active:scale-110 transition-transform duration-500 ease-out" />
+                      <img src={getImageUrl(product.image_url || product.imageUrl)} alt={product.name} className="w-full h-full object-cover group-active:scale-110 transition-transform duration-500 ease-out" />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 group-active:text-emerald-400 group-active:scale-110 transition-all duration-500">
                         <ImageIcon size={24} />
@@ -368,7 +369,7 @@ export default function WaiterAppPage() {
                 <div key={item.product.id} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4">
                   <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
                     {(item.product.image_url || item.product.imageUrl) ? (
-                      <img src={(item.product.image_url || item.product.imageUrl)?.replace(/^https?:\/\/[^/]+(\/uploads\/)/, '$1')} alt={item.product.name} className="w-full h-full object-cover" />
+                      <img src={getImageUrl(item.product.image_url || item.product.imageUrl)} alt={item.product.name} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-emerald-600 font-bold text-xl">{item.product.name[0]}</span>
                     )}

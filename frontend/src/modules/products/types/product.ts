@@ -16,4 +16,5 @@ export interface Product {
   createdAt?: string;
   updatedAt?: string;
   category?: any;
+  inventory_item_id?: string | null;
 }

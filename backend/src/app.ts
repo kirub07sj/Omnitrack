@@ -50,7 +50,8 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/sync', syncRoutes);
 
 // Serve static uploaded files
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+app.use('/uploads', express.static(uploadDir));
 
 // Basic health check route to verify connection
 app.get('/api/health', (req, res) => {

@@ -1,9 +1,9 @@
 import { Employee } from "../types/employee";
+import { useAppStore } from "@/store/useAppStore";
 
 export const EmployeeService = {
   getEmployees: async (): Promise<Employee[]> => {
-    // For now, assume a hardcoded or single business ID until auth is fully implemented
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
     
     const response = await fetch(`/api/employees?business_id=${businessId}`);
@@ -52,7 +52,7 @@ export const EmployeeService = {
   },
 
   createEmployee: async (data: any): Promise<Employee> => {
-    const businessId = "a28d7aab-8d0b-4d2b-bdbf-f2e2641b0fe6";
+    const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
 
     const payload = { 

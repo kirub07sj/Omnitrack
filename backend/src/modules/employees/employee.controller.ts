@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../database';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 
 export const getEmployees = async (req: Request, res: Response) => {

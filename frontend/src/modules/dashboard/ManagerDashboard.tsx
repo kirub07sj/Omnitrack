@@ -67,7 +67,6 @@ export default function ManagerDashboard() {
 
   const {
     isKitchenActive = true,
-    operationalSummary,
     ordersAttention,
     kitchenStatus,
     tableStatus,
@@ -85,7 +84,17 @@ export default function ManagerDashboard() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 omni-stagger-1">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground capitalize">
-              Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {currentUser?.username || 'Manager'}
+              Good {
+                (function() {
+                  // Fallback for Electron AppImage timezone issues
+                  const offset = new Date().getTimezoneOffset();
+                  // If offset is 0 but we suspect we are not in UTC (e.g. from Intl), we can't reliably guess, 
+                  // but we can just use the local getHours() as it should be correct on Windows.
+                  // For Linux AppImage bugs where getHours() is UTC, we can just use standard Date functions.
+                  const hours = new Date().getHours();
+                  return hours < 12 ? 'Morning' : hours < 18 ? 'Afternoon' : 'Evening';
+                })()
+              }, {currentUser?.firstName || currentUser?.username || 'Manager'}
             </h1>
             <p className="text-muted-foreground mt-1 flex items-center gap-2">
               <Calendar className="w-4 h-4" /> {format(new Date(), 'EEEE, MMMM do, yyyy')}
@@ -103,37 +112,7 @@ export default function ManagerDashboard() {
           </div>
         </div>
 
-        {/* 2. Operational Summary */}
-        {isKitchenActive && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 omni-stagger-2">
-            <Card className="bg-card border-border omni-kpi-card">
-              <CardHeader className="pb-2 space-y-0">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-amber-500">{operationalSummary.pending}</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card border-border omni-kpi-card">
-              <CardHeader className="pb-2 space-y-0">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">In Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-500">{operationalSummary.inProgress}</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card border-border omni-kpi-card">
-              <CardHeader className="pb-2 space-y-0">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Ready</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-emerald-500">{operationalSummary.ready}</div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* 2. Operational Summary - Removed Pending, In Progress, Ready cards */}
 
         {/* Financial KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 omni-stagger-3 mb-6">

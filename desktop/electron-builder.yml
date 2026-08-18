@@ -1,23 +1,30 @@
 appId: com.electron.app
-productName: omintrack
+productName: Omnitrack
 directories:
   buildResources: build
 files:
+  - "**/*"
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-asarUnpack:
-  - resources/**
+  - '!{.npmrc,pnpm-lock.yaml}'
+asar: false
+extraResources:
+  - from: node_modules/.prisma
+    to: app/node_modules/.prisma
 win:
-  executableName: omintrack
+  executableName: Omintrack
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: true
+  installerSidebar: build/installerSidebar.bmp
+  uninstallerSidebar: build/installerSidebar.bmp
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -31,8 +38,6 @@ dmg:
 linux:
   target:
     - AppImage
-    - snap
-    - deb
   maintainer: electronjs.org
   category: Utility
 appImage:

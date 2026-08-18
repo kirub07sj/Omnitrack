@@ -4,7 +4,6 @@ import {
   Settings,
   Users,
   Wallet,
-  Building,
   Package,
 } from "lucide-react"
 
@@ -15,13 +14,14 @@ import { useAppStore } from "@/store/useAppStore"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
+  SidebarFooter,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import logo from "@/assets/logo.png"
 
 const LogoIcon = ({ className }: { className?: string }) => (
-  <img src="/logo.png" alt="Logo" className={`w-full h-full object-contain bg-transparent scale-150 ${className || ''}`} />
+  <img src={logo} alt="Logo" className={`w-full h-full object-contain bg-transparent scale-150 ${className || ''}`} />
 );
 
 const teams = [
