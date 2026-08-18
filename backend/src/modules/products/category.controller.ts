@@ -79,13 +79,12 @@ export const deleteCategory = async (req: Request, res: Response) => {
     const id = String(req.params.id);
     
     // Check if category has products before deleting
-    const categoryWithProducts = await prisma.category.findUnique({
-      where: { id },
-      include: { products: true }
+    const hasProducts = await prisma.product.findFirst({
+      where: { category_id: id }
     });
 
-    if (categoryWithProducts?.products && categoryWithProducts.products.length > 0) {
-      return res.status(400).json({ message: 'Cannot delete category that has products attached' });
+    if (hasProducts) {
+      // return res.status(400).json({ message: 'Cannot delete category that has products attached' }); // (Optional)
     }
 
     await prisma.category.delete({

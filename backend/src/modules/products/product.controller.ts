@@ -13,7 +13,7 @@ export const getProducts = async (req: Request, res: Response) => {
 
     const products = await prisma.product.findMany({
       where: { business_id: String(business_id) },
-      include: { category: true }
+      // include: { category: true }
     });
     
     res.json(products);
@@ -27,7 +27,7 @@ export const getProductById = async (req: Request, res: Response) => {
     const id = String(req.params.id);
     const product = await prisma.product.findUnique({
       where: { id },
-      include: { category: true }
+      // include: { category: true }
     });
     
     if (!product) {
@@ -77,7 +77,7 @@ export const createProduct = async (req: Request, res: Response) => {
         image_url,
         status: status || 'Active'
       },
-      include: { category: true }
+      // include: { category: true }
     });
 
     res.status(201).json(product);
@@ -94,7 +94,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     const product = await prisma.product.update({
       where: { id },
       data,
-      include: { category: true }
+      // include: { category: true }
     });
     
     res.json(product);

@@ -78,7 +78,7 @@ export const createEmployee = async (req: Request, res: Response) => {
       role
     } = req.body;
 
-    let role_id = null;
+    let role_id: string | null = null;
     let final_password_hash = password_hash;
     
     if (createLoginAccount && role) {
