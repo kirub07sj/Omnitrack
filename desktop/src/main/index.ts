@@ -78,7 +78,7 @@ function checkBackendHealth(timeoutMs = 12000): Promise<boolean> {
     const startTime = Date.now()
 
     const interval = setInterval(() => {
-      const req = http.get('http://127.0.0.1:5000/api/health', (res) => {
+      const req = http.get('http://127.0.0.1:5055/api/health', (res) => {
         if (res.statusCode === 200) {
           clearInterval(interval)
           appendLog('INFO', 'Backend health check passed (status 200 OK)')
@@ -180,7 +180,7 @@ function startBackend(): void {
         DATABASE_URL: databaseUrl,
         UPLOAD_DIR: uploadDir,
         NODE_ENV: 'production',
-        PORT: '5000'
+        PORT: '5055'
       },
       stdio: ['ignore', 'pipe', 'pipe', 'ipc']
     })
@@ -253,7 +253,7 @@ function setupIpc(): void {
     const isRunning = is.dev ? true : !!backendProcess && !backendProcess.killed
     return {
       isRunning,
-      port: 5000,
+      port: 5055,
       pid: backendProcess?.pid,
       lastError: lastBackendError,
       logFilePath: backendLogFile,

@@ -7,7 +7,7 @@ import './index.css'
 
 // Intercept file:// protocol requests and route them to local backend
 const isElectron = window.location.protocol === 'file:';
-const BASE_URL = isElectron ? 'http://localhost:5000' : '';
+const BASE_URL = isElectron ? 'http://localhost:5055' : '';
 
 // 1. Configure Axios
 axios.defaults.baseURL = BASE_URL;

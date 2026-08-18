@@ -1,7 +1,7 @@
 import app from './app';
 import { syncEngine } from './modules/sync/sync.engine';
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 5055;
 
 console.log(`[BACKEND STARTUP] Initializing Omnitrack backend service...`);
 console.log(`[BACKEND STARTUP] Node version: ${process.version}, Platform: ${process.platform}, Arch: ${process.arch}`);

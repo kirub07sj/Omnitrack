@@ -99,7 +99,7 @@ export const setupTables = async (req: Request, res: Response) => {
     });
 
     if (currentTables.length < tableCount) {
-       const tablesToCreate = [];
+       const tablesToCreate: any[] = [];
        const maxNum = currentTables.length > 0 ? 
          Math.max(...currentTables.map(t => parseInt(t.table_number.replace(/\D/g, '')) || 0)) : 0;
          

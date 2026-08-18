@@ -3,7 +3,7 @@ export function getImageUrl(path?: string): string {
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
   
   const isElectron = window.location.protocol === 'file:';
-  const BASE_URL = isElectron ? 'http://localhost:5000' : '';
+  const BASE_URL = isElectron ? 'http://localhost:5055' : '';
   
   // If it's a relative path like ./logo.png in electron, leave it alone
   if (path.startsWith('./')) return path;

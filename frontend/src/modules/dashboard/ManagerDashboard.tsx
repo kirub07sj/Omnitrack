@@ -86,11 +86,6 @@ export default function ManagerDashboard() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground capitalize">
               Good {
                 (function() {
-                  // Fallback for Electron AppImage timezone issues
-                  const offset = new Date().getTimezoneOffset();
-                  // If offset is 0 but we suspect we are not in UTC (e.g. from Intl), we can't reliably guess, 
-                  // but we can just use the local getHours() as it should be correct on Windows.
-                  // For Linux AppImage bugs where getHours() is UTC, we can just use standard Date functions.
                   const hours = new Date().getHours();
                   return hours < 12 ? 'Morning' : hours < 18 ? 'Afternoon' : 'Evening';
                 })()

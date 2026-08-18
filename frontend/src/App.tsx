@@ -143,8 +143,8 @@ export default function App() {
 
           <h1 className="text-2xl font-bold mb-2 tracking-tight">Backend Connection Failed</h1>
           <p className="text-muted-foreground text-center max-w-md text-sm mb-6">
-            Omnitrack could not establish a connection to the local service on port 5000. 
-            The backend engine may still be starting, failed to load its database, or port 5000 is occupied.
+            Omnitrack could not establish a connection to the local service on port 5055. 
+            The backend engine may still be starting, failed to load its database, or port 5055 is occupied.
           </p>
 
           {/* Diagnostic Box */}
