@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: Omintrack
+productName: Omnitrack
 directories:
   buildResources: build
 files:

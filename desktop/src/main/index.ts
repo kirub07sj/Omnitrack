@@ -2,9 +2,19 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import http from 'http'
 import fs from 'fs'
-import { fork, ChildProcess } from 'child_process'
+import { fork, ChildProcess, execSync } from 'child_process'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+
+// Fallback for Linux AppImage timezone bug
+try {
+  if (process.platform === 'linux' && !process.env.TZ) {
+    const localtimePath = execSync('readlink /etc/localtime', { encoding: 'utf8' }).trim()
+    if (localtimePath.includes('zoneinfo/')) {
+      process.env.TZ = localtimePath.split('zoneinfo/')[1]
+    }
+  }
+} catch (e) {}
 
 let mainWindow: BrowserWindow | null = null
 let splashWindow: BrowserWindow | null = null
