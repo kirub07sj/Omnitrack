@@ -119,7 +119,7 @@ model Category {
   status      String  @default("Active") // Active, Inactive
 
   business Business  @relation(fields: [business_id], references: [id])
-  products Product[]
+//  products Product[]
 
   @@map("categories")
 }
@@ -144,7 +144,7 @@ model Product {
   updated_at      DateTime @updatedAt
 
   business       Business       @relation(fields: [business_id], references: [id])
-  category       Category       @relation(fields: [category_id], references: [id])
+//  category       Category       @relation(fields: [category_id], references: [id])
   inventory_item InventoryItem? @relation(fields: [inventory_item_id], references: [id])
   orders         OrderItem[]
 

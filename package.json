@@ -1,0 +1,8 @@
+{
+  "name": "omnitrack-root",
+  "version": "1.0.0",
+  "scripts": {
+    "install:all": "npm install --prefix frontend && npm install --prefix backend && npm install --prefix desktop && npm install --prefix cloud-backend",
+    "dev": "npx concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" \"npm run dev --prefix desktop\" \"npm run dev --prefix cloud-backend\""
+  }
+}

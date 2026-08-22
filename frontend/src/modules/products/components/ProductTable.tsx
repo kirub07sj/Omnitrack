@@ -29,7 +29,7 @@ interface Product {
   trackInventory: boolean;
   imageUrl?: string;
   status: string;
-  category?: { name: string };
+  categoryId?: string;
 }
 
 interface Props {
@@ -70,11 +70,11 @@ export function ProductTable({ data, onView, onEdit, onToggleStatus, onDelete }:
       cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
     },
     {
-      accessorKey: "category.name",
+      accessorKey: "categoryId",
       id: "category",
       header: "Category",
       cell: ({ row }) => {
-        const cat = row.original.category?.name || "Uncategorized";
+        const cat = row.original.categoryId || "Uncategorized";
         return <div>{cat}</div>;
       },
     },
