@@ -1,483 +1,336 @@
-Build the CASHIER DASHBOARD for the Omnitrack Restaurant Management System.
-
-IMPORTANT:
-The cashier has a different role from Owner and Manager.
-
-The cashier's primary responsibility is handling customer payments, completing sales, viewing orders needed for payment, and monitoring their own cash/transaction activity.
-
-Do NOT give the cashier access to owner/manager functionality such as:
-
-- Employee management
-- Supplier management
-- Purchase management
-- Inventory management
-- Expense management
-- Business settings
-- User/role management
-- License management
-- Advanced financial reports
-- Profit analysis
-- System administration
-
-Reuse the existing database, APIs, authentication, components, styling system, and business logic.
-
-Do not create duplicate functionality that already exists.
-
-==================================================
-CASHIER SIDEBAR
-==================================================
-
-Create this sidebar:
-
-Dashboard
-Orders
-Sales / Checkout
-Transactions
-Tables
-Reports
-
-----------------
-
-Notifications
-Settings
-
-The sidebar must only display items the cashier is authorized to access.
-
-==================================================
-1. CASHIER DASHBOARD
-==================================================
-
-Create a clean, practical cashier dashboard.
-
-The dashboard should prioritize information needed during a working shift.
-
-Display:
-
-Today's Sales
-Today's Transactions
-Pending Payments
-Cash Collected
-Card Payments
-Mobile/Digital Payments
-
-Also display:
-
-Current Shift Status
-Recent Transactions
-Pending/Unpaid Orders
-Quick Actions
-
-Do NOT fill the dashboard with unnecessary charts.
-
-The cashier needs useful information, not decorative analytics.
-
-Example layout:
-
-Today's Sales
-12,450 ETB
-
-Transactions
-48
-
-Pending Payments
-3
-
-Cash
-7,200 ETB
-
-Card
-3,250 ETB
-
-Mobile
-2,000 ETB
-
-Current Shift
-Active
-Started 08:00 AM
-
-Quick Actions:
-
-[ New Sale ]
-[ View Orders ]
-[ Transactions ]
-[ Close Shift ]
-
-==================================================
-2. ORDERS
-==================================================
-
-The cashier must be able to view orders that require payment.
-
-Display:
-
-Order Number
-Table Number
-Waiter
-Items
-Total
-Order Status
-Payment Status
-Created Time
-
-Allow:
-
-Search by order number
-Search by table
-Filter by status
-Filter by payment status
-
-Important restaurant workflow:
-
-A waiter may create an order using the system.
-
-When the customer is ready to pay:
-
-Waiter → Cashier
-Cashier finds order
-Cashier reviews order
-Cashier completes payment
-Sale is recorded
-
-The cashier must also be able to create a completed/finished order manually when the restaurant did not use the order system.
-
-Example:
-
-The waiter verbally gives the cashier:
-
-Table 4
-2 Burgers
-1 Pizza
-2 Coke
-
-The cashier can create the finished order directly in the checkout flow and immediately proceed to payment.
-
-Do not force the order through an artificial pending/kitchen workflow when the kitchen did not use the system.
-
-==================================================
-3. SALES / CHECKOUT
-==================================================
-
-This is the cashier's primary working page.
-
-Create a fast checkout interface.
-
-The cashier should be able to:
-
-1. Select an existing unpaid order
-2. Review items
-3. Adjust allowed quantities if authorized
-4. Calculate subtotal
-5. Apply supported discounts if the existing system supports them
-6. Calculate total
-7. Select payment method
-8. Complete payment
-9. Generate transaction
-10. Mark sale as paid
-11. Print or preview receipt
-
-Payment methods should support the methods already defined by the system, such as:
-
-Cash
-Card
-Mobile/Digital
-
-Do not invent unsupported payment providers.
-
-After successful payment:
-
-Show:
-
-Payment Successful
-
-Transaction Number
-Order Number
-Table
-Total
-Payment Method
-Date/Time
-
-Actions:
-
-[ Print Receipt ]
-[ New Sale ]
-
-==================================================
-4. TRANSACTIONS
-==================================================
-
-Create a transaction history page.
-
-Display:
-
-Transaction Number
-Date/Time
-Order Number
-Table
-Amount
-Payment Method
-Cashier
-Status
-
-Support:
-
-Search
-Date filtering
-Payment-method filtering
-Status filtering
-
-The cashier can view transaction history but should not be able to freely modify historical financial transactions.
-
-If refunds/voids already exist in the system, expose only the actions the cashier's permissions allow.
-
-Do not allow the cashier to delete financial history.
-
-==================================================
-5. TABLES
-==================================================
-
-Create a simple table-status view.
-
-Show:
-
-Available
-Occupied
-Waiting for Payment
-Completed
-
-The cashier should be able to click a table and see:
-
-Table number
-Current order
-Order total
-Payment status
-
-The cashier should NOT manage waiter assignments here.
-
-Waiter/table assignment remains under the appropriate management workflow.
-
-==================================================
-6. REPORTS
-==================================================
-
-Create a limited cashier report page.
-
-Show only information relevant to the cashier.
-
-Examples:
-
-Today's sales
-Number of transactions
-Cash collected
-Card collected
-Mobile/digital collected
-Refunds if applicable
-
-Allow date filtering where appropriate.
-
-Do NOT expose:
-
-Profit
-Payroll
-Employee salaries
-Business expenses
-Supplier costs
-Inventory valuation
-Owner financial analytics
-
-unless explicitly permitted by the existing role/permission system.
-
-==================================================
-7. CASHIER SHIFT
-==================================================
-
-Implement or integrate cashier shift functionality if it does not already exist.
-
-At the beginning of a shift:
-
-Cashier enters opening cash amount.
-
-Example:
-
-Opening Cash
-1,000 ETB
-
-[ Start Shift ]
-
-During the shift show:
-
-Shift Started
-Opening Cash
-Total Sales
-Cash Sales
-Card Sales
-Mobile Sales
-Refunds
-Expected Cash
-
-At the end:
-
-Cashier selects:
-
-[ Close Shift ]
-
-Show:
-
-Opening Cash
-Cash Sales
-Cash Refunds
-Expected Cash
-Actual Cash
-Difference
-
-Example:
-
-Opening Cash: 1,000 ETB
-Cash Sales: 7,200 ETB
-Cash Refunds: 0 ETB
-Expected Cash: 8,200 ETB
-Actual Cash: 8,150 ETB
-Difference: -50 ETB
-
-Require confirmation before closing.
-
-Do not allow the cashier to silently change the expected amount.
-
-==================================================
-8. PERMISSIONS
-==================================================
-
-Enforce cashier permissions at both:
-
-Frontend
-AND
-Backend/API
-
-Do not rely only on hiding sidebar items.
-
-A cashier must not be able to access protected owner/manager endpoints by manually entering URLs or API requests.
-
-Use the existing role/permission system.
-
-==================================================
-9. USER EXPERIENCE
-==================================================
-
-The cashier interface must prioritize speed.
-
-Cashiers may be handling many customers continuously.
-
-Therefore:
-
-- Minimal clicks
-- Large clear payment actions
-- Fast search
-- Keyboard-friendly where appropriate
-- Clear totals
-- Clear payment status
-- Clear success/error feedback
-- No unnecessary charts
-- No unnecessary configuration
-
-The main workflow should be:
-
-Existing Order:
-
-Order
- ↓
-Review
- ↓
-Payment
- ↓
-Complete Sale
- ↓
-Receipt
-
-Manual Order:
-
-New Sale
- ↓
-Add Items
- ↓
-Select Table/Order information if required
- ↓
-Payment
- ↓
-Complete Sale
- ↓
-Receipt
-
-==================================================
-10. RESPONSIVE DESIGN
-==================================================
-
-The cashier dashboard will primarily be used on a desktop computer.
-
-Optimize for desktop first.
-
-It should still work on smaller screens where practical.
-
-==================================================
-11. DESIGN
-==================================================
-
-Use the existing Omnitrack design system.
-
-Keep the interface:
-
-Minimal
-Modern
-Professional
-Fast
-Easy to scan
-
-Do not introduce a completely different visual language.
-
-Avoid filling the page with cards, graphs, and decorative elements.
-
-Every component should have a practical purpose.
-
-==================================================
-12. IMPLEMENTATION
-==================================================
-
-Before coding:
-
-1. Inspect the existing cashier-related APIs.
-2. Inspect the orders module.
-3. Inspect the sales module.
-4. Inspect the transactions module.
-5. Inspect the tables module.
-6. Inspect authentication and roles.
-7. Inspect the existing dashboard components.
-8. Reuse existing components and APIs.
-9. Do not duplicate business logic.
-10. Do not break the existing Owner or Manager dashboards.
-
-Then implement the cashier dashboard.
-
-Finally test:
-
-- Cashier login
-- Dashboard data
-- Existing order checkout
-- Manual finished order checkout
-- Cash payment
-- Card payment
-- Mobile/digital payment
-- Transaction creation
-- Receipt flow
-- Table status viewing
-- Shift opening
-- Shift closing
-- Permission restrictions
-- Unauthorized API access
-- Offline operation
-- Sync to cloud
-
-The final cashier experience should be extremely simple:
-
-SEE WHAT NEEDS PAYMENT
-→ TAKE PAYMENT
-→ RECORD SALE
-→ PRINT RECEIPT
-→ CONTINUE
+Implementation Plan
+
+ Phase 1: Extract Shared Code
+
+ Goal: Move common types and utilities into shared/ so both backends
+ can import them.
+
+ Files to create:
+ - shared/types/index.ts - Export all TypeScript interfaces
+ (Business, User, Employee, Product, Category, Order, Sale, etc.)
+ - shared/constants/index.ts - Export role names, status enums, etc.
+ - shared/validators/index.ts - Zod schemas for request validation
+ - shared/utils/index.ts - Pure functions (date formatting,
+ calculations, etc.)
+
+ Files to modify:
+ - Update backend/tsconfig.json and cloud-backend/tsconfig.json to
+ reference shared/
+ - Update imports in backend/src/ modules to use @shared/* instead of
+ local types
+ - Update imports in frontend/src/ to use @shared/* for types
+
+ Note: Use TypeScript path aliases in tsconfig.json:
+ {
+   "compilerOptions": {
+     "paths": {
+       "@shared/*": ["../shared/*"]
+     }
+   }
+ }
+
+ ---
+ Phase 2: Make Frontend Environment-Aware
+
+ Goal: Frontend should detect if it's running in "desktop mode"
+ (talking to http://localhost:5055) or "cloud mode" (talking to a
+ remote API like https://api.omnitrack.com).
+
+ Files to modify:
+
+ 1. frontend/.env.development and frontend/.env.production
+ # Desktop mode (default)
+ VITE_API_BASE_URL=http://localhost:5055
+ VITE_MODE=desktop
+
+ # Cloud mode (set when building for cloud)
+ # VITE_API_BASE_URL=https://api.omnitrack.com
+ # VITE_MODE=cloud
+ 2. frontend/src/store/useAppStore.ts
+   - Add isCloudMode computed from import.meta.env.VITE_MODE
+   - Modify checkSetupStatus():
+       - In desktop mode: check /api/license/status → show
+ ActivationPage if not licensed
+     - In cloud mode: skip license check, go straight to login/signup
+ 3. frontend/src/App.tsx
+   - Current flow: isLicensed ? (currentUser ? Dashboard : Login) :
+ ActivationPage
+   - New flow:
+ if (isCloudMode) {
+   // Cloud: no license check, just auth
+   return currentUser ? <Dashboard /> : <CloudAuth />
+ } else {
+   // Desktop: license → local login
+   return isLicensed ? (currentUser ? <Dashboard /> : <Login />) :
+ <ActivationPage />
+ }
+ 4. frontend/src/modules/auth/CloudAuth.tsx (NEW)
+   - Cloud-only login/signup page
+   - Calls /api/account/login (cloud-backend)
+   - Stores JWT token in localStorage
+   - On successful login, redirects to dashboard
+ 5. frontend/vite.config.ts
+   - Add build script for cloud:
+ "scripts": {
+   "build:desktop": "vite build",
+   "build:cloud": "VITE_MODE=cloud
+ VITE_API_BASE_URL=https://api.omnitrack.com vite build --outDir
+ dist-cloud"
+ }
+
+ ---
+ Phase 3: Expand Cloud Backend
+
+ Goal: Turn cloud-backend/ into a full-featured backend that mirrors
+ backend/ but uses PostgreSQL and account-based auth.
+
+ Files to create:
+
+ 1. cloud-backend/prisma/schema.prisma
+   - Copy the entire schema from backend/prisma/schema.prisma
+   - Change provider = "sqlite" to provider = "postgresql"
+   - Add new tables:
+ model Account {
+   id            String   @id @default(uuid())
+   email         String   @unique
+   password_hash String
+   firstName     String?
+   lastName      String?
+   created_at    DateTime @default(now())
+   updated_at    DateTime @updatedAt
+
+   subscriptions Subscription[]
+ }
+
+ model Subscription {
+   id           String   @id @default(uuid())
+   account_id   String
+   business_id  String   @unique
+   plan         String   // 'free', 'pro', 'enterprise'
+   status       String   // 'active', 'canceled', 'expired'
+   starts_at    DateTime
+   expires_at   DateTime?
+   created_at   DateTime @default(now())
+
+   account Account  @relation(fields: [account_id], references: [id])
+   business Business @relation(fields: [business_id], references:
+ [id])
+ }
+
+ // Add to Business model:
+ model Business {
+   // ... existing fields
+   subscription Subscription?
+ }
+ 2. cloud-backend/src/modules/account/
+   - account.routes.ts - POST /api/account/register, POST
+ /api/account/login
+   - account.controller.ts - Handle registration, login, JWT
+ generation
+   - account.service.ts - Hash passwords (bcrypt), validate emails
+ 3. cloud-backend/src/modules/subscription/
+   - subscription.routes.ts - GET /api/subscription/status
+   - subscription.service.ts - Check if user has active subscription
+ 4. cloud-backend/src/middleware/auth.middleware.ts
+   - Verify JWT token from Authorization: Bearer <token> header
+   - Attach req.user (decoded token with account_id, business_id)
+ 5. cloud-backend/src/middleware/subscription.middleware.ts
+   - Check if req.user.business_id has an active subscription
+   - Block request if subscription is expired or canceled
+ 6. Copy all business logic modules from backend/src/modules/
+   - business/, products/, inventory/, orders/, sales/, expenses/,
+ employees/, etc.
+   - Modify each controller to use req.user.business_id (from JWT)
+ instead of expecting business_id in query/body
+   - Remove license/ module (cloud doesn't use license keys)
+ 7. cloud-backend/src/app.ts
+   - Import all routes
+   - Apply authMiddleware globally (except /api/account/login,
+ /api/account/register, /api/health)
+   - Apply subscriptionMiddleware to protected routes
+ 8. cloud-backend/src/server.ts
+   - Start Express on port 8000 (or configured PORT)
+   - Remove sync engine (cloud doesn't sync to another cloud—it IS
+ the cloud)
+
+ Files to modify:
+ - cloud-backend/package.json - Add dependencies: bcryptjs,
+ jsonwebtoken, @types/bcryptjs, @types/jsonwebtoken
+ - cloud-backend/.env - Add JWT_SECRET, DATABASE_URL (PostgreSQL
+ connection string)
+
+ ---
+ Phase 4: Update Desktop Build Process
+
+ Goal: Ensure desktop/ continues to bundle the built frontend and
+ backend correctly.
+
+ Files to modify:
+
+ 1. desktop/electron-builder.yml
+   - Ensure resources/backend/dist/ is included (already done)
+   - Ensure resources/frontend/ contains the built React app (already
+ done)
+ 2. desktop/package.json scripts:
+ {
+   "scripts": {
+     "build": "npm run typecheck && electron-vite build && npm run
+ copy-resources",
+     "copy-resources": "node scripts/copy-resources.js"
+   }
+ }
+ 3. desktop/scripts/copy-resources.js (NEW, or existing build script)
+   - Copy ../backend/dist/ → desktop/resources/backend/dist/
+   - Copy ../backend/prisma/empty.db →
+ desktop/resources/backend/prisma/empty.db
+   - Copy ../frontend/dist/ → desktop/resources/frontend/
+ 4. Build order (root package.json):
+ {
+   "scripts": {
+     "build:backend": "cd backend && npm run build",
+     "build:frontend:desktop": "cd frontend && npm run
+ build:desktop",
+     "build:desktop": "npm run build:backend && npm run
+ build:frontend:desktop && cd desktop && npm run build",
+     "build:cloud": "cd cloud-backend && npm run build && cd
+ ../frontend && npm run build:cloud"
+   }
+ }
+
+ No changes needed to desktop/src/main/index.ts - it already forks
+ the backend and loads the frontend correctly.
+
+ ---
+ Phase 5: Deploy Cloud Product
+
+ Goal: Deploy cloud-backend/ and frontend/dist-cloud/ to hosting.
+
+ Hosting recommendations:
+ - Cloud Backend: Railway, Render, Heroku, DigitalOcean App Platform,
+ or Vercel (for API routes)
+ - Cloud Frontend: Vercel, Netlify, Cloudflare Pages, or serve from
+ the same backend as static files
+ - Database: Neon, Supabase, Railway Postgres, or any managed
+ PostgreSQL
+
+ Deployment steps:
+ 1. Create PostgreSQL database (e.g., Neon)
+ 2. Set environment variables on hosting platform:
+ DATABASE_URL=postgresql://...
+ JWT_SECRET=<random-secret>
+ PORT=8000
+ NODE_ENV=production
+ 3. Deploy cloud-backend/:
+   - Install dependencies
+   - Run npx prisma migrate deploy (apply migrations)
+   - Run npm start (or node dist/server.js)
+ 4. Deploy frontend/dist-cloud/:
+   - Upload to CDN or static hosting
+   - Set environment variable:
+ VITE_API_BASE_URL=https://api.omnitrack.com
+
+ ---
+ Summary of Changes
+
+ ┌─────────────┬───────────────────┬────────────────────────────┐
+ │  Component  │  Desktop Product  │       Cloud Product        │
+ ├─────────────┼───────────────────┼────────────────────────────┤
+ │             │ Build with VITE_M │ Build with                 │
+ │ Frontend    │ ODE=desktop,      │ VITE_MODE=cloud, talks to  │
+ │             │ talks to          │ cloud API                  │
+ │             │ localhost:5055    │                            │
+ ├─────────────┼───────────────────┼────────────────────────────┤
+ │             │ License           │                            │
+ │ Auth Flow   │ activation →      │ Account signup/login (JWT) │
+ │             │ local login       │                            │
+ ├─────────────┼───────────────────┼────────────────────────────┤
+ │             │ Express + SQLite  │ Express + PostgreSQL       │
+ │ Backend     │ (bundled in       │ (deployed)                 │
+ │             │ Electron)         │                            │
+ ├─────────────┼───────────────────┼────────────────────────────┤
+ │             │ Local SQLite file │                            │
+ │ Database    │  in user data     │ Cloud PostgreSQL database  │
+ │             │ directory         │                            │
+ ├─────────────┼───────────────────┼────────────────────────────┤
+ │ Access      │ ProdKey license   │ JWT token + subscription   │
+ │ Control     │ certificate       │ status                     │
+ ├─────────────┼───────────────────┼────────────────────────────┤
+ │ Distributio │ Electron          │ Web URL (https://app.omnit │
+ │ n           │ installer (.exe,  │ rack.com)                  │
+ │             │ .dmg, .AppImage)  │                            │
+ └─────────────┴───────────────────┴────────────────────────────┘
+
+ Shared between both:
+ - All React components (UI, layouts, modules)
+ - All business logic (controllers, services)
+ - All types and utilities (shared/)
+
+ ---
+ Verification
+
+ Desktop Product
+
+ 1. Run npm run build:desktop (builds backend, frontend, packages
+ Electron)
+ 2. Install the generated .exe/.dmg
+ 3. Launch app → shows activation page
+ 4. Enter license key → activates via ProdKey API
+ 5. See business setup wizard → create business → local login
+ 6. Use app offline → data stored in local SQLite
+
+ Cloud Product
+
+ 1. Deploy cloud-backend to Railway/Render
+ 2. Deploy frontend/dist-cloud to Vercel/Netlify
+ 3. Open https://app.omnitrack.com
+ 4. See signup/login page (no activation)
+ 5. Register account → receives JWT token
+ 6. Create business → data stored in cloud PostgreSQL
+ 7. Use app online → API calls authenticated with JWT
+
+ ---
+ Critical Files Reference
+
+ Existing files to modify:
+
+ - frontend/src/App.tsx - Add cloud/desktop routing logic
+ - frontend/src/store/useAppStore.ts - Add isCloudMode flag
+ - frontend/vite.config.ts - Add cloud build target
+ - cloud-backend/prisma/schema.prisma - Add Account, Subscription
+ tables
+ - cloud-backend/src/server.ts - Expand to full backend
+
+ New files to create:
+
+ - shared/types/index.ts - Shared TypeScript types
+ - shared/constants/index.ts - Shared constants
+ - frontend/src/modules/auth/CloudAuth.tsx - Cloud signup/login
+ - cloud-backend/src/modules/account/ - Account registration/login
+ - cloud-backend/src/modules/subscription/ - Subscription management
+ - cloud-backend/src/middleware/auth.middleware.ts - JWT verification
+ - cloud-backend/src/middleware/subscription.middleware.ts -
+ Subscription check
+ - Copy all modules from backend/src/modules/ to
+ cloud-backend/src/modules/
+
+ Files to keep as-is:
+
+ - desktop/src/main/index.ts - Electron main process (no changes
+ needed)
+ - backend/src/ - Desktop backend (no changes needed)
+ - frontend/src/modules/license/ActivationPage.tsx - Desktop-only (no
+ changes)
+ - All other frontend modules (products, inventory, orders, etc.) -
+ unchanged
+
+ ---
+ Next Steps
+
+ Once this plan is approved:
+ 1. Create shared/ directory structure
+ 2. Modify frontend to be environment-aware
+ 3. Expand cloud-backend with account/subscription modules
+ 4. Update build scripts
+ 5. Test desktop build (license activation → local app)
+ 6. Test cloud build (account signup → cloud app)
+ 7. Deploy cloud product to hosting platform

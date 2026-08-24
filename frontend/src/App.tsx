@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 import Login from './modules/auth/Login';
 import ActivationPage from './modules/license/ActivationPage';
+import CloudAuth from './modules/auth/CloudAuth';
 import { AlertCircle, RefreshCw, FileText, FolderOpen, Terminal, Check, Copy } from 'lucide-react';
 
 interface BackendDiagnostic {
@@ -18,14 +19,15 @@ interface BackendDiagnostic {
 
 export default function App() {
   const navigate = useNavigate();
-  const { 
-    isSetupComplete, 
-    isLoadingStatus, 
-    hasConnectionError, 
-    connectionErrorMessage, 
-    checkSetupStatus, 
-    currentUser, 
-    isLicensed 
+  const {
+    isSetupComplete,
+    isLoadingStatus,
+    hasConnectionError,
+    connectionErrorMessage,
+    checkSetupStatus,
+    currentUser,
+    isLicensed,
+    isCloud
   } = useAppStore();
 
   const [diagnostic, setDiagnostic] = useState<BackendDiagnostic | null>(null);
@@ -254,6 +256,16 @@ export default function App() {
     );
   }
 
+  // Cloud mode: no license check, just authentication
+  if (isCloud) {
+    if (!currentUser) {
+      return <CloudAuth />;
+    }
+    // User is logged in, continue to dashboard routing
+    return null;
+  }
+
+  // Desktop mode: license check then local login
   if (!isLicensed) {
     return <ActivationPage />;
   }

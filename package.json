@@ -2,7 +2,13 @@
   "name": "omnitrack-root",
   "version": "1.0.0",
   "scripts": {
-    "install:all": "npm install --prefix frontend && npm install --prefix backend && npm install --prefix desktop && npm install --prefix cloud-backend",
-    "dev": "npx concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" \"npm run dev --prefix desktop\" \"npm run dev --prefix cloud-backend\""
+    "install:all": "npm install --prefix shared && npm install --prefix frontend && npm install --prefix backend && npm install --prefix desktop && npm install --prefix cloud-backend",
+    "dev": "npx concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" \"npm run dev --prefix desktop\" \"npm run dev --prefix cloud-backend\"",
+    "build:backend": "cd backend && npm run build",
+    "build:cloud-backend": "cd cloud-backend && npm run build",
+    "build:frontend:desktop": "cd frontend && npm run build:desktop",
+    "build:frontend:cloud": "cd frontend && npm run build:cloud",
+    "build:desktop": "npm run build:backend && npm run build:frontend:desktop && cd desktop && npm run build",
+    "build:cloud": "npm run build:cloud-backend && npm run build:frontend:cloud"
   }
 }
