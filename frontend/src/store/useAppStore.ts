@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { apiFetch, isCloudMode, clearAuthToken } from '@/lib/api';
 
 interface AppState {
   isSetupComplete: boolean;
@@ -12,6 +13,7 @@ interface AppState {
   businessSettings: any | null;
   isLicensed: boolean;
   licenseError: string | null;
+  isCloud: boolean;
   
   setSetupStep: (step: number) => void;
   checkSetupStatus: (retryCount?: number) => Promise<boolean>;
@@ -35,8 +37,9 @@ export const useAppStore = create<AppState>((set) => ({
   connectionErrorMessage: null,
   currentUser: null,
   businessSettings: null,
-  isLicensed: true,
+  isLicensed: !isCloudMode,
   licenseError: null,
+  isCloud: isCloudMode,
 
   setSetupStep: (step) => set({ currentSetupStep: step }),
 
@@ -45,24 +48,31 @@ export const useAppStore = create<AppState>((set) => ({
   markOwnerCreated: () => set({ hasOwner: true, isSetupComplete: true, currentSetupStep: 4 }),
 
   login: (user) => set({ currentUser: user }),
-  
-  logout: () => set({ currentUser: null }),
+
+  logout: () => {
+    if (isCloudMode) {
+      clearAuthToken();
+    }
+    set({ currentUser: null });
+  },
   
   updateBusinessSettings: (settings) => set({ businessSettings: settings }),
 
   checkSetupStatus: async (retryCount = 0): Promise<boolean> => {
     set({ isLoadingStatus: true });
     try {
-      const res = await fetch('/api/business/status');
+      const res = await apiFetch('/api/business/status');
       if (!res.ok) throw new Error(`Backend responded with HTTP status ${res.status}`);
       const data = await res.json();
-      
-      const licenseRes = await fetch('/api/license/status').catch(() => null);
+
       let licenseData = { allowed: true, reason: null };
-      if (licenseRes && licenseRes.ok) {
-        try {
-          licenseData = await licenseRes.json();
-        } catch (e) {}
+      if (!isCloudMode) {
+        const licenseRes = await apiFetch('/api/license/status').catch(() => null);
+        if (licenseRes && licenseRes.ok) {
+          try {
+            licenseData = await licenseRes.json();
+          } catch (e) {}
+        }
       }
 
       if (data.success) {
@@ -79,8 +89,8 @@ export const useAppStore = create<AppState>((set) => ({
           hasConnectionError: false,
           connectionErrorMessage: null,
           businessSettings: data.business || null,
-          isLicensed: licenseData.allowed,
-          licenseError: licenseData.reason
+          isLicensed: isCloudMode ? true : licenseData.allowed,
+          licenseError: isCloudMode ? null : licenseData.reason
         });
         return true;
       } else {
@@ -92,7 +102,7 @@ export const useAppStore = create<AppState>((set) => ({
         return false;
       }
     } catch (e: any) {
-      if (retryCount < 8) {
+      if (retryCount < 8 && !isCloudMode) {
         await new Promise((r) => setTimeout(r, 800));
         return useAppStore.getState().checkSetupStatus(retryCount + 1);
       } else {
@@ -110,13 +120,11 @@ export const useAppStore = create<AppState>((set) => ({
   unpaidCounts: { sales: 0, expenses: 0, purchases: 0 },
   
   fetchUnpaidCounts: async () => {
-    // We can't access currentUser directly without get(), so we update the store creator to use (set, get)
-    // We'll rewrite the create call in a separate edit if needed, or just use useAppStore.getState()
     const currentUser = useAppStore.getState().currentUser;
     if (!currentUser?.business_id) return;
-    
+
     try {
-      const res = await fetch(`/api/dashboard/unpaid-counts?business_id=${currentUser.business_id}`);
+      const res = await apiFetch(`/api/dashboard/unpaid-counts?business_id=${currentUser.business_id}`);
       const data = await res.json();
       if (data.success) {
         set({
