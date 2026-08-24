@@ -7,6 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Cloud-only models for account management
+model Account {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String
+  first_name    String?
+  last_name     String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("accounts")
+}
+
+model Subscription {
+  id          String    @id @default(uuid())
+  account_id  String
+  business_id String    @unique
+  plan        String    // 'free', 'pro', 'enterprise'
+  status      String    // 'active', 'canceled', 'expired', 'trial'
+  starts_at   DateTime  @default(now())
+  expires_at  DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  account  Account  @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
 model Business {
   id         String   @id @default(uuid())
   name       String
@@ -36,6 +68,7 @@ model Business {
   sales      Sale[]
   expenses   Expense[]
   sync_changes SyncChange[]
+  subscription Subscription?
 
   @@map("businesses")
 }

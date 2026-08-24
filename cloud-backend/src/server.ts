@@ -1,18 +1,41 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+import path from 'path';
+
+import { authMiddleware } from './middleware/auth.middleware';
+import { subscriptionMiddleware } from './middleware/subscription.middleware';
+import { prisma } from './config/database';
+
+import accountRoutes from './modules/account/account.routes';
+import subscriptionRoutes from './modules/subscription/subscription.routes';
+import authRoutes from './modules/auth/auth.routes';
+import businessRoutes from './modules/business/business.routes';
+import employeeRoutes from './modules/employees/employee.routes';
+import categoryRoutes from './modules/products/category.routes';
+import productRoutes from './modules/products/product.routes';
+import inventoryRoutes from './modules/inventory/inventory.routes';
+import supplierRoutes from './modules/inventory/supplier.routes';
+import purchaseRoutes from './modules/inventory/purchase.routes';
+import orderRoutes from './modules/orders/order.routes';
+import salesRoutes from './modules/sales/sales.routes';
+import tableRoutes from './modules/tables/table.routes';
+import expenseRoutes from './modules/expenses/expense.routes';
+import transactionRoutes from './modules/transactions/transactions.routes';
+import dashboardRoutes from './modules/dashboard/dashboard.routes';
+import reportRoutes from './modules/reports/reports.routes';
+import uploadRoutes from './modules/upload/upload.routes';
 
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-// Basic health check
+// 1. Health check
 app.get('/api/health', async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -22,34 +45,30 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// The core endpoint for offline-first sync
+// 2. Sync Push (Retained from original)
 app.post('/api/sync/push', async (req, res) => {
   const { installationId, changes } = req.body;
-  
   if (!installationId || !changes || !Array.isArray(changes)) {
-    return res.status(400).json({ success: false, message: 'Invalid payload' });
+    res.status(400).json({ success: false, message: 'Invalid payload' });
+    return;
   }
 
   console.log(`[CLOUD API] Received ${changes.length} changes from installation: ${installationId}`);
   
-  const processedIds = [];
-  const errors = [];
+  const processedIds: string[] = [];
+  const errors: { changeId: string; error: string }[] = [];
 
   for (const change of changes) {
     try {
-      // Very basic idempotency check: did we already process this exact change event?
       const existingChange = await prisma.syncChange.findUnique({
         where: { id: change.changeId }
       });
 
       if (existingChange) {
-        // Already processed, mark success and skip
         processedIds.push(change.changeId);
         continue;
       }
 
-      // 1. Replicate the actual data into the Neon PostgreSQL database FIRST
-      // This prevents foreign key errors when creating the sync_change audit log (e.g. if the change IS the Business)
       const modelName = change.entityType.charAt(0).toLowerCase() + change.entityType.slice(1);
       const modelDelegate = (prisma as any)[modelName];
 
@@ -69,7 +88,6 @@ app.post('/api/sync/push', async (req, res) => {
         }
       }
 
-      // 2. Record the change in the cloud's sync_change log for audit
       await prisma.syncChange.create({
         data: {
           id: change.changeId,
@@ -91,7 +109,6 @@ app.post('/api/sync/push', async (req, res) => {
     }
   }
 
-  // Return exactly which changes succeeded so the local system can mark them as SYNCED
   res.json({
     success: true,
     processed: processedIds,
@@ -99,6 +116,37 @@ app.post('/api/sync/push', async (req, res) => {
   });
 });
 
+// 3. Public Routes (No Auth)
+app.use('/api/account', accountRoutes);
+
+// 4. Protected Routes
+// Apply global auth middleware
+app.use('/api', authMiddleware);
+
+// Auth & Setup (Subscription check not needed here, they might not have a business yet)
+app.use('/api/auth', authRoutes);
+app.use('/api/business', businessRoutes);
+app.use('/api/subscription', subscriptionRoutes);
+
+// Apply subscription check middleware for business endpoints
+app.use('/api', subscriptionMiddleware);
+
+// 5. Business Operations
+app.use('/api/employees', employeeRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/suppliers', supplierRoutes);
+app.use('/api/purchases', purchaseRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/sales', salesRoutes);
+app.use('/api/tables', tableRoutes);
+app.use('/api/expenses', expenseRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/upload', uploadRoutes);
+
 app.listen(PORT, () => {
-  console.log(`Cloud Sync Backend running on port ${PORT}`);
+  console.log(`Cloud Backend running on port ${PORT}`);
 });

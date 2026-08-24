@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { getOverview, getSales, getExpenses, getTransactions, getInventory, getProducts } from './reports.controller';
+const router = Router();
+router.get('/overview', getOverview);
+router.get('/sales', getSales);
+router.get('/expenses', getExpenses);
+router.get('/transactions', getTransactions);
+router.get('/inventory', getInventory);
+router.get('/products', getProducts);
+export default router;
