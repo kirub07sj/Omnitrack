@@ -9,11 +9,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["../shared/*"]
-    }
+    "rootDir": "./src"
   },
-  "include": ["src/**/*", "../shared/**/*"]
+  "include": ["src/**/*"]
 }
