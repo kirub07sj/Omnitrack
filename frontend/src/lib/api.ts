@@ -20,8 +20,14 @@ export function getApiUrl(endpoint: string): string {
     // Cloud mode: use absolute URL
     return `${API_BASE_URL}${path}`;
   } else {
-    // Desktop mode: use relative path (proxied by Vite or served by Electron)
-    return path;
+    // Desktop mode: In development Vite proxies '/api', but in production Electron (file:// protocol) we must hit localhost:5055 directly
+    const isFileProtocol = window.location.protocol === 'file:';
+    if (isFileProtocol) {
+      // Remove '/api' prefix since the backend routes are mounted at root, or keep it depending on your backend config.
+      // Assuming backend is on port 5055
+      return `http://localhost:5055${path}`;
+    }
+    return `${API_BASE_URL === '/api' ? '' : API_BASE_URL}${path}`;
   }
 }
 
