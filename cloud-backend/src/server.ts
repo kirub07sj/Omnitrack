@@ -153,6 +153,10 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/upload', uploadRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Cloud Backend running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Cloud Backend running on port ${PORT}`);
+  });
+}
+
+export default app;
