@@ -9,7 +9,7 @@ interface AppState {
   isLoadingStatus: boolean;
   hasConnectionError: boolean;
   connectionErrorMessage: string | null;
-  currentUser: { id: string; username: string; firstName: string; lastName: string; role: string; business_id: string; employee_id: string } | null;
+  currentUser: { id: string; username: string; firstName: string; lastName: string; role: string; business_id: string; employee_id: string; is_super_admin?: boolean; email?: string } | null;
   businessSettings: any | null;
   isLicensed: boolean;
   licenseError: string | null;
