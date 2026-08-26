@@ -4,10 +4,17 @@ import path from 'path';
 import fs from 'fs';
 
 const router = Router();
-const baseUploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+const isVercel = !!process.env.VERCEL;
+const baseUploadDir = isVercel
+  ? '/tmp/uploads'
+  : (process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'));
 const uploadDir = path.join(baseUploadDir, 'products');
 
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+try {
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+} catch (e) {
+  console.warn('Could not create upload directory:', uploadDir);
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
