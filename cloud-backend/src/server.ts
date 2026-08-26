@@ -39,7 +39,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+const uploadsPath = process.env.VERCEL
+  ? '/tmp/uploads'
+  : path.join(process.cwd(), 'uploads');
+app.use('/uploads', express.static(uploadsPath));
 
 // 1. Health check
 app.get('/api/health', async (req, res) => {
