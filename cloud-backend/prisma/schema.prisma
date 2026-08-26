@@ -14,6 +14,7 @@ model Account {
   password_hash String
   first_name    String?
   last_name     String?
+  is_super_admin Boolean @default(false)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 

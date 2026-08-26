@@ -3,7 +3,7 @@ import { prisma } from '../../config/database';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'omnitrack-cloud-secret';
+// Removed top level JWT_SECRET
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -28,8 +28,8 @@ export const register = async (req: Request, res: Response) => {
     });
 
     const token = jwt.sign(
-      { account_id: account.id, email: account.email, business_id: null },
-      JWT_SECRET,
+      { account_id: account.id, email: account.email, business_id: null, is_super_admin: account.is_super_admin },
+      (process.env.JWT_SECRET || 'omnitrack-cloud-secret'),
       { expiresIn: '30d' }
     );
 
@@ -41,6 +41,7 @@ export const register = async (req: Request, res: Response) => {
         email: account.email,
         first_name: account.first_name,
         last_name: account.last_name,
+        is_super_admin: account.is_super_admin,
         business_id: null
       }
     });
@@ -81,8 +82,8 @@ export const login = async (req: Request, res: Response) => {
     const business_id = subscription?.business_id || null;
 
     const token = jwt.sign(
-      { account_id: account.id, email: account.email, business_id },
-      JWT_SECRET,
+      { account_id: account.id, email: account.email, business_id, is_super_admin: account.is_super_admin },
+      (process.env.JWT_SECRET || 'omnitrack-cloud-secret'),
       { expiresIn: '30d' }
     );
 
@@ -94,6 +95,7 @@ export const login = async (req: Request, res: Response) => {
         email: account.email,
         first_name: account.first_name,
         last_name: account.last_name,
+        is_super_admin: account.is_super_admin,
         business_id
       }
     });

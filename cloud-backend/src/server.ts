@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 
+dotenv.config();
+
 import { authMiddleware } from './middleware/auth.middleware';
 import { subscriptionMiddleware } from './middleware/subscription.middleware';
 import { prisma } from './config/database';
@@ -25,8 +27,7 @@ import transactionRoutes from './modules/transactions/transactions.routes';
 import dashboardRoutes from './modules/dashboard/dashboard.routes';
 import reportRoutes from './modules/reports/reports.routes';
 import uploadRoutes from './modules/upload/upload.routes';
-
-dotenv.config();
+import superAdminRoutes from './modules/super-admin/super-admin.routes';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -133,6 +134,7 @@ app.use('/api/account', accountRoutes);
 app.use('/api', authMiddleware);
 
 // Auth & Setup (Subscription check not needed here, they might not have a business yet)
+app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/subscription', subscriptionRoutes);
