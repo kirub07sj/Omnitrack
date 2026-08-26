@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
 import { AlertCircle } from 'lucide-react';
+import { apiFetch, setAuthToken } from '@/lib/api';
 import logo from '@/assets/logo.png';
 
 export default function Login() {
-  const { login } = useAppStore();
+  const navigate = useNavigate();
+  const { login, checkSetupStatus } = useAppStore();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -18,17 +21,34 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await fetch('/api/auth/login', {
+      // Determine if logging in as an Account (email) or Employee (username)
+      const isAccount = username.includes('@') || username.toLowerCase() === 'admin';
+      const endpoint = isAccount ? '/api/account/login' : '/api/auth/login';
+      const payload = isAccount ? { email: username, password } : { username, password };
+
+      const res = await apiFetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
 
-      if (data.success) {
-        login(data.user);
+      if (res.ok && data.success) {
+        if (data.token) {
+          setAuthToken(data.token);
+        }
+        
+        const loggedInUser = data.account || data.user;
+        login(loggedInUser);
+        
+        await checkSetupStatus();
+        
+        if (loggedInUser?.is_super_admin) {
+          navigate('/super-admin');
+        } else {
+          navigate('/');
+        }
       } else {
-        setError(data.message);
+        setError(data.message || 'Login failed');
       }
     } catch (err) {
       setError('Connection failed. Please check your network.');
@@ -123,7 +143,7 @@ export default function Login() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-[15px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  placeholder="eg. johnfrans"
+                  placeholder="eg. admin or johnfrans"
                   required
                 />
               </div>

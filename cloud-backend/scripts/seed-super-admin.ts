@@ -9,7 +9,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.SUPER_ADMIN_EMAIL || 'admin@omnitrack.com';
+  const email = process.env.SUPER_ADMIN_EMAIL || 'admin';
   const password = process.env.SUPER_ADMIN_PASSWORD || 'admin123';
 
   // Check if it already exists

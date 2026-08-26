@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 import Login from './modules/auth/Login';
 import ActivationPage from './modules/license/ActivationPage';
-import CloudAuth from './modules/auth/CloudAuth';
 import { AlertCircle, RefreshCw, FileText, FolderOpen, Terminal, Check, Copy } from 'lucide-react';
 
 interface BackendDiagnostic {
@@ -269,7 +268,7 @@ export default function App() {
   // Cloud mode: no license check, just authentication
   if (isCloud) {
     if (!currentUser) {
-      return <CloudAuth />;
+      return <Login />;
     }
     // User is logged in, continue to dashboard routing
     return null;
