@@ -27,7 +27,7 @@ export const register = async (req: Request, res: Response) => {
       data: { email, password_hash, first_name, last_name }
     });
 
-    const isSuperAdmin = Boolean((account as any).is_super_admin);
+    const isSuperAdmin = (account as any).is_super_admin ?? false;
 
     const token = jwt.sign(
       { account_id: account.id, email: account.email, business_id: null, is_super_admin: isSuperAdmin },
@@ -82,9 +82,10 @@ export const login = async (req: Request, res: Response) => {
     });
 
     const business_id = subscription?.business_id || null;
+    const isSuperAdmin = (account as any).is_super_admin ?? false;
 
     const token = jwt.sign(
-      { account_id: account.id, email: account.email, business_id, is_super_admin: (account as any).is_super_admin },
+      { account_id: account.id, email: account.email, business_id, is_super_admin: isSuperAdmin },
       (process.env.JWT_SECRET || 'omnitrack-cloud-secret'),
       { expiresIn: '30d' }
     );
@@ -97,7 +98,7 @@ export const login = async (req: Request, res: Response) => {
         email: account.email,
         first_name: account.first_name,
         last_name: account.last_name,
-        is_super_admin: (account as any).is_super_admin,
+        is_super_admin: isSuperAdmin,
         business_id
       }
     });
