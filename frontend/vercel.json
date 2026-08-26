@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build:cloud",
+  "outputDirectory": "dist-cloud",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://omnitrack-cloud-backend.vercel.app/api/:path*"
+    }
+  ]
+}

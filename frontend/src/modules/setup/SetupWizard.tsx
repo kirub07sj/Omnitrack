@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, AlertCircle, Building2, Mail, Phone, MapPin, User, Lock, ChevronRight } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 import logo from '@/assets/logo.png';
 
 export default function SetupWizard() {
@@ -23,9 +24,8 @@ export default function SetupWizard() {
     setError('');
 
     try {
-      const res = await fetch('/api/business/setup', {
+      const res = await apiFetch('/api/business/setup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(businessData)
       });
       const data = await res.json();
@@ -51,9 +51,8 @@ export default function SetupWizard() {
     setError('');
 
     try {
-      const res = await fetch('/api/auth/setup-owner', {
+      const res = await apiFetch('/api/auth/setup-owner', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ownerData)
       });
       const data = await res.json();
