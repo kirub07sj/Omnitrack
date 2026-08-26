@@ -4,6 +4,12 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'omnitrack-cloud-secret';
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  // Allow public status checks for frontend bootstrapping
+  if (req.path === '/business/status' || req.originalUrl === '/api/business/status') {
+    next();
+    return;
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
