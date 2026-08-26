@@ -41,6 +41,7 @@ import AddExpensePage from '../modules/expenses/pages/AddExpensePage';
 import ReportsPage from '../modules/reports/pages/ReportsPage';
 
 import Login from '../modules/auth/Login';
+import SuperAdminDashboard from '../modules/super-admin/SuperAdminDashboard';
 
 export const router = createHashRouter([
   {
@@ -50,6 +51,10 @@ export const router = createHashRouter([
   {
     path: '/login',
     element: <Login />
+  },
+  {
+    path: '/super-admin',
+    element: <SuperAdminDashboard />
   },
   {
     path: '/waiter',

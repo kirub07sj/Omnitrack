@@ -58,13 +58,23 @@ export default function App() {
 
   useEffect(() => {
     if (!isLoadingStatus && !hasConnectionError) {
-      if (!isSetupComplete) {
-        navigate('/setup');
-      } else if (currentUser) {
-        navigate(`/${currentUser.role.toLowerCase()}`);
+      if (isCloud) {
+        if (currentUser) {
+          if (currentUser.is_super_admin) {
+            navigate('/super-admin');
+          } else {
+            navigate(`/${currentUser.role.toLowerCase()}`);
+          }
+        }
+      } else {
+        if (!isSetupComplete) {
+          navigate('/setup');
+        } else if (currentUser) {
+          navigate(`/${currentUser.role.toLowerCase()}`);
+        }
       }
     }
-  }, [isSetupComplete, isLoadingStatus, hasConnectionError, navigate, currentUser]);
+  }, [isSetupComplete, isLoadingStatus, hasConnectionError, navigate, currentUser, isCloud]);
 
   const handleRetry = async () => {
     const success = await checkSetupStatus(0);

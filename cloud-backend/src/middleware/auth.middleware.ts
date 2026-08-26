@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'omnitrack-cloud-secret';
+// Removed top-level JWT_SECRET to avoid ES6 hoisting order issues
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // Allow public status checks for frontend bootstrapping
@@ -20,15 +20,18 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as {
+    const secret = process.env.JWT_SECRET || 'omnitrack-cloud-secret';
+    const decoded = jwt.verify(token, secret) as {
       account_id: string;
       email: string;
       business_id: string | null;
+      is_super_admin: boolean;
     };
 
     (req as any).user = decoded;
     next();
   } catch (error) {
+    console.error('JWT Verify Error:', error);
     res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
