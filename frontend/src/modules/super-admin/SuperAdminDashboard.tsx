@@ -14,7 +14,14 @@ import {
   Loader2,
   CalendarClock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Mail,
+  Phone,
+  MapPin,
+  User,
+  Lock,
+  ChevronRight,
+  ArrowLeft
 } from 'lucide-react';
 import {
   Dialog,
@@ -32,15 +39,24 @@ export default function SuperAdminDashboard() {
   const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'business' | 'owner'>('business');
   
-  // New Tenant Form
-  const [newBusinessName, setNewBusinessName] = useState('');
+  // Business Profile Form State (matching Desktop Setup)
+  const [businessName, setBusinessName] = useState('');
+  const [businessEmail, setBusinessEmail] = useState('');
+  const [businessPhone, setBusinessPhone] = useState('');
+  const [businessAddress, setBusinessAddress] = useState('');
+  const [plan, setPlan] = useState('pro');
+  const [durationDays, setDurationDays] = useState(30);
+
+  // Owner Info Form State (matching Desktop Setup + separate Email and Username)
   const [ownerFirstName, setOwnerFirstName] = useState('');
   const [ownerLastName, setOwnerLastName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
+  const [ownerUsername, setOwnerUsername] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
-  const [plan, setPlan] = useState('pro');
-  const [durationDays, setDurationDays] = useState(30);
 
   useEffect(() => {
     if (!currentUser?.is_super_admin) {
@@ -69,39 +85,94 @@ export default function SuperAdminDashboard() {
     navigate('/');
   };
 
+  const resetForm = () => {
+    setBusinessName('');
+    setBusinessEmail('');
+    setBusinessPhone('');
+    setBusinessAddress('');
+    setOwnerFirstName('');
+    setOwnerLastName('');
+    setOwnerEmail('');
+    setOwnerUsername('');
+    setOwnerPassword('');
+    setPlan('pro');
+    setDurationDays(30);
+    setActiveTab('business');
+    setFormError('');
+  };
+
+  const handleNextToOwner = () => {
+    if (!businessName.trim()) {
+      setFormError('Please enter the business name before continuing.');
+      return;
+    }
+    setFormError('');
+    setActiveTab('owner');
+  };
+
   const handleCreateTenant = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
+
+    if (!businessName.trim()) {
+      setActiveTab('business');
+      setFormError('Business name is required.');
+      return;
+    }
+
+    if (!ownerFirstName.trim() || !ownerLastName.trim()) {
+      setActiveTab('owner');
+      setFormError('Owner first and last name are required.');
+      return;
+    }
+
+    if (!ownerEmail.trim()) {
+      setActiveTab('owner');
+      setFormError('Owner email is required.');
+      return;
+    }
+
+    if (!ownerUsername.trim()) {
+      setActiveTab('owner');
+      setFormError('Owner username is required.');
+      return;
+    }
+
+    if (!ownerPassword) {
+      setActiveTab('owner');
+      setFormError('Owner initial password is required.');
+      return;
+    }
+
     setIsCreating(true);
     try {
       const res = await apiFetch('/api/super-admin/tenants', {
         method: 'POST',
         body: JSON.stringify({
-          businessName: newBusinessName,
-          ownerFirstName,
-          ownerLastName,
-          ownerEmail,
+          businessName: businessName.trim(),
+          businessEmail: businessEmail.trim() || undefined,
+          businessPhone: businessPhone.trim() || undefined,
+          businessAddress: businessAddress.trim() || undefined,
+          ownerFirstName: ownerFirstName.trim(),
+          ownerLastName: ownerLastName.trim(),
+          ownerEmail: ownerEmail.trim(),
+          ownerUsername: ownerUsername.trim(),
           ownerPassword,
           plan,
-          durationDays: parseInt(durationDays.toString(), 10)
+          durationDays: parseInt(durationDays.toString(), 10) || 30
         })
       });
       const data = await res.json();
-      if (data.success) {
-        // Reset form
-        setNewBusinessName('');
-        setOwnerFirstName('');
-        setOwnerLastName('');
-        setOwnerEmail('');
-        setOwnerPassword('');
-        setDurationDays(30);
-        // Refresh list
+      if (res.ok && data.success) {
+        resetForm();
+        setDialogOpen(false);
         fetchTenants();
       } else {
-        alert(data.message || 'Error creating tenant');
+        setFormError(data.message || 'Error creating tenant');
       }
     } catch (err) {
       console.error(err);
-      alert('An error occurred');
+      setFormError('An error occurred connecting to the backend.');
     } finally {
       setIsCreating(false);
     }
@@ -122,7 +193,7 @@ export default function SuperAdminDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
       </div>
     );
   }
@@ -132,7 +203,7 @@ export default function SuperAdminDashboard() {
       {/* Top Navbar */}
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100">
             <img src={logo} alt="Logo" className="w-7 h-7 object-contain" />
           </div>
           <div>
@@ -145,9 +216,9 @@ export default function SuperAdminDashboard() {
         
         <div className="flex items-center gap-4">
           <span className="text-sm font-medium text-gray-600">
-            {currentUser?.email}
+            {currentUser?.email || currentUser?.username}
           </span>
-          <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+          <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 text-gray-700 hover:text-emerald-800 hover:border-emerald-200">
             <LogOut className="w-4 h-4" />
             Logout
           </Button>
@@ -161,66 +232,294 @@ export default function SuperAdminDashboard() {
             <p className="text-sm text-gray-500 mt-1">Manage cloud businesses, owners, and subscriptions.</p>
           </div>
           
-          <Dialog>
+          <Dialog open={dialogOpen} onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) resetForm();
+          }}>
             <DialogTrigger asChild>
               <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 shadow-sm">
                 <Plus className="w-4 h-4" />
                 New Business
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Create New Business Tenant</DialogTitle>
+            <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader className="pb-2">
+                <DialogTitle className="text-xl font-bold text-gray-900">Provision New Tenant</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCreateTenant} className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Business Name</Label>
-                  <Input required value={newBusinessName} onChange={e => setNewBusinessName(e.target.value)} placeholder="Acme Hotel & Restaurant" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Owner First Name</Label>
-                    <Input required value={ownerFirstName} onChange={e => setOwnerFirstName(e.target.value)} placeholder="John" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Owner Last Name</Label>
-                    <Input required value={ownerLastName} onChange={e => setOwnerLastName(e.target.value)} placeholder="Doe" />
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label>Owner Email (Login Username)</Label>
-                  <Input type="email" required value={ownerEmail} onChange={e => setOwnerEmail(e.target.value)} placeholder="owner@acme.com" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Initial Password</Label>
-                  <Input type="text" required value={ownerPassword} onChange={e => setOwnerPassword(e.target.value)} placeholder="TempPass123" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Plan</Label>
-                    <select 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                      value={plan} 
-                      onChange={e => setPlan(e.target.value)}
-                    >
-                      <option value="free">Free</option>
-                      <option value="pro">Pro</option>
-                      <option value="enterprise">Enterprise</option>
-                    </select>
+              {/* Form Navigation Tabs */}
+              <div className="flex border-b border-gray-200 my-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('business')}
+                  className={`flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
+                    activeTab === 'business'
+                      ? 'border-emerald-600 text-emerald-700 bg-emerald-50/70 rounded-t-lg'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                    activeTab === 'business' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    1
                   </div>
-                  <div className="space-y-2">
-                    <Label>Initial Duration (Days)</Label>
-                    <Input type="number" required min="1" value={durationDays} onChange={e => setDurationDays(Number(e.target.value))} />
-                  </div>
-                </div>
+                  <Building2 className="w-4 h-4" />
+                  <span>Business Profile</span>
+                </button>
 
-                <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isCreating}>
-                  {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : 'Provision Tenant'}
-                </Button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('owner')}
+                  className={`flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
+                    activeTab === 'owner'
+                      ? 'border-emerald-600 text-emerald-700 bg-emerald-50/70 rounded-t-lg'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                    activeTab === 'owner' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    2
+                  </div>
+                  <User className="w-4 h-4" />
+                  <span>Owner Info</span>
+                </button>
+              </div>
+
+              {formError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl flex items-start gap-2.5 text-xs mt-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleCreateTenant} className="space-y-4 pt-2">
+                {/* 1. BUSINESS PROFILE TAB */}
+                {activeTab === 'business' && (
+                  <div className="space-y-4 animate-in fade-in-50 duration-200">
+                    <div className="p-3 bg-emerald-50/40 rounded-xl border border-emerald-100 mb-3">
+                      <h3 className="text-sm font-semibold text-emerald-950 flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-emerald-600" /> Business Details
+                      </h3>
+                      <p className="text-xs text-emerald-800/80 mt-0.5">
+                        Matches the desktop setup wizard profile fields.
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
+                      <Label className="text-xs font-medium text-gray-700">Business Name *</Label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input 
+                          required 
+                          value={businessName} 
+                          onChange={e => setBusinessName(e.target.value)} 
+                          placeholder="Grand Hotel & Restaurant" 
+                          className="pl-10 h-10 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-medium text-gray-700">Business Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input 
+                            type="email"
+                            value={businessEmail} 
+                            onChange={e => setBusinessEmail(e.target.value)} 
+                            placeholder="contact@hotel.com" 
+                            className="pl-10 h-10 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-medium text-gray-700">Business Phone</Label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input 
+                            value={businessPhone} 
+                            onChange={e => setBusinessPhone(e.target.value)} 
+                            placeholder="+1 234 567 8900" 
+                            className="pl-10 h-10 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
+                      <Label className="text-xs font-medium text-gray-700">Business Address</Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input 
+                          value={businessAddress} 
+                          onChange={e => setBusinessAddress(e.target.value)} 
+                          placeholder="123 Main St, City" 
+                          className="pl-10 h-10 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                      <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-medium text-gray-700">Subscription Plan</Label>
+                        <select 
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                          value={plan} 
+                          onChange={e => setPlan(e.target.value)}
+                        >
+                          <option value="free">Free Trial</option>
+                          <option value="pro">Pro</option>
+                          <option value="enterprise">Enterprise</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-medium text-gray-700">Duration (Days)</Label>
+                        <Input 
+                          type="number" 
+                          required 
+                          min="1" 
+                          value={durationDays} 
+                          onChange={e => setDurationDays(Number(e.target.value))} 
+                          className="h-10 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-3 flex justify-end">
+                      <Button 
+                        type="button" 
+                        onClick={handleNextToOwner}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                      >
+                        Next: Owner Info
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. OWNER INFO TAB */}
+                {activeTab === 'owner' && (
+                  <div className="space-y-4 animate-in fade-in-50 duration-200">
+                    <div className="p-3 bg-emerald-50/40 rounded-xl border border-emerald-100 mb-3">
+                      <h3 className="text-sm font-semibold text-emerald-950 flex items-center gap-2">
+                        <User className="w-4 h-4 text-emerald-600" /> Owner Account & POS Credentials
+                      </h3>
+                      <p className="text-xs text-emerald-800/80 mt-0.5">
+                        Separates Account Email from the POS Login Username.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-medium text-gray-700">First Name *</Label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input 
+                            required 
+                            value={ownerFirstName} 
+                            onChange={e => setOwnerFirstName(e.target.value)} 
+                            placeholder="John" 
+                            className="pl-10 h-10 text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-medium text-gray-700">Last Name *</Label>
+                        <Input 
+                          required 
+                          value={ownerLastName} 
+                          onChange={e => setOwnerLastName(e.target.value)} 
+                          placeholder="Doe" 
+                          className="h-10 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* SEPARATED EMAIL AND USERNAME */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-medium text-gray-700">Owner Email (Account) *</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input 
+                            type="email" 
+                            required 
+                            value={ownerEmail} 
+                            onChange={e => setOwnerEmail(e.target.value)} 
+                            placeholder="owner@hotel.com" 
+                            className="pl-10 h-10 text-sm"
+                          />
+                        </div>
+                        <p className="text-[11px] text-gray-400">Used for cloud account & SaaS access</p>
+                      </div>
+
+                      <div className="space-y-1.5 text-left">
+                        <Label className="text-xs font-medium text-gray-700">Owner Username (POS) *</Label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input 
+                            type="text" 
+                            required 
+                            value={ownerUsername} 
+                            onChange={e => setOwnerUsername(e.target.value)} 
+                            placeholder="admin or john_owner" 
+                            className="pl-10 h-10 text-sm"
+                          />
+                        </div>
+                        <p className="text-[11px] text-gray-400">Used to sign in at the POS register</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
+                      <Label className="text-xs font-medium text-gray-700">Initial Password *</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input 
+                          type="text" 
+                          required 
+                          value={ownerPassword} 
+                          onChange={e => setOwnerPassword(e.target.value)} 
+                          placeholder="TemporaryPassword123" 
+                          className="pl-10 h-10 text-sm font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex items-center justify-between border-t border-gray-100">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setActiveTab('business')}
+                        className="gap-2 text-gray-600"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Business
+                      </Button>
+
+                      <Button 
+                        type="submit" 
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 shadow-sm" 
+                        disabled={isCreating}
+                      >
+                        {isCreating ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Provisioning Tenant...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-4 h-4" />
+                            Provision Tenant
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </form>
             </DialogContent>
           </Dialog>
@@ -229,7 +528,7 @@ export default function SuperAdminDashboard() {
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center">
               <Building2 className="w-6 h-6" />
             </div>
             <div>
@@ -239,7 +538,7 @@ export default function SuperAdminDashboard() {
           </div>
           
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100">
               <Users className="w-6 h-6" />
             </div>
             <div>
@@ -249,7 +548,7 @@ export default function SuperAdminDashboard() {
           </div>
           
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center border border-amber-100">
               <CalendarClock className="w-6 h-6" />
             </div>
             <div>
@@ -267,8 +566,8 @@ export default function SuperAdminDashboard() {
             <table className="w-full text-sm text-left">
               <thead className="bg-gray-50/80 text-gray-600 font-medium border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4">Business</th>
-                  <th className="px-6 py-4">Owner</th>
+                  <th className="px-6 py-4">Business Profile</th>
+                  <th className="px-6 py-4">Owner Info</th>
                   <th className="px-6 py-4">Plan</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Expiry</th>
@@ -281,8 +580,28 @@ export default function SuperAdminDashboard() {
                     <td className="px-6 py-4">
                       {tenant.business ? (
                         <div>
-                          <p className="font-semibold text-gray-900">{tenant.business.name}</p>
-                          <p className="text-xs text-gray-500">ID: {tenant.business.id.split('-')[0]}...</p>
+                          <p className="font-semibold text-gray-900 flex items-center gap-1.5">
+                            <Building2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            {tenant.business.name}
+                          </p>
+                          {tenant.business.email && (
+                            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                              <Mail className="w-3 h-3 text-gray-400" />
+                              {tenant.business.email}
+                            </p>
+                          )}
+                          {tenant.business.phone && (
+                            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                              <Phone className="w-3 h-3 text-gray-400" />
+                              {tenant.business.phone}
+                            </p>
+                          )}
+                          {tenant.business.address && (
+                            <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                              <MapPin className="w-3 h-3 text-gray-400" />
+                              {tenant.business.address}
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <span className="text-gray-400 italic">No Business</span>
@@ -291,28 +610,36 @@ export default function SuperAdminDashboard() {
                     <td className="px-6 py-4">
                       {tenant.account ? (
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-gray-900 flex items-center gap-1">
+                            <User className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                             {tenant.account.first_name} {tenant.account.last_name}
                           </p>
-                          <p className="text-xs text-gray-500">{tenant.account.email}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            <span className="text-gray-400 font-medium">Email:</span> {tenant.account.email}
+                          </p>
+                          {tenant.business?.owner?.username && (
+                            <p className="text-xs text-emerald-700 font-mono mt-1 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 w-fit">
+                              POS User: @{tenant.business.owner.username}
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <span className="text-gray-400">N/A</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="capitalize px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md font-medium text-xs">
+                      <span className="capitalize px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-md font-semibold text-xs">
                         {tenant.plan}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       {tenant.status === 'active' || tenant.status === 'trial' ? (
-                        <div className="flex items-center gap-1.5 text-emerald-600 font-medium text-xs bg-emerald-50 px-2.5 py-1 rounded-md w-fit">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        <div className="flex items-center gap-1.5 text-emerald-700 font-medium text-xs bg-emerald-50 px-2.5 py-1 rounded-md w-fit border border-emerald-100">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                           <span className="capitalize">{tenant.status}</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1.5 text-rose-600 font-medium text-xs bg-rose-50 px-2.5 py-1 rounded-md w-fit">
+                        <div className="flex items-center gap-1.5 text-rose-600 font-medium text-xs bg-rose-50 px-2.5 py-1 rounded-md w-fit border border-rose-100">
                           <AlertCircle className="w-3.5 h-3.5" />
                           <span className="capitalize">{tenant.status}</span>
                         </div>
@@ -327,7 +654,7 @@ export default function SuperAdminDashboard() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800"
+                        className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800 font-medium text-xs"
                         onClick={() => handleExtendSubscription(tenant.subscription_id)}
                       >
                         +30 Days

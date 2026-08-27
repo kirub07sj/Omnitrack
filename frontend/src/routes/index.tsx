@@ -41,7 +41,21 @@ import AddExpensePage from '../modules/expenses/pages/AddExpensePage';
 import ReportsPage from '../modules/reports/pages/ReportsPage';
 
 import Login from '../modules/auth/Login';
-import SuperAdminDashboard from '../modules/super-admin/SuperAdminDashboard';
+import SuperAdminLayout from '../modules/super-admin/layouts/SuperAdminLayout';
+import SuperAdminOverview from '../modules/super-admin/pages/SuperAdminOverview';
+import SuperAdminBusinesses from '../modules/super-admin/pages/SuperAdminBusinesses';
+import SuperAdminBusinessDetails from '../modules/super-admin/pages/SuperAdminBusinessDetails';
+import SuperAdminUsers from '../modules/super-admin/pages/SuperAdminUsers';
+import SuperAdminSubscriptions from '../modules/super-admin/pages/SuperAdminSubscriptions';
+import {
+  SuperAdminLicenses,
+  SuperAdminDevices,
+  SuperAdminSync,
+  SuperAdminSupport,
+  SuperAdminReports,
+  SuperAdminAuditLogs,
+  SuperAdminSettings
+} from '../modules/super-admin/pages/Placeholders';
 
 export const router = createHashRouter([
   {
@@ -54,7 +68,21 @@ export const router = createHashRouter([
   },
   {
     path: '/super-admin',
-    element: <SuperAdminDashboard />
+    element: <SuperAdminLayout />,
+    children: [
+      { path: '', element: <SuperAdminOverview /> },
+      { path: 'businesses', element: <SuperAdminBusinesses /> },
+      { path: 'businesses/:id', element: <SuperAdminBusinessDetails /> },
+      { path: 'users', element: <SuperAdminUsers /> },
+      { path: 'licenses', element: <SuperAdminLicenses /> },
+      { path: 'subscriptions', element: <SuperAdminSubscriptions /> },
+      { path: 'devices', element: <SuperAdminDevices /> },
+      { path: 'sync', element: <SuperAdminSync /> },
+      { path: 'support', element: <SuperAdminSupport /> },
+      { path: 'reports', element: <SuperAdminReports /> },
+      { path: 'audit-logs', element: <SuperAdminAuditLogs /> },
+      { path: 'settings', element: <SuperAdminSettings /> }
+    ]
   },
   {
     path: '/waiter',
