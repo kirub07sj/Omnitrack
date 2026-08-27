@@ -226,4 +226,78 @@ router.put('/tenants/:id/subscription', async (req: Request, res: Response) => {
   }
 });
 
+
+// 4. GET /businesses/:id - Detailed business view
+router.get('/businesses/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const business = await prisma.business.findUnique({
+      where: { id },
+      include: {
+        users: {
+          include: {
+            role: true,
+            employee: true
+          }
+        },
+        devices: true,
+        subscriptions: {
+          include: { account: true },
+          orderBy: { created_at: 'desc' }
+        }
+      }
+    });
+
+    if (!business) {
+      res.status(404).json({ success: false, message: 'Business not found' });
+      return;
+    }
+
+    res.json({ success: true, business });
+  } catch (error) {
+    console.error('Error fetching business details:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch business details' });
+  }
+});
+
+
+// 5. GET /users - List all users across the platform
+router.get('/users', async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      include: {
+        business: { select: { name: true } },
+        role: { select: { name: true } },
+        employee: { select: { first_name: true, last_name: true, email: true } }
+      },
+      orderBy: { created_at: 'desc' }
+    });
+
+    res.json({ success: true, users });
+  } catch (error) {
+    console.error('Error fetching platform users:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch platform users' });
+  }
+});
+
+// 6. GET /subscriptions - List all subscriptions
+router.get('/subscriptions', async (req: Request, res: Response) => {
+  try {
+    const subscriptions = await prisma.subscription.findMany({
+      include: {
+        business: { select: { name: true } },
+        account: { select: { first_name: true, last_name: true, email: true } }
+      },
+      orderBy: { created_at: 'desc' }
+    });
+
+    res.json({ success: true, subscriptions });
+  } catch (error) {
+    console.error('Error fetching subscriptions:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch subscriptions' });
+  }
+});
+
 export default router;
+
+
