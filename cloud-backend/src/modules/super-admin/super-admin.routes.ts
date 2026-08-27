@@ -38,6 +38,9 @@ router.get('/tenants', async (req: Request, res: Response) => {
       business: sub.business ? {
         id: sub.business.id,
         name: sub.business.name,
+        email: sub.business.email,
+        phone: sub.business.phone,
+        address: sub.business.address,
         created_at: sub.business.created_at,
         owner: sub.business.users[0]?.employee ? {
           first_name: sub.business.users[0].employee.first_name,
@@ -58,23 +61,41 @@ router.get('/tenants', async (req: Request, res: Response) => {
 router.post('/tenants', async (req: Request, res: Response) => {
   try {
     const { 
+      // Business Profile (matching desktop setup)
       businessName, 
+      businessEmail,
+      businessPhone,
+      businessAddress,
+      currency = 'USD',
+
+      // Owner Info (matching desktop setup with separated email and username)
       ownerFirstName, 
       ownerLastName, 
       ownerEmail, 
+      ownerUsername,
       ownerPassword, 
+
+      // Subscription
       plan = 'pro',
       durationDays = 30 
     } = req.body;
 
-    if (!businessName || !ownerFirstName || !ownerLastName || !ownerEmail || !ownerPassword) {
-      res.status(400).json({ success: false, message: 'Missing required fields' });
+    const usernameToUse = ownerUsername || ownerEmail;
+
+    if (!businessName || !ownerFirstName || !ownerLastName || !ownerEmail || !usernameToUse || !ownerPassword) {
+      res.status(400).json({ success: false, message: 'Missing required fields. Please provide business name, owner names, email, username, and password.' });
       return;
     }
 
     const existingAccount = await prisma.account.findUnique({ where: { email: ownerEmail } });
     if (existingAccount) {
-      res.status(409).json({ success: false, message: 'An account with this email already exists' });
+      res.status(409).json({ success: false, message: 'An account with this email already exists.' });
+      return;
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { username: usernameToUse } });
+    if (existingUser) {
+      res.status(409).json({ success: false, message: 'A user with this username already exists.' });
       return;
     }
 
@@ -83,7 +104,7 @@ router.post('/tenants', async (req: Request, res: Response) => {
     const password_hash = await bcrypt.hash(ownerPassword, salt);
 
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + durationDays);
+    expiresAt.setDate(expiresAt.getDate() + Number(durationDays || 30));
 
     // Create everything in a transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -101,7 +122,11 @@ router.post('/tenants', async (req: Request, res: Response) => {
       const business = await tx.business.create({
         data: {
           name: businessName,
-          currency: 'USD'
+          email: businessEmail || null,
+          phone: businessPhone || null,
+          address: businessAddress || null,
+          currency: currency || 'USD',
+          owner_name: `${ownerFirstName} ${ownerLastName}`.trim()
         }
       });
 
@@ -117,17 +142,20 @@ router.post('/tenants', async (req: Request, res: Response) => {
           business_id: business.id,
           first_name: ownerFirstName,
           last_name: ownerLastName,
+          email: ownerEmail || null,
+          phone: businessPhone || null,
+          address: businessAddress || null,
           status: 'Active'
         }
       });
 
-      // 5. Create Owner User
+      // 5. Create Owner User (distinct username separated from email!)
       await tx.user.create({
         data: {
           business_id: business.id,
           employee_id: employee.id,
           role_id: role.id,
-          username: ownerEmail, // Using email as username
+          username: usernameToUse,
           password_hash,
           status: 'Active'
         }
