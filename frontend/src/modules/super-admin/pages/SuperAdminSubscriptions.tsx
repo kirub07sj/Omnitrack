@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
-import { Loader2, Building2, CalendarClock, User } from 'lucide-react';
+import { Loader2, Building2, User } from 'lucide-react';
 
 export default function SuperAdminSubscriptions() {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
