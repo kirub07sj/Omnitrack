@@ -12,6 +12,18 @@ const BASE_URL = isElectron ? 'http://localhost:5055' : '';
 // 1. Configure Axios
 axios.defaults.baseURL = BASE_URL;
 
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token && import.meta.env.VITE_MODE === 'cloud') {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  // In cloud mode, axios calls should also use the cloud API base url if they are using relative paths
+  if (import.meta.env.VITE_MODE === 'cloud' && config.url?.startsWith('/api')) {
+    config.baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+  }
+  return config;
+});
+
 // 2. Wrap native fetch
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
