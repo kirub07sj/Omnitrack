@@ -194,7 +194,7 @@ router.put('/tenants/:id/subscription', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { status, addDays } = req.body;
 
-    const subscription = await prisma.subscription.findUnique({ where: { id } });
+    const subscription = await prisma.subscription.findUnique({ where: { id: id as string } });
     if (!subscription) {
       res.status(404).json({ success: false, message: 'Subscription not found' });
       return;
@@ -215,7 +215,7 @@ router.put('/tenants/:id/subscription', async (req: Request, res: Response) => {
     }
 
     const updated = await prisma.subscription.update({
-      where: { id },
+      where: { id: id as string },
       data: dataToUpdate
     });
 
@@ -232,7 +232,7 @@ router.get('/businesses/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const business = await prisma.business.findUnique({
-      where: { id },
+      where: { id: id as string },
       include: {
         users: {
           include: {
@@ -240,7 +240,7 @@ router.get('/businesses/:id', async (req: Request, res: Response) => {
             employee: true
           }
         },
-        devices: true,
+        
         subscriptions: {
           include: { account: true },
           orderBy: { created_at: 'desc' }
@@ -269,8 +269,7 @@ router.get('/users', async (req: Request, res: Response) => {
         business: { select: { name: true } },
         role: { select: { name: true } },
         employee: { select: { first_name: true, last_name: true, email: true } }
-      },
-      orderBy: { created_at: 'desc' }
+      }
     });
 
     res.json({ success: true, users });
