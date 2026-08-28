@@ -1,4 +1,4 @@
-import { createHashRouter } from 'react-router-dom';
+import { createHashRouter, createBrowserRouter } from 'react-router-dom';
 import SetupLayout from '../layouts/SetupLayout';
 import SetupWizard from '../modules/setup/SetupWizard';
 import App from '../App';
@@ -57,7 +57,8 @@ import {
   SuperAdminSettings
 } from '../modules/super-admin/pages/Placeholders';
 
-export const router = createHashRouter([
+const isElectron = typeof window !== 'undefined' && window.location.protocol === 'file:';
+export const router = (isElectron || import.meta.env.VITE_MODE !== 'cloud' ? createHashRouter : createBrowserRouter)([
   {
     path: '/',
     element: <App />, // We'll update this later to Dashboard/Auth based on state

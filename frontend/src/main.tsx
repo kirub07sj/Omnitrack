@@ -35,7 +35,19 @@ const originalFetch = window.fetch;
 window.fetch = async (...args) => {
   let [resource, config] = args;
   if (typeof resource === 'string' && resource.startsWith('/api')) {
-    resource = BASE_URL + resource;
+    const isCloud = import.meta.env.VITE_MODE === 'cloud';
+    resource = isCloud ? (import.meta.env.VITE_API_BASE_URL || '/api') + resource.substring(4) : BASE_URL + resource;
+    
+    if (isCloud) {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        config = config || {};
+        config.headers = {
+          ...config.headers,
+          'Authorization': `Bearer ${token}`
+        };
+      }
+    }
   }
   return originalFetch(resource, config);
 };
