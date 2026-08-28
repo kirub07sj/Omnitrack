@@ -128,6 +128,7 @@ app.post('/api/sync/push', async (req, res) => {
 
 // 3. Public Routes (No Auth)
 app.use('/api/account', accountRoutes);
+app.use('/api/auth', authRoutes);
 
 // 4. Protected Routes
 // Apply global auth middleware
@@ -135,7 +136,6 @@ app.use('/api', authMiddleware);
 
 // Auth & Setup (Subscription check not needed here, they might not have a business yet)
 app.use('/api/super-admin', superAdminRoutes);
-app.use('/api/auth', authRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 
