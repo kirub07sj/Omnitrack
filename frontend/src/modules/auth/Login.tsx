@@ -37,7 +37,18 @@ export default function Login() {
           setAuthToken(data.token);
         }
         
-        const loggedInUser = data.account || data.user;
+        let loggedInUser = data.account || data.user;
+        
+        // Normalize account to look like a user object for the store
+        if (data.account && !data.account.is_super_admin) {
+          loggedInUser = {
+            ...loggedInUser,
+            role: 'Owner',
+            firstName: data.account.first_name,
+            lastName: data.account.last_name,
+          };
+        }
+
         login(loggedInUser);
         
         await checkSetupStatus();

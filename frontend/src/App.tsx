@@ -62,7 +62,7 @@ export default function App() {
           if (currentUser.is_super_admin) {
             navigate('/super-admin');
           } else {
-            navigate(`/${currentUser.role.toLowerCase()}`);
+            navigate(`/${(currentUser.role || 'owner').toLowerCase()}`);
           }
         }
       } else {
