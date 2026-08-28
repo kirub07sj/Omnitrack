@@ -15,7 +15,13 @@ axios.defaults.baseURL = BASE_URL;
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
   if (token && import.meta.env.VITE_MODE === 'cloud') {
-    config.headers.Authorization = `Bearer ${token}`;
+    if (config.headers) {
+      if (typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
   }
   // In cloud mode, axios calls should also use the cloud API base url if they are using relative paths
   if (import.meta.env.VITE_MODE === 'cloud' && config.url?.startsWith('/api')) {
