@@ -54,9 +54,9 @@ export default function Login() {
         await checkSetupStatus();
         
         if (loggedInUser?.is_super_admin) {
-          navigate('/super-admin');
+          navigate('/super-admin', { replace: true });
         } else {
-          navigate('/');
+          navigate(`/${(loggedInUser.role || 'owner').toLowerCase()}`, { replace: true });
         }
       } else {
         setError(data.message || 'Login failed');
