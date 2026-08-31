@@ -1,33 +1,24 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 
 const router = Router();
-const isVercel = !!process.env.VERCEL;
-const baseUploadDir = isVercel
-  ? '/tmp/uploads'
-  : (process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'));
-const uploadDir = path.join(baseUploadDir, 'products');
 
-try {
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-} catch (e) {
-  console.warn('Could not create upload directory:', uploadDir);
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
-  }
+// Store file in memory to convert to Base64 (Perfect for Vercel Serverless where /tmp is ephemeral)
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage, 
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit 
 });
 
-const upload = multer({ storage });
 router.post('/', upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-  const fileUrl = `/uploads/products/${req.file.filename}`;
+  
+  // Convert buffer to base64 Data URL
+  const base64Image = req.file.buffer.toString('base64');
+  const mimeType = req.file.mimetype;
+  const fileUrl = `data:${mimeType};base64,${base64Image}`;
+  
   res.status(200).json({ url: fileUrl });
 });
+
 export default router;
