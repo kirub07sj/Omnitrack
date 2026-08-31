@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Search, Filter, Receipt, Banknote, Plus } from 'lucide-react';
@@ -119,8 +120,8 @@ export default function PaymentQueue() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({length: 8}).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-xl" />)}
         </div>
       ) : filteredOrders.length === 0 ? (
         <Card className="border-dashed">

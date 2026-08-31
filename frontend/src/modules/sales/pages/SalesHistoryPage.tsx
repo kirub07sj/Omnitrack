@@ -12,6 +12,7 @@ import ReceiptDialog from '../components/ReceiptDialog';
 import RefundDialog from '../components/RefundDialog';
 import { CheckCircle2 } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SalesHistoryPage() {
   const { currentUser } = useAppStore();
@@ -188,8 +189,10 @@ export default function SalesHistoryPage() {
               <tbody className="divide-y">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center">
-                      <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
+                    <td colSpan={7} className="py-6 px-4">
+                      <div className="space-y-3 w-full">
+                        {Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-md" />)}
+                      </div>
                     </td>
                   </tr>
                 ) : filteredSales.length === 0 ? (

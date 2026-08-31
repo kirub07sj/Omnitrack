@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
 import { ProductService } from "../services/product.service";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProductListPage() {
   const navigate = useNavigate();
@@ -115,9 +116,11 @@ export default function ProductListPage() {
             <Button variant="outline" onClick={fetchProducts} className="mt-4 border-border">Retry</Button>
           </div>
         ) : loading ? (
-          <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-muted-foreground animate-pulse">Loading products...</p>
+          <div className="space-y-4 w-full">
+            <Skeleton className="h-10 w-full rounded-lg" />
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-lg" />
+            ))}
           </div>
         ) : (
           <ProductTable 

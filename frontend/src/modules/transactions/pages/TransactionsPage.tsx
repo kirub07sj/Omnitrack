@@ -7,6 +7,7 @@ import { ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSettings } from '@/hooks/useSettings';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TransactionsPage() {
   const { currentUser } = useAppStore();
@@ -125,8 +126,14 @@ export default function TransactionsPage() {
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <div className="py-10 text-center text-muted-foreground">Loading...</div>
-          ) : (
+                  <tr>
+                    <td colSpan={7} className="py-6 px-4">
+                      <div className="space-y-3 w-full">
+                        {Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-md" />)}
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader className="bg-muted/50">

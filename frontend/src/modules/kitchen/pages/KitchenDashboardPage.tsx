@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Loader2, ChefHat, CheckCircle2, Clock, Image as ImageIcon, QrCode } from 'lucide-react';
 import { getImageUrl } from '@/utils/image';
 import QRCode from 'react-qr-code';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function KitchenDashboardPage() {
   const { currentUser } = useAppStore();
@@ -101,9 +102,11 @@ export default function KitchenDashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[500px]">
-        <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-        <p className="text-muted-foreground animate-pulse">Loading Kitchen Display...</p>
+      <div className="p-6 max-w-[1600px] mx-auto space-y-6 w-full">
+        <div className="flex justify-between items-center"><Skeleton className="h-10 w-[200px]" /><Skeleton className="h-10 w-[150px]" /></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}
+        </div>
       </div>
     );
   }
