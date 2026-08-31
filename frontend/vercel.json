@@ -6,6 +6,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://omnitrack-cloud-backend.vercel.app/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
