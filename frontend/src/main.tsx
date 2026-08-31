@@ -36,7 +36,8 @@ window.fetch = async (...args) => {
   let [resource, config] = args;
   if (typeof resource === 'string' && resource.startsWith('/api')) {
     const isCloud = import.meta.env.VITE_MODE === 'cloud';
-    resource = isCloud ? (import.meta.env.VITE_API_BASE_URL || '/api') + resource.substring(4) : BASE_URL + resource;
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || '';
+    resource = isCloud ? apiUrl + (resource.startsWith('/api') ? resource : '/api' + resource) : BASE_URL + resource;
     
     if (isCloud) {
       const token = localStorage.getItem('auth_token');
