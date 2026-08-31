@@ -1,9 +1,16 @@
 import { useState } from 'react';
+import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
 import { AlertCircle } from 'lucide-react';
 import { apiFetch, setAuthToken } from '@/lib/api';
 import logo from '@/assets/logo.png';
+
+
+const loginSchema = z.object({
+  username: z.string().min(1, "Username/Email is required"),
+  password: z.string().min(1, "Password is required")
+});
 
 export default function Login() {
   const navigate = useNavigate();
@@ -19,6 +26,13 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    const validation = loginSchema.safeParse({ username, password });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      setLoading(false);
+      return;
+    }
 
     try {
       // Determine if logging in as an Account (email) or Employee (username)

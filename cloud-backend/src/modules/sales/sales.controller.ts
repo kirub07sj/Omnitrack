@@ -18,7 +18,6 @@ export const checkoutOrder = async (req: Request, res: Response) => {
   try {
     const business_id = (req as any).user.business_id;
     const { order_id, cashier_id, payment_method, subtotal, tax, discount, total, amount_received } = req.body;
-    if (!business_id || !order_id || !cashier_id || !payment_method || total === undefined) return res.status(400).json({ error: 'Missing required fields' });
 
     const result = await prisma.$transaction(async (tx) => {
       const order = await tx.order.update({ where: { id: order_id }, data: { status: 'Completed' }, include: { table: true } });
@@ -39,7 +38,6 @@ export const createManualSale = async (req: Request, res: Response) => {
   try {
     const business_id = (req as any).user.business_id;
     const { table_id, waiter_id, cashier_id, items, payment_method, subtotal, tax, discount, total } = req.body;
-    if (!business_id || !cashier_id || !payment_method || !items || !items.length) return res.status(400).json({ error: 'Missing required fields' });
 
     const result = await prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
@@ -90,7 +88,6 @@ export const refundSale = async (req: Request, res: Response) => {
   try {
     const business_id = (req as any).user.business_id;
     const { sale_id, cashier_id, reason, amount } = req.body;
-    if (!business_id || !sale_id || !cashier_id) return res.status(400).json({ error: 'Missing required fields' });
 
     const result = await prisma.$transaction(async (tx) => {
       const originalSale = await tx.sale.findUnique({ where: { id: sale_id } });

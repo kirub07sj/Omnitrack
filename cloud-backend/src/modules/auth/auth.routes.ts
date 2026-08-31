@@ -2,15 +2,16 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../config/database';
+import { validate } from '../../middleware/validate';
+import { setupOwnerSchema, loginSchema, updateProfileSchema } from '../../schemas/auth.schema';
 
 const router = Router();
 
-router.post('/setup-owner', async (req, res) => {
+router.post('/setup-owner', validate(setupOwnerSchema), async (req, res) => {
   try {
     const { firstName, lastName, username, password } = req.body;
     const business_id = (req as any).user.business_id;
 
-    if (!firstName || !lastName || !username || !password) return res.status(400).json({ success: false, message: 'All fields are required.' });
     if (!business_id) return res.status(400).json({ success: false, message: 'Business not found.' });
 
     const existingOwner = await prisma.user.findFirst({ where: { business_id, role: { name: 'Owner' } } });
@@ -37,7 +38,7 @@ router.post('/setup-owner', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', validate(loginSchema), async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -77,10 +78,9 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.put('/update-profile', async (req, res) => {
+router.put('/update-profile', validate(updateProfileSchema), async (req, res) => {
   try {
     const { userId, firstName, lastName, currentPin, newPin, email } = req.body;
-    if (!userId) return res.status(400).json({ success: false, message: 'User ID is required.' });
 
     const user = await prisma.user.findUnique({ where: { id: userId }, include: { employee: true, role: true } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });

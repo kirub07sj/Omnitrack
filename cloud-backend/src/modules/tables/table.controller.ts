@@ -40,7 +40,6 @@ export const setupTables = async (req: Request, res: Response) => {
   try {
     const business_id = (req as any).user.business_id;
     const { count } = req.body;
-    if (!count) return res.status(400).json({ message: 'count is required' });
 
     const tableCount = parseInt(count);
     const currentTables = await prisma.restaurantTable.findMany({ where: { business_id } });

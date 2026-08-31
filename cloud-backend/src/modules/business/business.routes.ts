@@ -2,6 +2,8 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../config/database';
+import { validate } from '../../middleware/validate';
+import { setupBusinessSchema, setupEmployeeSchema, setupProductSchema, updateSettingsSchema } from '../../schemas/business.schema';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'omnitrack-cloud-secret';
 const router = Router();
@@ -41,12 +43,10 @@ router.get('/status', async (req, res) => {
   }
 });
 
-router.post('/setup', async (req, res) => {
+router.post('/setup', validate(setupBusinessSchema), async (req, res) => {
   try {
     const { name, phone, email, address, currency } = req.body;
     const user = (req as any).user;
-
-    if (!name) return res.status(400).json({ success: false, message: 'Business name is required.' });
 
     const existingSub = await prisma.subscription.findFirst({ where: { account_id: user.account_id } });
     if (existingSub) return res.status(400).json({ success: false, message: 'You already have a business.' });
@@ -71,7 +71,7 @@ router.post('/setup', async (req, res) => {
   }
 });
 
-router.post('/setup-employee', async (req, res) => {
+router.post('/setup-employee', validate(setupEmployeeSchema), async (req, res) => {
   try {
     const { firstName, lastName, roleName, username, password } = req.body;
     const business_id = (req as any).user.business_id;
@@ -97,7 +97,7 @@ router.post('/setup-employee', async (req, res) => {
   }
 });
 
-router.post('/setup-product', async (req, res) => {
+router.post('/setup-product', validate(setupProductSchema), async (req, res) => {
   try {
     const { name, price } = req.body;
     const business_id = (req as any).user.business_id;
@@ -115,7 +115,7 @@ router.post('/setup-product', async (req, res) => {
   }
 });
 
-router.put('/settings', async (req, res) => {
+router.put('/settings', validate(updateSettingsSchema), async (req, res) => {
   try {
     const business_id = (req as any).user.business_id;
     const { is_kitchen_active, name, owner_name, phone, email, address, logo, currency, tax_rate, settings } = req.body;

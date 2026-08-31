@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '../../config/database';
 import bcrypt from 'bcryptjs';
 import { superAdminMiddleware } from '../../middleware/super-admin.middleware';
+import { validate } from '../../middleware/validate';
+import { createTenantSchema, updateSubscriptionSchema } from '../../schemas/super-admin.schema';
 
 const router = Router();
 
@@ -58,7 +60,7 @@ router.get('/tenants', async (req: Request, res: Response) => {
 });
 
 // 2. POST /tenants - Create a new tenant (Account, Business, Owner User, Subscription)
-router.post('/tenants', async (req: Request, res: Response) => {
+router.post('/tenants', validate(createTenantSchema), async (req: Request, res: Response) => {
   try {
     const { 
       // Business Profile (matching desktop setup)
@@ -81,11 +83,6 @@ router.post('/tenants', async (req: Request, res: Response) => {
     } = req.body;
 
     const usernameToUse = ownerUsername || ownerEmail;
-
-    if (!businessName || !ownerFirstName || !ownerLastName || !ownerEmail || !usernameToUse || !ownerPassword) {
-      res.status(400).json({ success: false, message: 'Missing required fields. Please provide business name, owner names, email, username, and password.' });
-      return;
-    }
 
     const existingAccount = await prisma.account.findUnique({ where: { email: ownerEmail } });
     if (existingAccount) {
@@ -189,7 +186,7 @@ router.post('/tenants', async (req: Request, res: Response) => {
 });
 
 // 3. PUT /tenants/:id/subscription - Update subscription
-router.put('/tenants/:id/subscription', async (req: Request, res: Response) => {
+router.put('/tenants/:id/subscription', validate(updateSubscriptionSchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status, addDays } = req.body;

@@ -1,10 +1,26 @@
 import { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, AlertCircle, Building2, Mail, Phone, MapPin, User, Lock, ChevronRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import logo from '@/assets/logo.png';
+
+
+const businessSchema = z.object({
+  name: z.string().min(1, "Business name is required"),
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  phone: z.string().optional(),
+  address: z.string().optional()
+});
+
+const ownerSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters")
+});
 
 export default function SetupWizard() {
   const { currentSetupStep, checkSetupStatus, markBusinessCreated, markOwnerCreated } = useAppStore();
@@ -22,6 +38,13 @@ export default function SetupWizard() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    
+    const validation = businessSchema.safeParse(businessData);
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await apiFetch('/api/business/setup', {
@@ -49,6 +72,13 @@ export default function SetupWizard() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    
+    const validation = ownerSchema.safeParse(ownerData);
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await apiFetch('/api/auth/setup-owner', {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Loader2, Users, Utensils, CheckCircle2 } from 'lucide-react';
@@ -11,6 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+
+const setupSchema = z.object({
+  tableCount: z.number().min(1, "Table count must be at least 1").max(500, "Maximum 500 tables allowed")
+});
 
 export default function TableManagementPage() {
   const { currentUser } = useAppStore();
@@ -67,6 +73,12 @@ export default function TableManagementPage() {
 
   const handleSetup = async () => {
     if (!tableCount || isNaN(Number(tableCount))) return;
+    
+    const validation = setupSchema.safeParse({ tableCount: Number(tableCount) });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      return;
+    }
     
     try {
       setSetupLoading(true);

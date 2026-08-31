@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+
+
+const tenantSchema = z.object({
+  businessName: z.string().min(1, "Business name is required"),
+  ownerFirstName: z.string().min(1, "Owner first name is required"),
+  ownerLastName: z.string().min(1, "Owner last name is required"),
+  ownerEmail: z.string().email("Invalid email for owner"),
+  ownerUsername: z.string().min(3, "Owner username must be at least 3 characters"),
+  ownerPassword: z.string().min(6, "Initial password must be at least 6 characters")
+});
 
 export default function SuperAdminBusinesses() {
   const navigate = useNavigate();
