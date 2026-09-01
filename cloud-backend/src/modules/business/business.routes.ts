@@ -9,6 +9,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'omnitrack-cloud-secret';
 const router = Router();
 
 router.get('/status', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   try {
     const user = (req as any).user;
     let business: any = null;

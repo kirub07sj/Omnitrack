@@ -34,7 +34,7 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || '*', // Restrict this in Vercel settings!
+  origin: true, // Restrict this in Vercel settings!
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
