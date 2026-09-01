@@ -3,7 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Search, Filter, Receipt, Banknote, Plus } from 'lucide-react';
+import { Search, Filter, Receipt, Banknote, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import CheckoutDialog from '../components/CheckoutDialog';

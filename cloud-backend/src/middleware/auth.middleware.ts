@@ -3,9 +3,14 @@ import jwt from 'jsonwebtoken';
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const isStatusCheck = req.path === '/business/status' || req.originalUrl === '/api/business/status';
-  const authHeader = req.headers.authorization;
+  
+  // Check for token in cookies first, then fallback to Authorization header
+  let token = req.cookies?.token;
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!token) {
     if (isStatusCheck) {
       next();
       return;
@@ -13,8 +18,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     res.status(401).json({ message: 'Authentication required' });
     return;
   }
-
-  const token = authHeader.split(' ')[1];
 
   try {
     const secret = process.env.JWT_SECRET || 'omnitrack-cloud-secret';

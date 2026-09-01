@@ -64,7 +64,9 @@ router.post('/setup', validate(setupBusinessSchema), async (req, res) => {
 
     const newToken = jwt.sign({ account_id: user.account_id, email: user.email, business_id: business.id }, JWT_SECRET, { expiresIn: '30d' });
 
-    res.status(201).json({ success: true, business, token: newToken, message: 'Business profile created successfully!' });
+    res.cookie('token', newToken, { httpOnly: true, secure: process.env.VERCEL ? true : false, sameSite: process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'none' : 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
+
+    res.status(201).json({ success: true, business, message: 'Business profile created successfully!' });
   } catch (error) {
     console.error('Business setup error:', error);
     res.status(500).json({ success: false, message: 'An internal server error occurred during setup.' });

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -35,11 +36,13 @@ const PORT = process.env.PORT || 8000;
 const corsOptions = {
   origin: process.env.FRONTEND_URL || '*', // Restrict this in Vercel settings!
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 };
 
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
+app.use(cookieParser());
 const uploadsPath = process.env.VERCEL
   ? '/tmp/uploads'
   : path.join(process.cwd(), 'uploads');

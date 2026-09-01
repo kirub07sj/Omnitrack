@@ -57,7 +57,7 @@ export default function AddExpensePage() {
       amount: parseFloat(formData.amount),
       description: formData.description,
       category: formData.category,
-      payment_method: formData.payment_method
+      payment_method: formData.method
     });
     
     if (!validation.success) {

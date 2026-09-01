@@ -61,6 +61,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
   };
 
   return fetch(url, {
+    credentials: 'include',
     ...options,
     headers,
   });

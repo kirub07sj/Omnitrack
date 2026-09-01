@@ -62,9 +62,10 @@ router.post('/login', validate(loginSchema), async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    res.cookie('token', token, { httpOnly: true, secure: process.env.VERCEL ? true : false, sameSite: process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'none' : 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
+
     res.json({
       success: true,
-      token,
       user: {
         id: user.id, username: user.username,
         firstName: user.employee.first_name, lastName: user.employee.last_name,
@@ -76,6 +77,11 @@ router.post('/login', validate(loginSchema), async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ success: false, message: 'An error occurred during login.' });
   }
+});
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('token', { sameSite: process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'none' : 'lax', secure: process.env.VERCEL ? true : false });
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 router.put('/update-profile', validate(updateProfileSchema), async (req, res) => {

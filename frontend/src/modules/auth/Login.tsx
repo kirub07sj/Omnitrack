@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
 import { AlertCircle } from 'lucide-react';
-import { apiFetch, setAuthToken } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
 import logo from '@/assets/logo.png';
 
 
@@ -47,9 +47,6 @@ export default function Login() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        if (data.token) {
-          setAuthToken(data.token);
-        }
         
         let loggedInUser = data.account || data.user;
         

@@ -107,38 +107,15 @@ export default function SuperAdminBusinesses() {
   const handleCreateTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
-
-    if (!businessName.trim()) {
-      setActiveTab('business');
-      setFormError('Business name is required.');
-      return;
-    }
-
-    if (!ownerFirstName.trim() || !ownerLastName.trim()) {
-      setActiveTab('owner');
-      setFormError('Owner first and last name are required.');
-      return;
-    }
-
-    if (!ownerEmail.trim()) {
-      setActiveTab('owner');
-      setFormError('Owner email is required.');
-      return;
-    }
-
-    if (!ownerUsername.trim()) {
-      setActiveTab('owner');
-      setFormError('Owner username is required.');
-      return;
-    }
-
-    if (!ownerPassword) {
-      setActiveTab('owner');
-      setFormError('Owner initial password is required.');
-      return;
-    }
-
     setIsCreating(true);
+
+    const validation = tenantSchema.safeParse({ businessName, ownerFirstName, ownerLastName, ownerEmail, ownerUsername, ownerPassword });
+    if (!validation.success) {
+      setFormError(validation.error.errors[0].message);
+      setIsCreating(false);
+      return;
+    }
+
     try {
       const res = await apiFetch('/api/super-admin/tenants', {
         method: 'POST',

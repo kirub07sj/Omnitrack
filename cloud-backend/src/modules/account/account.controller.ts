@@ -35,9 +35,10 @@ export const register = async (req: Request, res: Response) => {
       { expiresIn: '30d' }
     );
 
+    res.cookie('token', token, { httpOnly: true, secure: process.env.VERCEL ? true : false, sameSite: process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'none' : 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
+
     res.status(201).json({
       success: true,
-      token,
       account: {
         id: account.id,
         email: account.email,
@@ -90,9 +91,10 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '30d' }
     );
 
+    res.cookie('token', token, { httpOnly: true, secure: process.env.VERCEL ? true : false, sameSite: process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'none' : 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
+
     res.json({
       success: true,
-      token,
       account: {
         id: account.id,
         email: account.email,
