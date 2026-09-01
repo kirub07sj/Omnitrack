@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import cookieParser from 'cookie-parser';
@@ -33,14 +32,21 @@ import superAdminRoutes from './modules/super-admin/super-admin.routes';
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || '*', // Restrict this in Vercel settings!
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-};
-
-app.use(cors(corsOptions));
+// Custom CORS middleware to guarantee headers are ALWAYS set on Vercel
+app.use((req, res, next) => {
+  const origin = req.headers.origin || 'https://omnitrack-portal.vercel.app';
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  next();
+});
 app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
 const uploadsPath = process.env.VERCEL
