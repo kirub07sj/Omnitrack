@@ -49,7 +49,12 @@ export const useAppStore = create<AppState>((set) => ({
 
   login: (user) => set({ currentUser: user }),
 
-  logout: () => {
+  logout: async () => {
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout request failed', e);
+    }
     if (isCloudMode) {
       clearAuthToken();
     }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Skeleton } from "@/components/ui/skeleton";
 import { useProductStore } from '@/store/useProductStore';
 import { useSettings } from '@/hooks/useSettings';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -207,9 +208,12 @@ export default function WaiterAppPage() {
 
   if (loading || productsLoading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
-        <p className="text-slate-500 font-medium animate-pulse">Loading Menu...</p>
+      <div className="min-h-screen bg-white flex flex-col w-full max-w-md mx-auto p-4 space-y-4">
+        <Skeleton className="h-12 w-full rounded-full" />
+        <div className="flex gap-2 overflow-hidden py-2"><Skeleton className="h-8 w-20 rounded-full" /><Skeleton className="h-8 w-24 rounded-full" /></div>
+        <div className="grid grid-cols-2 gap-4">
+          {Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-2xl" />)}
+        </div>
       </div>
     );
   }

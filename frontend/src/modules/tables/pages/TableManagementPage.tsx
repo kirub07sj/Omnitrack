@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { z } from 'zod';
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Loader2, Users, Utensils, CheckCircle2 } from 'lucide-react';
@@ -11,6 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+
+const setupSchema = z.object({
+  tableCount: z.number().min(1, "Table count must be at least 1").max(500, "Maximum 500 tables allowed")
+});
 
 export default function TableManagementPage() {
   const { currentUser } = useAppStore();
@@ -67,6 +74,12 @@ export default function TableManagementPage() {
 
   const handleSetup = async () => {
     if (!tableCount || isNaN(Number(tableCount))) return;
+    
+    const validation = setupSchema.safeParse({ tableCount: Number(tableCount) });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      return;
+    }
     
     try {
       setSetupLoading(true);
@@ -142,8 +155,14 @@ export default function TableManagementPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6 w-full">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Table Management</h1>
+          <p className="text-muted-foreground mt-2">Configure your restaurant layout and assign waiters to tables.</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+          {Array.from({length: 24}).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)}
+        </div>
       </div>
     );
   }

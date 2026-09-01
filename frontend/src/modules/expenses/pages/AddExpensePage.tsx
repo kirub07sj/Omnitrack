@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,14 @@ const CATEGORIES = [
   'License', 'Government Fees', 'Other Taxes',
   'Miscellaneous'
 ];
+
+
+const expenseSchema = z.object({
+  amount: z.number().min(0.01, "Amount must be greater than 0"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  payment_method: z.string().min(1, "Payment method is required")
+});
 
 export default function AddExpensePage() {
   const navigate = useNavigate();
@@ -41,6 +50,18 @@ export default function AddExpensePage() {
     e.preventDefault();
     if (!currentUser?.business_id) {
       alert("Error: No business selected. Please refresh the page.");
+      return;
+    }
+    
+    const validation = expenseSchema.safeParse({
+      amount: parseFloat(formData.amount),
+      description: formData.description,
+      category: formData.category,
+      payment_method: formData.method
+    });
+    
+    if (!validation.success) {
+      alert(validation.error.errors[0].message);
       return;
     }
     

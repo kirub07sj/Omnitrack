@@ -11,6 +11,7 @@ const BASE_URL = isElectron ? 'http://localhost:5055' : '';
 
 // 1. Configure Axios
 axios.defaults.baseURL = BASE_URL;
+axios.defaults.withCredentials = true;
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');

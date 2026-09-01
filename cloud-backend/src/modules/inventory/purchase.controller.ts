@@ -18,8 +18,6 @@ export const createPurchase = async (req: Request, res: Response) => {
   try {
     const business_id = (req as any).user.business_id;
     const { supplier_id, status, items } = req.body;
-    if (!supplier_id || !items || !Array.isArray(items)) return res.status(400).json({ message: 'Invalid data' });
-
     const total = items.reduce((sum: number, item: any) => sum + (parseFloat(item.quantity) * parseFloat(item.cost)), 0);
 
     const purchase = await prisma.$transaction(async (tx) => {
@@ -65,8 +63,6 @@ export const updatePurchaseStatus = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
     const { status } = req.body;
-    if (!status) return res.status(400).json({ message: 'Status is required' });
-
     const purchase = await prisma.$transaction(async (tx) => {
       const p = await tx.purchase.update({ where: { id }, data: { status } });
       await tx.transaction.updateMany({ where: { purchase_id: id }, data: { status: status.toUpperCase() } });

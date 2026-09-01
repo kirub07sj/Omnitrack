@@ -18,6 +18,7 @@ import PayExpenseDialog from '../components/PayExpenseDialog';
 import EditExpenseDialog from '../components/EditExpenseDialog';
 import DeleteExpenseDialog from '../components/DeleteExpenseDialog';
 import AddExpenseDialog from '../components/AddExpenseDialog';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ExpensesPage() {
   const { currentUser, fetchUnpaidCounts } = useAppStore();
@@ -184,7 +185,11 @@ export default function ExpensesPage() {
               <tbody className="divide-y divide-border">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-10 text-muted-foreground">Loading expenses...</td>
+                    <td colSpan={6} className="py-6 px-4">
+                      <div className="space-y-3 w-full">
+                        {Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-md" />)}
+                      </div>
+                    </td>
                   </tr>
                 ) : filteredExpenses.length === 0 ? (
                   <tr>

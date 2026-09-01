@@ -24,6 +24,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { format } from 'date-fns';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function OwnerDashboard() {
   const { currentUser } = useAppStore();
@@ -54,7 +55,18 @@ export default function OwnerDashboard() {
   }, [currentUser?.business_id, dateRange]);
 
   if (loading && !data) {
-    return <div className="p-8 text-center text-muted-foreground flex h-full items-center justify-center">Loading dashboard...</div>;
+    return (
+      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto w-full">
+        <div className="flex justify-between items-center"><Skeleton className="h-10 w-[200px]" /><Skeleton className="h-10 w-[150px]" /></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-[400px] w-full col-span-2 rounded-xl" />
+          <Skeleton className="h-[400px] w-full rounded-xl" />
+        </div>
+      </div>
+    );
   }
 
   if (!data) {

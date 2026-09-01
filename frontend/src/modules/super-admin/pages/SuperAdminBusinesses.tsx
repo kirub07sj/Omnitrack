@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+
+
+const tenantSchema = z.object({
+  businessName: z.string().min(1, "Business name is required"),
+  ownerFirstName: z.string().min(1, "Owner first name is required"),
+  ownerLastName: z.string().min(1, "Owner last name is required"),
+  ownerEmail: z.string().email("Invalid email for owner"),
+  ownerUsername: z.string().min(3, "Owner username must be at least 3 characters"),
+  ownerPassword: z.string().min(6, "Initial password must be at least 6 characters")
+});
 
 export default function SuperAdminBusinesses() {
   const navigate = useNavigate();
@@ -96,38 +107,15 @@ export default function SuperAdminBusinesses() {
   const handleCreateTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
-
-    if (!businessName.trim()) {
-      setActiveTab('business');
-      setFormError('Business name is required.');
-      return;
-    }
-
-    if (!ownerFirstName.trim() || !ownerLastName.trim()) {
-      setActiveTab('owner');
-      setFormError('Owner first and last name are required.');
-      return;
-    }
-
-    if (!ownerEmail.trim()) {
-      setActiveTab('owner');
-      setFormError('Owner email is required.');
-      return;
-    }
-
-    if (!ownerUsername.trim()) {
-      setActiveTab('owner');
-      setFormError('Owner username is required.');
-      return;
-    }
-
-    if (!ownerPassword) {
-      setActiveTab('owner');
-      setFormError('Owner initial password is required.');
-      return;
-    }
-
     setIsCreating(true);
+
+    const validation = tenantSchema.safeParse({ businessName, ownerFirstName, ownerLastName, ownerEmail, ownerUsername, ownerPassword });
+    if (!validation.success) {
+      setFormError(validation.error.errors[0].message);
+      setIsCreating(false);
+      return;
+    }
+
     try {
       const res = await apiFetch('/api/super-admin/tenants', {
         method: 'POST',

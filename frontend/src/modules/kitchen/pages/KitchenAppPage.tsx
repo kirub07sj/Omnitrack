@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Clock, Image as ImageIcon, Loader2, ChefHat } from 'lucide-react';
 import { getImageUrl } from '@/utils/image';
@@ -92,9 +93,11 @@ export default function KitchenAppPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-        <p className="text-muted-foreground animate-pulse">Loading Kitchen Display...</p>
+      <div className="min-h-screen bg-background p-6 space-y-6">
+        <div className="flex justify-between items-center"><Skeleton className="h-10 w-[200px]" /><Skeleton className="h-10 w-[150px]" /></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({length: 8}).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}
+        </div>
       </div>
     );
   }

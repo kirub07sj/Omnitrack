@@ -25,11 +25,6 @@ export const createTrialSubscription = async (req: Request, res: Response) => {
     const { business_id } = req.body;
     const account_id = (req as any).user.account_id;
 
-    if (!business_id) {
-      res.status(400).json({ message: 'business_id is required' });
-      return;
-    }
-
     const existing = await prisma.subscription.findUnique({ where: { business_id } });
     if (existing) {
       res.status(409).json({ message: 'A subscription already exists for this business' });
