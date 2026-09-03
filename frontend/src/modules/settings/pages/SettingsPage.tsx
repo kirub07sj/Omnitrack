@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { apiFetch } from '@/lib/api';
 import { 
   BusinessSettingsTab, 
   PaymentSettingsTab, 
@@ -53,7 +54,7 @@ export default function SettingsPage() {
         settings: JSON.stringify(otherSettings)
       };
 
-      const res = await fetch('/api/business/settings', {
+      const res = await apiFetch('/api/business/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

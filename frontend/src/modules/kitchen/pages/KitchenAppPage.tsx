@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Clock, Image as ImageIcon, Loader2, ChefHat } from 'lucide-react';
 import { getImageUrl } from '@/utils/image';
+import { apiFetch } from '@/lib/api';
 
 export default function KitchenAppPage() {
   const [searchParams] = useSearchParams();
@@ -19,7 +20,7 @@ export default function KitchenAppPage() {
     if (!businessId) return;
     if (!silent) setLoading(true);
     try {
-      const res = await fetch(`/api/orders?business_id=${businessId}`);
+      const res = await apiFetch(`/api/orders?business_id=${businessId}`);
       const data = await res.json();
       
       let oItems = [];
@@ -64,7 +65,7 @@ export default function KitchenAppPage() {
   const handleServe = async (orderId: string) => {
     setProcessingId(orderId);
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
+      const res = await apiFetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'Ready' })

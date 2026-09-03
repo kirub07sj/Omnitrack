@@ -1,12 +1,13 @@
 import { Employee } from "../types/employee";
 import { useAppStore } from "@/store/useAppStore";
+import { apiFetch } from '@/lib/api';
 
 export const EmployeeService = {
   getEmployees: async (): Promise<Employee[]> => {
     const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
     
-    const response = await fetch(`/api/employees?business_id=${businessId}`);
+    const response = await apiFetch(`/api/employees?business_id=${businessId}`);
     if (!response.ok) {
       throw new Error("Failed to fetch employees");
     }
@@ -29,7 +30,7 @@ export const EmployeeService = {
   },
   
   getEmployeeById: async (id: string): Promise<Employee | undefined> => {
-    const response = await fetch(`/api/employees/${id}`);
+    const response = await apiFetch(`/api/employees/${id}`);
     if (!response.ok) {
       if (response.status === 404) return undefined;
       throw new Error("Failed to fetch employee");
@@ -79,7 +80,7 @@ export const EmployeeService = {
       role: data.role
     };
 
-    const response = await fetch(`/api/employees`, {
+    const response = await apiFetch(`/api/employees`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -117,7 +118,7 @@ export const EmployeeService = {
     // Remove undefined values
     Object.keys(payload).forEach(key => (payload as any)[key] === undefined && delete (payload as any)[key]);
 
-    const response = await fetch(`/api/employees/${id}`, {
+    const response = await apiFetch(`/api/employees/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -132,7 +133,7 @@ export const EmployeeService = {
   },
 
   deleteEmployee: async (id: string): Promise<void> => {
-    const response = await fetch(`/api/employees/${id}`, {
+    const response = await apiFetch(`/api/employees/${id}`, {
       method: "DELETE"
     });
     

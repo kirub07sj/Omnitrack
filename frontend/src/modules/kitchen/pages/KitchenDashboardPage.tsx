@@ -7,6 +7,7 @@ import { Loader2, ChefHat, CheckCircle2, Clock, Image as ImageIcon, QrCode } fro
 import { getImageUrl } from '@/utils/image';
 import QRCode from 'react-qr-code';
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiFetch } from '@/lib/api';
 
 export default function KitchenDashboardPage() {
   const { currentUser } = useAppStore();
@@ -26,7 +27,7 @@ export default function KitchenDashboardPage() {
     if (loc.hostname !== 'localhost' && loc.hostname !== '127.0.0.1') {
       setLanUrl(`${loc.protocol}//${loc.hostname}:${loc.port}/kitchen?business_id=${businessId}`);
     } else {
-      fetch('/api/network-info').then(r => r.json()).then(data => {
+      apiFetch('/api/network-info').then(r => r.json()).then(data => {
         if (data.ip) {
           setLanUrl(`${loc.protocol}//${data.ip}:${loc.port}/kitchen?business_id=${businessId}`);
         }
@@ -38,7 +39,7 @@ export default function KitchenDashboardPage() {
     if (!businessId) return;
     if (!silent) setLoading(true);
     try {
-      const res = await fetch(`/api/orders?business_id=${businessId}`);
+      const res = await apiFetch(`/api/orders?business_id=${businessId}`);
       const data = await res.json();
       
       let oItems = [];
@@ -73,7 +74,7 @@ export default function KitchenDashboardPage() {
   const handleServe = async (orderId: string) => {
     setProcessingId(orderId);
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
+      const res = await apiFetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'Ready' })

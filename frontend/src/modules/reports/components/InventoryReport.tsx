@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSettings } from '@/hooks/useSettings';
+import { apiFetch } from '@/lib/api';
 
 export function InventoryReport({ refreshTrigger = 0 }: { refreshTrigger?: number }) {
   const { currency } = useSettings();
@@ -18,7 +19,7 @@ export function InventoryReport({ refreshTrigger = 0 }: { refreshTrigger?: numbe
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/reports/inventory`);
+        const res = await apiFetch(`/api/reports/inventory`);
         const result = await res.json();
         if (result.success) {
           setData(result.data);

@@ -1,6 +1,7 @@
 //@ts-nocheck
 import { useState, useEffect } from "react";
 import { EmployeeTable } from "../components/EmployeeTable";
+import { Skeleton } from "@/components/ui/skeleton";
 import { EmployeeService } from "../services/employee.service";
 import { Employee } from "../types/employee";
 import { Plus, Download, RefreshCw } from "lucide-react";

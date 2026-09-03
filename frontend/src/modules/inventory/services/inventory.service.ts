@@ -1,18 +1,19 @@
 import { InventoryItem } from "../types/inventory";
 import { useAppStore } from "@/store/useAppStore";
+import { apiFetch } from '@/lib/api';
 
 export const InventoryService = {
   getInventory: async (): Promise<InventoryItem[]> => {
     const businessId = useAppStore.getState().currentUser?.business_id;
     if (!businessId) throw new Error("No business selected");
     
-    const response = await fetch(`/api/inventory?business_id=${businessId}`);
+    const response = await apiFetch(`/api/inventory?business_id=${businessId}`);
     if (!response.ok) throw new Error("Failed to fetch inventory");
     return response.json();
   },
   
   getInventoryById: async (id: string): Promise<InventoryItem | undefined> => {
-    const response = await fetch(`/api/inventory/${id}`);
+    const response = await apiFetch(`/api/inventory/${id}`);
     if (!response.ok) {
       if (response.status === 404) return undefined;
       throw new Error("Failed to fetch inventory item");
@@ -24,7 +25,7 @@ export const InventoryService = {
     const businessId = useAppStore.getState().currentUser?.business_id;
     const payload = { ...data, business_id: businessId };
 
-    const response = await fetch(`/api/inventory`, {
+    const response = await apiFetch(`/api/inventory`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -35,7 +36,7 @@ export const InventoryService = {
   },
 
   updateInventory: async (id: string, data: any): Promise<InventoryItem> => {
-    const response = await fetch(`/api/inventory/${id}`, {
+    const response = await apiFetch(`/api/inventory/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -46,7 +47,7 @@ export const InventoryService = {
   },
 
   deleteInventory: async (id: string): Promise<void> => {
-    const response = await fetch(`/api/inventory/${id}`, {
+    const response = await apiFetch(`/api/inventory/${id}`, {
       method: "DELETE"
     });
     if (!response.ok) throw new Error("Failed to delete inventory item");
@@ -54,7 +55,7 @@ export const InventoryService = {
 
   getPurchases: async (): Promise<any[]> => {
     const businessId = useAppStore.getState().currentUser?.business_id;
-    const response = await fetch(`/api/purchases?business_id=${businessId}`);
+    const response = await apiFetch(`/api/purchases?business_id=${businessId}`);
     if (!response.ok) throw new Error("Failed to fetch purchases");
     return response.json();
   },
@@ -63,7 +64,7 @@ export const InventoryService = {
     const businessId = useAppStore.getState().currentUser?.business_id;
     const payload = { ...data, business_id: businessId };
 
-    const response = await fetch(`/api/purchases`, {
+    const response = await apiFetch(`/api/purchases`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -74,7 +75,7 @@ export const InventoryService = {
   },
 
   updatePurchaseStatus: async (id: string, status: string): Promise<any> => {
-    const response = await fetch(`/api/purchases/${id}`, {
+    const response = await apiFetch(`/api/purchases/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status })
@@ -86,7 +87,7 @@ export const InventoryService = {
 
   getMovements: async (): Promise<any[]> => {
     const businessId = useAppStore.getState().currentUser?.business_id;
-    const response = await fetch(`/api/inventory/movements?business_id=${businessId}`);
+    const response = await apiFetch(`/api/inventory/movements?business_id=${businessId}`);
     if (!response.ok) throw new Error("Failed to fetch movements");
     return response.json();
   }

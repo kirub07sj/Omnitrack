@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, RotateCcw } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useSettings } from '@/hooks/useSettings';
+import { apiFetch } from '@/lib/api';
 
 interface RefundDialogProps {
   sale: any | null;
@@ -39,7 +40,7 @@ export default function RefundDialog({ sale, open, onOpenChange, onSuccess }: Re
     setError(null);
 
     try {
-      const res = await fetch('/api/sales/refund', {
+      const res = await apiFetch('/api/sales/refund', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

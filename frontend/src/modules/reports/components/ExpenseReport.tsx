@@ -5,6 +5,7 @@ import { Download, Search, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { useSettings } from '@/hooks/useSettings';
+import { apiFetch } from '@/lib/api';
 
 export function ExpenseReport({ dateRange, refreshTrigger = 0 }: { dateRange: { startDate: string, endDate: string }, refreshTrigger?: number }) {
   const { currency } = useSettings();
@@ -18,7 +19,7 @@ export function ExpenseReport({ dateRange, refreshTrigger = 0 }: { dateRange: { 
       setLoading(true);
       try {
         const query = new URLSearchParams(dateRange as any).toString();
-        const res = await fetch(`/api/reports/expenses?${query}`);
+        const res = await apiFetch(`/api/reports/expenses?${query}`);
         const result = await res.json();
         if (result.success) {
           setData(result.data);

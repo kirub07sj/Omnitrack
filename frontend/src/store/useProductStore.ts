@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { apiFetch } from '@/lib/api';
 
 interface ProductState {
   products: any[];
@@ -17,7 +18,7 @@ export const useProductStore = create<ProductState>((set) => ({
   fetchProducts: async (businessId: string, silent = false) => {
     if (!silent) set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`/api/products?business_id=${businessId}&t=${Date.now()}`);
+      const res = await apiFetch(`/api/products?business_id=${businessId}&t=${Date.now()}`);
       if (!res.ok) throw new Error('Failed to fetch products');
       const data = await res.json();
       

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Users, Utensils, CheckCircle2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { apiFetch } from '@/lib/api';
 import {
   Select,
   SelectContent,
@@ -44,18 +45,19 @@ export default function TableManagementPage() {
     try {
       setLoading(true);
       const [tablesRes, employeesRes] = await Promise.all([
-        fetch(`/api/tables?business_id=${currentUser?.business_id}`),
-        fetch(`/api/employees?business_id=${currentUser?.business_id}`)
+        apiFetch(`/api/tables?business_id=${currentUser?.business_id}`),
+        apiFetch(`/api/employees?business_id=${currentUser?.business_id}`)
       ]);
       
       const tablesData = await tablesRes.json();
       const employeesData = await employeesRes.json();
       
-      const sortedTables = Array.isArray(tablesData) ? [...tablesData].sort((a, b) => {
+      const safeTablesArray = Array.isArray(tablesData) ? tablesData : (tablesData?.data || []);
+      const sortedTables = [...safeTablesArray].sort((a, b) => {
         const numA = parseInt(String(a.table_number || '').replace(/\D/g, '')) || 0;
         const numB = parseInt(String(b.table_number || '').replace(/\D/g, '')) || 0;
         return numA - numB;
-      }) : tablesData;
+      });
       
       setTables(sortedTables);
       setTableCount(sortedTables.length > 0 ? sortedTables.length.toString() : '');
@@ -86,7 +88,7 @@ export default function TableManagementPage() {
       setError('');
       setSuccess('');
       
-      const res = await fetch('/api/tables/setup', {
+      const res = await apiFetch('/api/tables/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -128,7 +130,7 @@ export default function TableManagementPage() {
       setSetupLoading(true);
       await Promise.all(
         selectedTables.map(tableId =>
-          fetch(`/api/tables/${tableId}`, {
+          apiFetch(`/api/tables/${tableId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ waiter_id: (!selectedWaiter || selectedWaiter === 'unassigned') ? null : selectedWaiter })

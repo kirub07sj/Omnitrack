@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSettings } from '@/hooks/useSettings';
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiFetch } from '@/lib/api';
 
 export default function TransactionsPage() {
   const { currentUser } = useAppStore();
@@ -27,7 +28,7 @@ export default function TransactionsPage() {
     const fetchTransactions = async () => {
       if (!currentUser?.business_id) return;
       try {
-        const res = await fetch(`/api/transactions?business_id=${currentUser.business_id}`);
+        const res = await apiFetch(`/api/transactions?business_id=${currentUser.business_id}`);
         const data = await res.json();
         if (data.success) {
           setTransactions(data.data);

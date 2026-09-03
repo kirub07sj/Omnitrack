@@ -13,6 +13,7 @@ import RefundDialog from '../components/RefundDialog';
 import { CheckCircle2 } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiFetch } from '@/lib/api';
 
 export default function SalesHistoryPage() {
   const { currentUser } = useAppStore();
@@ -32,7 +33,7 @@ export default function SalesHistoryPage() {
   const fetchSales = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/sales/history?business_id=${currentUser?.business_id}`);
+      const res = await apiFetch(`/api/sales/history?business_id=${currentUser?.business_id}`);
       const data = await res.json();
       if (data.success) {
         setSales(data.data);

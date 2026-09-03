@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { apiFetch } from '@/lib/api';
 
 interface OrderState {
   orders: any[];
@@ -26,7 +27,7 @@ export const useOrderStore = create<OrderState>((set) => ({
   fetchOrders: async (businessId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`/api/orders?business_id=${businessId}`);
+      const res = await apiFetch(`/api/orders?business_id=${businessId}`);
       if (!res.ok) throw new Error('Failed to fetch orders');
       const data = await res.json();
       set({ orders: data, isLoading: false });
@@ -38,7 +39,7 @@ export const useOrderStore = create<OrderState>((set) => ({
   fetchTables: async (businessId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`/api/tables?business_id=${businessId}`);
+      const res = await apiFetch(`/api/tables?business_id=${businessId}`);
       if (!res.ok) throw new Error('Failed to fetch tables');
       const data = await res.json();
       const sortedTables = Array.isArray(data) ? [...data].sort((a, b) => {
@@ -55,7 +56,7 @@ export const useOrderStore = create<OrderState>((set) => ({
   createOrder: async (orderData: any) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`/api/orders`, {
+      const res = await apiFetch(`/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
@@ -82,7 +83,7 @@ export const useOrderStore = create<OrderState>((set) => ({
   updateOrder: async (id: string, updateData: any) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`/api/orders/${id}`, {
+      const res = await apiFetch(`/api/orders/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),
@@ -103,7 +104,7 @@ export const useOrderStore = create<OrderState>((set) => ({
   deleteOrder: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`/api/orders/${id}`, {
+      const res = await apiFetch(`/api/orders/${id}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete order');

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, CheckCircle2, Banknote, Smartphone, CreditCard, Wallet } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useSettings } from '@/hooks/useSettings';
+import { apiFetch } from '@/lib/api';
 
 interface CheckoutDialogProps {
   order: any | null;
@@ -85,7 +86,7 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
         payload.order_id = order.id;
       }
 
-      const res = await fetch(endpoint, {
+      const res = await apiFetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
