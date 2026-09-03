@@ -73,9 +73,9 @@ router.post('/login', validate(loginSchema), async (req, res) => {
         business_id: user.employee.business_id, employee_id: user.employee.id
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ success: false, message: 'An error occurred during login.' });
+    res.status(500).json({ success: false, message: 'An error occurred during login.', error: error?.message || String(error), stack: error?.stack });
   }
 });
 

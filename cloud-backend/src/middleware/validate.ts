@@ -13,9 +13,16 @@ export const validate = (schema: ZodSchema) => {
 
       // Optionally attach validated data back to req if we want, but typically 
       // controllers just use req.body directly since it's now known to be valid.
-      req.body = validatedData.body;
-      req.query = validatedData.query;
-      req.params = validatedData.params;
+      if (validatedData.body !== undefined) req.body = validatedData.body;
+      if (validatedData.query !== undefined) {
+        // Express 5 makes req.query a getter, so we mutate the object instead of reassigning
+        for (const key in req.query) delete req.query[key];
+        Object.assign(req.query, validatedData.query);
+      }
+      if (validatedData.params !== undefined) {
+        for (const key in req.params) delete req.params[key];
+        Object.assign(req.params, validatedData.params);
+      }
 
       next();
     } catch (error) {
@@ -60,7 +67,9 @@ export const validateBody = (schema: ZodSchema) => {
 export const validateQuery = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      req.query = schema.parse(req.query);
+      const parsedQuery = schema.parse(req.query);
+      for (const key in req.query) delete req.query[key];
+      Object.assign(req.query, parsedQuery);
       next();
     } catch (error) {
       if (error instanceof ZodError) {

@@ -34,7 +34,8 @@ const PORT = process.env.PORT || 8000;
 
 // Custom CORS middleware to guarantee headers are ALWAYS set on Vercel
 app.use((req, res, next) => {
-  const origin = req.headers.origin || 'https://omnitrack-portal.vercel.app';
+  const origin = req.headers.origin || '*';
+  // Allow ALL origins for now
   res.header('Access-Control-Allow-Origin', origin);
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');

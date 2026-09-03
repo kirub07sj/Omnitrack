@@ -9,21 +9,8 @@
   "routes": [
     {
       "src": "/(.*)",
-      "methods": ["OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "https://omnitrack-portal.vercel.app",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie"
-      },
-      "status": 204
-    },
-    {
-      "src": "/(.*)",
       "dest": "api/index.ts",
       "headers": {
-        "Access-Control-Allow-Origin": "https://omnitrack-portal.vercel.app",
-        "Access-Control-Allow-Credentials": "true",
         "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
       }
     }
