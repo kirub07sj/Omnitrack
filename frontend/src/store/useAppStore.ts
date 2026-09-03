@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { apiFetch, isCloudMode, clearAuthToken } from '@/lib/api';
 
 interface AppState {
@@ -27,7 +28,9 @@ interface AppState {
   fetchUnpaidCounts: () => Promise<void>;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
   isSetupComplete: false,
   hasBusiness: false,
   hasOwner: false,
@@ -144,4 +147,7 @@ export const useAppStore = create<AppState>((set) => ({
       console.error("Failed to fetch unpaid counts", error);
     }
   }
-}));
+    }),
+    { name: 'omnitrack-auth-store' }
+  )
+);
