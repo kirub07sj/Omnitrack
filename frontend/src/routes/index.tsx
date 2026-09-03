@@ -58,7 +58,7 @@ import {
 } from '../modules/super-admin/pages/Placeholders';
 
 const isElectron = typeof window !== 'undefined' && window.location.protocol === 'file:';
-export const router = (isElectron || import.meta.env.VITE_MODE !== 'cloud' ? createHashRouter : createBrowserRouter)([
+export const router = (isElectron ? createHashRouter : createBrowserRouter)([
   {
     path: '/',
     element: <App />, // We'll update this later to Dashboard/Auth based on state
