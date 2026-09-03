@@ -16,6 +16,7 @@ import {
 import CheckoutDialog from '../components/CheckoutDialog';
 import ReceiptDialog from '../components/ReceiptDialog';
 import { useSettings } from '@/hooks/useSettings';
+import { apiFetch } from '@/lib/api';
 
 export default function ManualSalePage() {
   const { currentUser } = useAppStore();
@@ -37,8 +38,8 @@ export default function ManualSalePage() {
     const fetchData = async () => {
       try {
         const [prodRes, tableRes] = await Promise.all([
-          fetch(`/api/products?business_id=${currentUser?.business_id}`),
-          fetch(`/api/tables?business_id=${currentUser?.business_id}`)
+          apiFetch(`/api/products?business_id=${currentUser?.business_id}`),
+          apiFetch(`/api/tables?business_id=${currentUser?.business_id}`)
         ]);
         
         const pData = await prodRes.json();

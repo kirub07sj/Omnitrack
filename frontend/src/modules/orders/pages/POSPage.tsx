@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image as ImageIcon, CheckCircle2, XCircle } from 'lucide-react';
 import { getImageUrl } from '@/utils/image';
+import { apiFetch } from '@/lib/api';
 import {
   Select,
   SelectContent,
@@ -67,7 +68,7 @@ export default function POSPage() {
       setLanUrl(`${loc.protocol}//${loc.hostname}:${loc.port}/waiter?business_id=${currentUser?.business_id}`);
     } else {
       // Fallback: fetch a special endpoint or use the known IP
-      fetch('/api/network-info').then(r => r.json()).then(data => {
+      apiFetch('/api/network-info').then(r => r.json()).then(data => {
         if (data.ip) {
           setLanUrl(`${loc.protocol}//${data.ip}:${loc.port}/waiter?business_id=${currentUser?.business_id}`);
         }

@@ -7,6 +7,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus, X, CheckCircle2, Loader2, Image as ImageIcon, ShoppingCart, AlertCircle } from 'lucide-react';
 import { getImageUrl } from '@/utils/image';
+import { apiFetch } from '@/lib/api';
 import {
   Select,
   SelectContent,
@@ -48,11 +49,11 @@ export default function WaiterAppPage() {
       fetchProducts(businessId);
       
       Promise.all([
-        fetch(`/api/tables?business_id=${businessId}`).then(async r => {
+        apiFetch(`/api/tables?business_id=${businessId}`).then(async r => {
           const text = await r.text();
           return text ? JSON.parse(text) : [];
         }),
-        fetch(`/api/orders?business_id=${businessId}`).then(async r => {
+        apiFetch(`/api/orders?business_id=${businessId}`).then(async r => {
           const text = await r.text();
           return text ? JSON.parse(text) : [];
         })
@@ -95,7 +96,7 @@ export default function WaiterAppPage() {
       fetchProducts(businessId, true); // true = silent
       
       // Poll active orders
-      fetch(`/api/orders?business_id=${businessId}`)
+      apiFetch(`/api/orders?business_id=${businessId}`)
         .then(r => r.json())
         .then(data => {
           let oItems = [];
@@ -171,7 +172,7 @@ export default function WaiterAppPage() {
     };
 
     try {
-      const res = await fetch('/api/orders', {
+      const res = await apiFetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
@@ -181,7 +182,7 @@ export default function WaiterAppPage() {
         setOrderSuccess(true);
         setIsCartOpen(false);
         // Refresh orders list
-        fetch(`/api/orders?business_id=${businessId}`)
+        apiFetch(`/api/orders?business_id=${businessId}`)
           .then(r => r.json())
           .then(data => {
             let oItems = [];

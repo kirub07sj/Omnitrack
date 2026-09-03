@@ -7,6 +7,7 @@ import { Building, Wallet, ShoppingCart, Package, Receipt, Settings as SettingsI
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { apiFetch } from '@/lib/api';
 
 // We'll export the individual tab components from here
 
@@ -518,7 +519,7 @@ export function LicenseSettingsTab() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/license/info')
+    apiFetch('/api/license/info')
       .then(r => r.json())
       .then(d => {
         if (d.success) setInfo(d.data);

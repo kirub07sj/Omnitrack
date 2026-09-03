@@ -6,6 +6,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { startOfWeek, startOfMonth, format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSettings } from '@/hooks/useSettings';
+import { apiFetch } from '@/lib/api';
 
 const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#047857', '#a7f3d0'];
 
@@ -20,7 +21,7 @@ export function OverviewReport({ dateRange, refreshTrigger = 0 }: { dateRange: {
       setLoading(true);
       try {
         const query = new URLSearchParams(dateRange as any).toString();
-        const res = await fetch(`/api/reports/overview?${query}`);
+        const res = await apiFetch(`/api/reports/overview?${query}`);
         const result = await res.json();
         if (result.success) {
           setData(result.data);

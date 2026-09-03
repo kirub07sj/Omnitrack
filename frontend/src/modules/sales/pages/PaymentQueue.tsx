@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import CheckoutDialog from '../components/CheckoutDialog';
 import ReceiptDialog from '../components/ReceiptDialog';
 import { useSettings } from '@/hooks/useSettings';
+import { apiFetch } from '@/lib/api';
 
 export default function PaymentQueue() {
   const { currentUser } = useAppStore();
@@ -25,7 +26,7 @@ export default function PaymentQueue() {
   const fetchUnpaidOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/sales/unpaid-orders?business_id=${currentUser?.business_id}`);
+      const res = await apiFetch(`/api/sales/unpaid-orders?business_id=${currentUser?.business_id}`);
       const data = await res.json();
       if (data.success) {
         setOrders(data.data);
