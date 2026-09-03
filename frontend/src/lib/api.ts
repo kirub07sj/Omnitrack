@@ -1,7 +1,7 @@
 // API configuration utility
 // Handles different API base URLs for desktop vs cloud mode
 
-const MODE = import.meta.env.VITE_MODE || 'desktop';
+const MODE = (import.meta.env.VITE_MODE || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app') ? 'cloud' : 'desktop'));
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export const isCloudMode = MODE === 'cloud';
