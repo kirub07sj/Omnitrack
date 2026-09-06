@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 
 const router = Router();
 
@@ -12,44 +11,41 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit 
 });
 
-// Configure Cloudflare R2 Client
-let s3Client: S3Client | null = null;
-if (process.env.CLOUDFLARE_R2_ACCOUNT_ID && process.env.CLOUDFLARE_R2_ACCESS_KEY_ID && process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY) {
-  s3Client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${process.env.CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
-      secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
-    }
+// Configure Cloudinary Client
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
   });
-  console.log('☁️ Cloudflare R2 Client Initialized');
+  console.log('☁️ Cloudinary Client Initialized');
+} else {
+  console.log('⚠️ Cloudinary is not configured. Falling back to base64 images.');
 }
 
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
-    // If Cloudflare R2 is configured, upload there!
-    if (s3Client && process.env.CLOUDFLARE_R2_BUCKET_NAME && process.env.CLOUDFLARE_R2_PUBLIC_URL) {
-      const ext = path.extname(req.file.originalname) || '.png';
-      const fileName = `uploads/${Date.now()}-${Math.random().toString(36).substring(7)}${ext}`;
+    // If Cloudinary is configured, upload there!
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+      // Create a promise to handle the stream upload
+      const uploadPromise = new Promise<{ secure_url: string }>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'omnitrack_uploads' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result as { secure_url: string });
+          }
+        );
+        uploadStream.end(req.file!.buffer);
+      });
 
-      await s3Client.send(new PutObjectCommand({
-        Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
-        Key: fileName,
-        Body: req.file.buffer,
-        ContentType: req.file.mimetype,
-      }));
-
-      // Return the public URL
-      let baseUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL;
-      if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
-      
-      return res.status(200).json({ url: `${baseUrl}/${fileName}` });
+      const result = await uploadPromise;
+      return res.status(200).json({ url: result.secure_url });
     }
 
-    // Fallback: Convert buffer to base64 Data URL (Good for local dev or if R2 not configured)
+    // Fallback: Convert buffer to base64 Data URL
     const base64Image = req.file.buffer.toString('base64');
     const mimeType = req.file.mimetype;
     const fileUrl = `data:${mimeType};base64,${base64Image}`;
