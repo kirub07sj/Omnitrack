@@ -29,19 +29,13 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     // If Cloudinary is configured, upload there!
     if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
-      // Create a promise to handle the stream upload
-      const uploadPromise = new Promise<{ secure_url: string }>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: 'omnitrack_uploads' },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result as { secure_url: string });
-          }
-        );
-        uploadStream.end(req.file!.buffer);
+      const base64Image = req.file.buffer.toString('base64');
+      const mimeType = req.file.mimetype;
+      const dataUri = `data:${mimeType};base64,${base64Image}`;
+      
+      const result = await cloudinary.uploader.upload(dataUri, {
+        folder: 'omnitrack_uploads',
       });
-
-      const result = await uploadPromise;
       return res.status(200).json({ url: result.secure_url });
     }
 
