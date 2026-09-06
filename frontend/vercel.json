@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build:cloud",
+  "outputDirectory": "dist-cloud",
   "routes": [
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
