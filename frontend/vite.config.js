@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
     // Load env file based on mode
     const env = loadEnv(mode, process.cwd(), '');
     return {
-        base: './',
+        base: mode === 'cloud' ? '/' : './',
         plugins: [react()],
         resolve: {
             alias: {
