@@ -4,10 +4,11 @@ import { RouterProvider } from 'react-router-dom'
 import { router } from './routes'
 import axios from 'axios'
 import './index.css'
+import { isCloudMode, apiConfig } from './lib/api'
 
 // Intercept file:// protocol requests and route them to local backend
-const isElectron = window.location.protocol === 'file:';
-const BASE_URL = isElectron ? 'http://localhost:5055' : '';
+const isElectron = typeof window !== 'undefined' && window.location.protocol === 'file:';
+const BASE_URL = isElectron ? 'http://localhost:5055' : (isCloudMode ? apiConfig.baseUrl : '');
 
 // 1. Configure Axios
 axios.defaults.baseURL = BASE_URL;
@@ -15,7 +16,7 @@ axios.defaults.withCredentials = true;
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
-  if (token && import.meta.env.VITE_MODE === 'cloud') {
+  if (token && isCloudMode) {
     if (config.headers) {
       if (typeof config.headers.set === 'function') {
         config.headers.set('Authorization', `Bearer ${token}`);
@@ -25,8 +26,8 @@ axios.interceptors.request.use((config) => {
     }
   }
   // In cloud mode, axios calls should also use the cloud API base url if they are using relative paths
-  if (import.meta.env.VITE_MODE === 'cloud' && config.url?.startsWith('/api')) {
-    config.baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+  if (isCloudMode && config.url?.startsWith('/api') && !config.url?.startsWith('http')) {
+    config.baseURL = apiConfig.baseUrl || 'https://omnitrack-cloud-backend.vercel.app';
   }
   return config;
 });
@@ -35,12 +36,11 @@ axios.interceptors.request.use((config) => {
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
   let [resource, config] = args;
-  if (typeof resource === 'string' && resource.startsWith('/api')) {
-    const isCloud = import.meta.env.VITE_MODE === 'cloud';
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || '';
-    resource = isCloud ? apiUrl + (resource.startsWith('/api') ? resource : '/api' + resource) : BASE_URL + resource;
+  if (typeof resource === 'string' && resource.startsWith('/api') && !resource.startsWith('http')) {
+    const apiUrl = apiConfig.baseUrl || 'https://omnitrack-cloud-backend.vercel.app';
+    resource = isCloudMode ? apiUrl + (resource.startsWith('/api') ? resource : '/api' + resource) : BASE_URL + resource;
     
-    if (isCloud) {
+    if (isCloudMode) {
       const token = localStorage.getItem('auth_token');
       if (token) {
         config = config || {};

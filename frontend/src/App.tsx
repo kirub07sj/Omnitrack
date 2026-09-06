@@ -4,6 +4,7 @@ import { useAppStore } from './store/useAppStore';
 import Login from './modules/auth/Login';
 import ActivationPage from './modules/license/ActivationPage';
 import { AlertCircle, RefreshCw, FileText, FolderOpen, Terminal, Check, Copy } from 'lucide-react';
+import { isCloudMode } from './lib/api';
 
 interface BackendDiagnostic {
   isRunning: boolean;
@@ -55,9 +56,11 @@ export default function App() {
     }
   }, [hasConnectionError, fetchDiagnostics]);
 
+  const activeIsCloud = isCloud || isCloudMode;
+
   useEffect(() => {
     if (!isLoadingStatus && !hasConnectionError) {
-      if (isCloud) {
+      if (activeIsCloud) {
         if (currentUser) {
           if (currentUser.is_super_admin) {
             navigate('/super-admin');
@@ -73,7 +76,7 @@ export default function App() {
         }
       }
     }
-  }, [isSetupComplete, isLoadingStatus, hasConnectionError, navigate, currentUser, isCloud]);
+  }, [isSetupComplete, isLoadingStatus, hasConnectionError, navigate, currentUser, activeIsCloud]);
 
   const handleRetry = async () => {
     const success = await checkSetupStatus(0);
@@ -266,7 +269,7 @@ export default function App() {
   }
 
   // Cloud mode: no license check, just authentication
-  if (isCloud) {
+  if (activeIsCloud) {
     if (!currentUser) {
       return <Login />;
     }
