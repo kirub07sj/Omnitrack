@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:desktop": "tsc -b && vite build --mode production",
+    "build:desktop": "tsc -b && vite build --mode desktop",
     "build:cloud": "tsc -b && vite build --mode cloud --outDir dist-cloud",
     "lint": "eslint .",
     "preview": "vite preview"

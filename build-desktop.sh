@@ -15,7 +15,7 @@ BACKEND_RESOURCES="$RESOURCES_DIR/backend"
 # 1. Build the Frontend
 echo "[1/4] Building React Frontend..."
 cd "$FRONTEND_DIR"
-npm run build
+npm run build:desktop
 
 # 2. Build the Backend
 echo "[2/4] Building Node Backend..."
