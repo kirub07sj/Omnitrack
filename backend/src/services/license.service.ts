@@ -173,7 +173,11 @@ export async function activate(licenseKey: string): Promise<string> {
     saveCertificate(cert);
     
     return cert;
-  } catch (err) {
+  } catch (err: any) {
+    // Detect network-level errors (no internet, DNS failure, etc.)
+    if (err?.cause?.code === 'ENOTFOUND' || err?.cause?.code === 'ECONNREFUSED' || err?.cause?.code === 'ENETUNREACH' || err?.message === 'fetch failed' || err?.name === 'TypeError') {
+      throw new Error('Unable to connect to the license server. Please check your internet connection and try again.');
+    }
     throw err;
   }
 }
@@ -204,7 +208,10 @@ export async function validate(): Promise<string> {
     saveCertificate(cert);
     
     return cert;
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.cause?.code === 'ENOTFOUND' || err?.cause?.code === 'ECONNREFUSED' || err?.cause?.code === 'ENETUNREACH' || err?.message === 'fetch failed' || err?.name === 'TypeError') {
+      throw new Error('Unable to connect to the license server. Please check your internet connection and try again.');
+    }
     throw err;
   }
 }
@@ -232,7 +239,10 @@ export async function deactivate(): Promise<void> {
     if (fs.existsSync(LICENSE_FILE_PATH)) {
       fs.unlinkSync(LICENSE_FILE_PATH);
     }
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.cause?.code === 'ENOTFOUND' || err?.cause?.code === 'ECONNREFUSED' || err?.cause?.code === 'ENETUNREACH' || err?.message === 'fetch failed' || err?.name === 'TypeError') {
+      throw new Error('Unable to connect to the license server. Please check your internet connection and try again.');
+    }
     throw err;
   }
 }
