@@ -14,9 +14,9 @@ const upload = multer({
 // Configure Cloudinary Client
 if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME.trim(),
+    api_key: process.env.CLOUDINARY_API_KEY.trim(),
+    api_secret: process.env.CLOUDINARY_API_SECRET.trim(),
   });
   console.log('☁️ Cloudinary Client Initialized');
 } else {
@@ -33,10 +33,18 @@ router.post('/', upload.single('image'), async (req, res) => {
       const mimeType = req.file.mimetype;
       const dataUri = `data:${mimeType};base64,${base64Image}`;
       
-      const result = await cloudinary.uploader.upload(dataUri, {
-        folder: 'omnitrack_uploads',
-      });
-      return res.status(200).json({ url: result.secure_url });
+      try {
+        const uploadOptions: any = {};
+        if (process.env.CLOUDINARY_UPLOAD_PRESET) {
+          uploadOptions.upload_preset = process.env.CLOUDINARY_UPLOAD_PRESET.trim();
+        }
+        
+        const result = await cloudinary.uploader.upload(dataUri, uploadOptions);
+        return res.status(200).json({ url: result.secure_url });
+      } catch (cloudinaryError: any) {
+        console.error('Cloudinary specific error:', cloudinaryError);
+        throw cloudinaryError;
+      }
     }
 
     // Fallback: Convert buffer to base64 Data URL
