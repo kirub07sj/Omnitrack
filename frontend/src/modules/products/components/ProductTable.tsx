@@ -1,3 +1,4 @@
+import { PaginationControls } from '@/components/ui/pagination-controls';
 //@ts-nocheck
 import { useState } from "react";
 import { useSettings } from '@/hooks/useSettings';
@@ -16,11 +17,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Search, Plus, MoreHorizontal, ArrowUpDown, Edit, Trash, Box, Eye, Trash2, Copy, CheckCircle2, XCircle } from "lucide-react";
+import { Package, MoreHorizontal, ArrowUpDown, Edit, Box, Eye, Trash2, CheckCircle2, XCircle } from "lucide-react";
 import { getImageUrl } from '@/utils/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface Product {
+  inventory_item_id?: string;
   id: string;
   name: string;
   sku?: string;

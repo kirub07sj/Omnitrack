@@ -1,3 +1,4 @@
+import { PaginationControls } from '@/components/ui/pagination-controls';
 //@ts-nocheck
 import { useState } from "react";
 import { useSettings } from '@/hooks/useSettings';
@@ -146,7 +147,7 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
   ];
 
   const table = useReactTable({
-    initialState: { pagination: { pageSize: 15 } },
+    
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -162,7 +163,7 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
       globalFilter,
     },
     initialState: {
-      pagination: { pageSize: 10 }
+      pagination: { pageSize: 15 }
     }
   });
 
@@ -240,31 +241,14 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between py-2">
-        <div className="text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="border-border"
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="border-border"
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+      <PaginationControls
+        currentPage={table.getState().pagination.pageIndex + 1}
+        totalPages={table.getPageCount()}
+        itemsPerPage={table.getState().pagination.pageSize}
+        totalItems={table.getFilteredRowModel().rows.length}
+        onPageChange={(page: number) => table.setPageIndex(page - 1)}
+        onItemsPerPageChange={(size: number) => table.setPageSize(size)}
+      />
     </div>
   );
 }
