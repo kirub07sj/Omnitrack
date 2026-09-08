@@ -1,3 +1,4 @@
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { useEffect, useState } from "react";
 import { InventoryItem } from "../types/inventory";
 import { InventoryService } from "../services/inventory.service";
@@ -22,6 +23,16 @@ export default function InventoryListPage() {
   const [movements, setMovements] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPurchase, setSelectedPurchase] = useState<any>(null);
+  
+  const [purchasePage, setPurchasePage] = useState(1);
+  const [purchaseItemsPerPage, setPurchaseItemsPerPage] = useState(15);
+  const totalPurchasePages = Math.ceil(purchases.length / purchaseItemsPerPage);
+  const paginatedPurchases = purchases.slice((purchasePage - 1) * purchaseItemsPerPage, purchasePage * purchaseItemsPerPage);
+
+  const [movementPage, setMovementPage] = useState(1);
+  const [movementItemsPerPage, setMovementItemsPerPage] = useState(15);
+  const totalMovementPages = Math.ceil(movements.length / movementItemsPerPage);
+  const paginatedMovements = movements.slice((movementPage - 1) * movementItemsPerPage, movementPage * movementItemsPerPage);
   const navigate = useNavigate();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -127,7 +138,7 @@ export default function InventoryListPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {purchases.map(p => (
+                  {paginatedPurchases.map(p => (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium">{format(new Date(p.created_at), 'MMM dd, yyyy')}</TableCell>
                       <TableCell>{p.supplier?.name || 'Unknown'}</TableCell>
@@ -162,6 +173,18 @@ export default function InventoryListPage() {
               </Table>
             </div>
           )}
+          {purchases.length > 0 && (
+            <div className="mt-4 border rounded-md">
+              <PaginationControls
+                currentPage={purchasePage}
+                totalPages={totalPurchasePages}
+                itemsPerPage={purchaseItemsPerPage}
+                totalItems={purchases.length}
+                onPageChange={setPurchasePage}
+                onItemsPerPageChange={(val) => { setPurchaseItemsPerPage(val); setPurchasePage(1); }}
+              />
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="movements" className="pt-2">
@@ -182,7 +205,7 @@ export default function InventoryListPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {movements.map(m => (
+                  {paginatedMovements.map(m => (
                     <TableRow key={m.id}>
                       <TableCell className="font-medium">{format(new Date(m.created_at), 'MMM dd, yyyy HH:mm')}</TableCell>
                       <TableCell>{m.inventory_item?.name || 'Unknown Item'}</TableCell>
@@ -197,6 +220,18 @@ export default function InventoryListPage() {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+          )}
+          {movements.length > 0 && (
+            <div className="mt-4 border rounded-md">
+              <PaginationControls
+                currentPage={movementPage}
+                totalPages={totalMovementPages}
+                itemsPerPage={movementItemsPerPage}
+                totalItems={movements.length}
+                onPageChange={setMovementPage}
+                onItemsPerPageChange={(val) => { setMovementItemsPerPage(val); setMovementPage(1); }}
+              />
             </div>
           )}
         </TabsContent>
