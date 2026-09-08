@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
@@ -19,7 +23,7 @@ export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any)
     amount: '',
     description: '',
     paid_to: '',
-    date: format(new Date(), 'yyyy-MM-dd'),
+    date: new Date(),
     status: 'PAID',
     method: 'Cash',
   });
@@ -32,7 +36,7 @@ export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any)
         amount: '',
         description: '',
         paid_to: '',
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: new Date(),
         status: 'PAID',
         method: 'Cash',
       });
@@ -56,6 +60,7 @@ export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any)
       await axios.post('/api/expenses', {
         ...formData,
         amount: parseFloat(formData.amount),
+        date: format(formData.date, 'yyyy-MM-dd'),
         business_id: currentUser.business_id,
       });
       onSuccess();
@@ -105,11 +110,28 @@ export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any)
             </div>
             <div className="space-y-2">
               <Label>Date *</Label>
-              <Input 
-                type="date" 
-                value={formData.date} 
-                onChange={e => setFormData({...formData, date: e.target.value})}
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.date ? format(formData.date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData.date}
+                    onSelect={(date) => date && setFormData({...formData, date})}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 

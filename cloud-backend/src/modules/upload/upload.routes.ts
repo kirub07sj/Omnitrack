@@ -45,9 +45,9 @@ router.post('/', upload.single('image'), async (req, res) => {
     const fileUrl = `data:${mimeType};base64,${base64Image}`;
     
     res.status(200).json({ url: fileUrl });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Upload Error:', error);
-    res.status(500).json({ message: 'Failed to upload image' });
+    res.status(500).json({ message: 'Failed to upload image', error: error.message || String(error) });
   }
 });
 
