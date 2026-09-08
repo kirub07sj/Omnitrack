@@ -84,7 +84,7 @@ export default function SettingsPage() {
             if (pData.success) {
               login(pData.user);
               // Clear PINs from form
-              setFormData(prev => ({ ...prev, currentPin: '', newPin: '' }));
+              setFormData((prev: any) => ({ ...prev, currentPin: '', newPin: '' }));
             } else {
               setMessage({ type: 'error', text: pData.message || 'Failed to update user profile' });
               setIsSaving(false);

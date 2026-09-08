@@ -9,7 +9,6 @@ import {
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
 import { useAppStore } from "@/store/useAppStore"
 import {
   Sidebar,
@@ -19,23 +18,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import logo from "@/assets/logo.png"
-
-const LogoIcon = ({ className }: { className?: string }) => (
-  <img src={logo} alt="Logo" className={`w-full h-full object-contain bg-transparent scale-150 ${className || ''}`} />
-);
-
-const teams = [
-  {
-    name: "Omnitrack",
-    logo: LogoIcon,
-    plan: "",
-  },
-  {
-    name: "Branch 1 (Downtown)",
-    logo: LogoIcon,
-    plan: "",
-  }
-];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { currentUser, businessSettings, unpaidCounts, fetchUnpaidCounts } = useAppStore();

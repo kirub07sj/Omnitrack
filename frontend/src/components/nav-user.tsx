@@ -2,12 +2,9 @@
 
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
-} from "lucide-react"
+  } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useAppStore } from "@/store/useAppStore"
 
@@ -19,9 +16,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
