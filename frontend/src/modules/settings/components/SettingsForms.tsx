@@ -36,6 +36,28 @@ export function BusinessSettingsTab({ data, onChange }: { data: any, onChange: (
             <Label>Email</Label>
             <Input type="email" value={data.email || ''} onChange={e => onChange({ ...data, email: e.target.value })} placeholder="email@example.com" />
           </div>
+          
+          <div className="md:col-span-2 pt-4 border-t mt-2">
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Account Security</h4>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Username</Label>
+            <Input value={data.username || ''} onChange={e => onChange({ ...data, username: e.target.value })} placeholder="username" />
+          </div>
+          <div className="space-y-2">
+            <Label>Current Password / PIN</Label>
+            <Input type="password" value={data.currentPin || ''} onChange={e => onChange({ ...data, currentPin: e.target.value })} placeholder="Enter current to change" />
+          </div>
+          <div className="space-y-2">
+            <Label>New Password / PIN</Label>
+            <Input type="password" value={data.newPin || ''} onChange={e => onChange({ ...data, newPin: e.target.value })} placeholder="Enter new password/PIN" />
+          </div>
+
+          <div className="md:col-span-2 pt-4 border-t mt-2">
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Store Details</h4>
+          </div>
+
           <div className="space-y-2 md:col-span-2">
             <Label>Address</Label>
             <Input value={data.address || ''} onChange={e => onChange({ ...data, address: e.target.value })} placeholder="Full Address" />

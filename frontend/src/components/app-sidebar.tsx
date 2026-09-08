@@ -103,16 +103,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
       ] : [
         { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
-        { title: "Account & Permissions", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/account-permissions` },
-      ],
+              ],
     }] : []),
     ...((isManager || isCashier) ? [] : [{
       title: "System",
       url: "#",
       icon: Settings,
       items: [
-        { title: "Synchronization", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/sync` },
-        { title: "Settings", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/settings` },
+                { title: "Settings", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/settings` },
       ],
     }]),
   ];
@@ -121,7 +119,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" {...props} className="dark border-r-0 bg-gradient-to-b from-emerald-900 via-emerald-950 to-gray-950 text-sidebar-foreground">
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
       <SidebarHeader>
-        <TeamSwitcher teams={teams} />
+        <div className="flex items-center gap-3 py-2 px-2">
+    <div className="w-8 h-8 flex items-center justify-center">
+      <img src={logo} alt="Logo" className="w-full h-full object-contain scale-150" />
+    </div>
+    <span className="font-bold text-lg text-emerald-50 tracking-tight">Omnitrack</span>
+  </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
