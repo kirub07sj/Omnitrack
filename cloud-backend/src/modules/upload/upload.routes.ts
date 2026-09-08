@@ -34,7 +34,12 @@ router.post('/', upload.single('image'), async (req, res) => {
       const dataUri = `data:${mimeType};base64,${base64Image}`;
       
       try {
-        const result = await cloudinary.uploader.upload(dataUri);
+        const uploadOptions: any = {};
+        if (process.env.CLOUDINARY_UPLOAD_PRESET) {
+          uploadOptions.upload_preset = process.env.CLOUDINARY_UPLOAD_PRESET.trim();
+        }
+        
+        const result = await cloudinary.uploader.upload(dataUri, uploadOptions);
         return res.status(200).json({ url: result.secure_url });
       } catch (cloudinaryError: any) {
         console.error('Cloudinary specific error:', cloudinaryError);
