@@ -1,3 +1,4 @@
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { useState } from "react";
 import { useSettings } from '@/hooks/useSettings';
 import {
@@ -113,6 +114,7 @@ export function InventoryTable({ data, onEdit, onDelete }: InventoryTableProps) 
   ];
 
   const table = useReactTable({
+    initialState: { pagination: { pageSize: 15 } },
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -193,14 +195,14 @@ export function InventoryTable({ data, onEdit, onDelete }: InventoryTableProps) 
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-end space-x-2">
-        <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="border-border">
-          Previous
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="border-border">
-          Next
-        </Button>
-      </div>
+      <PaginationControls
+        currentPage={table.getState().pagination.pageIndex + 1}
+        totalPages={table.getPageCount()}
+        itemsPerPage={table.getState().pagination.pageSize}
+        totalItems={table.getFilteredRowModel().rows.length}
+        onPageChange={(page: number) => table.setPageIndex(page - 1)}
+        onItemsPerPageChange={(size: number) => table.setPageSize(size)}
+      />
     </div>
   );
 }

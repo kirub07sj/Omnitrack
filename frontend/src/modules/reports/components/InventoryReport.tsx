@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { Download, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSettings } from '@/hooks/useSettings';
@@ -55,6 +56,11 @@ export function InventoryReport({ refreshTrigger = 0 }: { refreshTrigger?: numbe
     document.body.removeChild(link);
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <Card>
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 gap-4">
@@ -99,7 +105,7 @@ export function InventoryReport({ refreshTrigger = 0 }: { refreshTrigger?: numbe
                   <td colSpan={6} className="text-center py-10 text-muted-foreground">No inventory items found.</td>
                 </tr>
               ) : (
-                filteredData.map((row) => (
+                paginatedData.map((row) => (
                   <tr key={row.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-6 py-4 font-medium">{row.name}</td>
                     <td className="px-6 py-4 text-muted-foreground">{row.sku || '-'}</td>
@@ -131,8 +137,16 @@ export function InventoryReport({ refreshTrigger = 0 }: { refreshTrigger?: numbe
               </tfoot>
             )}
           </table>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredData.length}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+        />
+      </Card>
   );
 }

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import {
   Table,
   TableBody,
@@ -18,7 +20,12 @@ interface SupplierTableProps {
 }
 
 export function SupplierTable({ data, onView, onEdit, onDelete }: SupplierTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const paginatedData = data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   return (
+    <div className="space-y-4">
     <div className="rounded-md border">
       <Table>
         <TableHeader>
@@ -36,7 +43,7 @@ export function SupplierTable({ data, onView, onEdit, onDelete }: SupplierTableP
               <TableCell colSpan={5} className="text-center">No suppliers found.</TableCell>
             </TableRow>
           ) : (
-            data.map((item) => (
+            paginatedData.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell>{item.phone}</TableCell>
@@ -60,6 +67,15 @@ export function SupplierTable({ data, onView, onEdit, onDelete }: SupplierTableP
           )}
         </TableBody>
       </Table>
+    </div>
+    <PaginationControls
+      currentPage={currentPage}
+      totalPages={totalPages}
+      itemsPerPage={itemsPerPage}
+      totalItems={data.length}
+      onPageChange={setCurrentPage}
+      onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+    />
     </div>
   );
 }

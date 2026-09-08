@@ -1,9 +1,10 @@
+import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { useSettings } from '@/hooks/useSettings';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
@@ -37,6 +38,8 @@ export default function ExpensesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   const fetchExpenses = async () => {
     if (!currentUser?.business_id) return;
@@ -92,6 +95,9 @@ export default function ExpensesPage() {
     }
     return true;
   });
+
+  const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
+  const paginatedExpenses = filteredExpenses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -196,7 +202,7 @@ export default function ExpensesPage() {
                     <td colSpan={6} className="text-center py-10 text-muted-foreground">No expenses found.</td>
                   </tr>
                 ) : (
-                  filteredExpenses.map((expense) => (
+                  paginatedExpenses.map((expense) => (
                     <tr key={expense.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">{format(new Date(expense.date), 'MMM dd, yyyy')}</td>
                       <td className="px-6 py-4 font-medium">{expense.category}</td>
@@ -247,6 +253,14 @@ export default function ExpensesPage() {
             </table>
           </div>
         </CardContent>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredExpenses.length}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+        />
       </Card>
       
       <PayExpenseDialog 
