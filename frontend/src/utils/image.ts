@@ -2,6 +2,18 @@ import { isCloudMode, apiConfig } from '@/lib/api';
 
 export function getImageUrl(path?: string): string {
   if (!path) return '';
+  
+  // Base64 data URIs
+  if (path.startsWith('data:')) return path;
+  
+  // Strip old legacy absolute localhost URLs from the database
+  if (path.includes('localhost:5000') && path.includes('/uploads')) {
+    path = path.substring(path.indexOf('/uploads'));
+  } else if (path.includes('localhost:5055') && path.includes('/uploads')) {
+    path = path.substring(path.indexOf('/uploads'));
+  }
+  
+  // If it's still a valid external http(s) URL (like Cloudinary), return it
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
   
   const isElectron = typeof window !== 'undefined' && window.location.protocol === 'file:';

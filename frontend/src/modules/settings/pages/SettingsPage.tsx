@@ -16,7 +16,7 @@ import {
 } from '../components/SettingsForms';
 
 export default function SettingsPage() {
-  const { businessSettings, updateBusinessSettings } = useAppStore();
+  const { businessSettings, updateBusinessSettings, currentUser, login } = useAppStore();
   
   // Parse existing JSON settings or use empty object
   const initialSettings = businessSettings?.settings ? JSON.parse(businessSettings.settings) : {};
@@ -32,6 +32,9 @@ export default function SettingsPage() {
     logo: businessSettings?.logo || '',
     currency: businessSettings?.currency || 'ETB',
     tax_rate: businessSettings?.tax_rate || 15,
+    username: currentUser?.username || '',
+    currentPin: '',
+    newPin: '',
     ...initialSettings
   });
 
@@ -44,7 +47,7 @@ export default function SettingsPage() {
     try {
       // Separate root columns from JSON settings
       const { 
-        is_kitchen_active, name, owner_name, phone, email, address, logo, currency, tax_rate, 
+        is_kitchen_active, name, owner_name, phone, email, address, logo, currency, tax_rate, username, currentPin, newPin, 
         ...otherSettings 
       } = formData;
 
@@ -63,6 +66,36 @@ export default function SettingsPage() {
       
       if (data.success) {
         updateBusinessSettings(data.business);
+        
+        // Update user profile if changed
+        if (username !== currentUser?.username || (currentPin && newPin)) {
+          try {
+            const pRes = await apiFetch('/api/auth/update-profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: currentUser?.id,
+                username,
+                currentPin: currentPin || undefined,
+                newPin: newPin || undefined
+              })
+            });
+            const pData = await pRes.json();
+            if (pData.success) {
+              login(pData.user);
+              // Clear PINs from form
+              setFormData((prev: any) => ({ ...prev, currentPin: '', newPin: '' }));
+            } else {
+              setMessage({ type: 'error', text: pData.message || 'Failed to update user profile' });
+              setIsSaving(false);
+              setTimeout(() => setMessage(null), 3000);
+              return;
+            }
+          } catch(e) {
+             console.error(e);
+          }
+        }
+        
         setMessage({ type: 'success', text: 'Settings saved successfully!' });
       } else {
         setMessage({ type: 'error', text: data.message || 'Failed to save settings' });
