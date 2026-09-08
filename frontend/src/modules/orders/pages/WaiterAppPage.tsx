@@ -418,7 +418,10 @@ export default function WaiterAppPage() {
               size="lg"
             >
               {submitLoading ? (
-                <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                  Processing...
+                </>
               ) : (
                 'Place Order'
               )}

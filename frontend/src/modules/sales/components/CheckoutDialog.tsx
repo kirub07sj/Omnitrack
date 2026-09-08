@@ -226,7 +226,12 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
               onClick={handleCheckout}
               disabled={loading}
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Processing...
+                </>
+              ) : (
                 <>
                   <CheckCircle2 className="w-5 h-5 mr-2" />
                   Complete Payment
