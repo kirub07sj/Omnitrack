@@ -8,8 +8,8 @@ export const createOrderSchema = z.object({
     status: z.string().optional(),
     items: z.array(z.object({
       product_id: z.string(),
-      quantity: z.number(),
-      price: z.number()
+      quantity: z.coerce.number(),
+      price: z.coerce.number()
     }))
   })
 });
@@ -20,8 +20,8 @@ export const updateOrderSchema = z.object({
     notes: z.string().optional().nullable(),
     items: z.array(z.object({
       product_id: z.string(),
-      quantity: z.number(),
-      price: z.number()
+      quantity: z.coerce.number(),
+      price: z.coerce.number()
     })).optional()
   })
 });
