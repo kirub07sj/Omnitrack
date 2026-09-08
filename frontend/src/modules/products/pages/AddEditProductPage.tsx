@@ -7,6 +7,7 @@ import { CategoryService } from "../services/category.service";
 import axios from 'axios';
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function AddEditProductPage() {
   const { id } = useParams();
