@@ -128,7 +128,6 @@ export default function AddExpenseDialog({ open, onOpenChange, onSuccess }: any)
                     mode="single"
                     selected={formData.date}
                     onSelect={(date) => date && setFormData({...formData, date})}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
