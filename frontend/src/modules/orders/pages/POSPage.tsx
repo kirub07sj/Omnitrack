@@ -7,6 +7,8 @@ import { useSettings } from '@/hooks/useSettings';
 import QRCode from 'react-qr-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -25,7 +27,7 @@ export default function POSPage() {
   const { currentUser } = useAppStore();
   const { currency, taxSettings, calculateTotal, isKitchenActive } = useSettings();
   const { orders, tables, fetchOrders, fetchTables, createOrder, updateOrder } = useOrderStore();
-  const { products: allProducts, fetchProducts } = useProductStore();
+  const { products: allProducts, fetchProducts, isLoading: productsLoading } = useProductStore();
   
   const products = useMemo(() => {
     return allProducts.filter(p => !p.status || String(p.status).toLowerCase() === 'active');
@@ -35,6 +37,7 @@ export default function POSPage() {
   const [selectedTable, setSelectedTable] = useState<string>('');
   
   const [success, setSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -117,9 +120,11 @@ export default function POSPage() {
   }, [products, activeCategory]);
 
   const handleCreateOrder = async () => {
+    setIsSubmitting(true);
     if (cart.length === 0) {
       setError("Cart is empty");
       setTimeout(() => setError(null), 3000);
+      setIsSubmitting(false);
       return;
     }
 
@@ -236,7 +241,19 @@ export default function POSPage() {
               )}
               
               <ScrollArea className="flex-1 px-4 pb-4">
-                {filteredProducts.length === 0 ? (
+                {productsLoading ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-10">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div key={i} className="flex flex-col rounded-2xl overflow-hidden border border-border bg-card h-[220px]">
+                        <Skeleton className="h-32 w-full rounded-none" />
+                        <div className="p-3 space-y-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-1/4" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredProducts.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-20 omni-animate-in">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-50"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                     <p className="text-lg font-medium">No products available</p>
@@ -439,11 +456,20 @@ export default function POSPage() {
           <Button 
             className="w-full py-6 text-lg font-bold text-primary-foreground shadow-lg shadow-primary/25 bg-primary hover:bg-primary/90 border-0"
             onClick={() => handleCreateOrder()}
-            disabled={cart.length === 0 || !selectedTable}
+            disabled={cart.length === 0 || !selectedTable || isSubmitting}
           >
             <span className="relative z-10 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-              {isKitchenActive ? 'Send to Kitchen' : 'Checkout & Complete'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  {isKitchenActive ? 'Send to Kitchen' : 'Checkout & Complete'}
+                </>
+              )}
             </span>
           </Button>
         </div>
