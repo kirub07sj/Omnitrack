@@ -1,9 +1,10 @@
+import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { Input } from '@/components/ui/input';
-import { Search, Printer, RotateCcw, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { Search, Printer, RotateCcw, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -28,7 +29,7 @@ export default function SalesHistoryPage() {
   const [refundSuccess, setRefundSuccess] = useState(false);
   
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 40;
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   const fetchSales = async () => {
     setLoading(true);
@@ -266,36 +267,14 @@ export default function SalesHistoryPage() {
             </table>
           </div>
           
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-border px-6 py-4">
-              <div className="text-sm text-muted-foreground">
-                Showing <span className="font-medium text-foreground">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium text-foreground">{Math.min(currentPage * itemsPerPage, filteredSales.length)}</span> of <span className="font-medium text-foreground">{filteredSales.length}</span> sales
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
-                  Previous
-                </Button>
-                <div className="text-sm font-medium px-2">
-                  Page {currentPage} of {totalPages}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredSales.length}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+          />
         </CardContent>
       </Card>
 

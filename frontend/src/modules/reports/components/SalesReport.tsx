@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { Download, Search, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
@@ -61,6 +62,11 @@ export function SalesReport({ dateRange, refreshTrigger = 0 }: { dateRange: { st
     document.body.removeChild(link);
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <Card>
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 gap-4">
@@ -109,7 +115,7 @@ export function SalesReport({ dateRange, refreshTrigger = 0 }: { dateRange: { st
                   <td colSpan={6} className="text-center py-10 text-muted-foreground">No sales found for this period.</td>
                 </tr>
               ) : (
-                sortedData.map((row) => (
+                paginatedData.map((row) => (
                   <tr key={row.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">{format(new Date(row.created_at), 'MMM dd, yyyy HH:mm')}</td>
                     <td className="px-6 py-4 font-medium truncate max-w-[150px]" title={row.id}>{row.id}</td>
@@ -122,8 +128,16 @@ export function SalesReport({ dateRange, refreshTrigger = 0 }: { dateRange: { st
               )}
             </tbody>
           </table>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          totalItems={sortedData.length}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+        />
+      </Card>
   );
 }

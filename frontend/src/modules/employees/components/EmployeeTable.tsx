@@ -146,6 +146,7 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
   ];
 
   const table = useReactTable({
+    initialState: { pagination: { pageSize: 15 } },
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
