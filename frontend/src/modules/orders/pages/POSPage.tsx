@@ -149,6 +149,8 @@ export default function POSPage() {
     } catch (e: any) {
       setError("Failed to create order: " + e.message);
       setTimeout(() => setError(null), 3000);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
