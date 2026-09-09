@@ -1,3 +1,4 @@
+import { useAppStore } from './store/useAppStore';
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
@@ -32,6 +33,19 @@ axios.interceptors.request.use((config) => {
   return config;
 });
 
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      useAppStore.getState().logout();
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // 2. Wrap native fetch
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
@@ -51,7 +65,15 @@ window.fetch = async (...args) => {
       }
     }
   }
-  return originalFetch(resource, config);
+  return originalFetch(resource, config).then(res => {
+    if (res.status === 401) {
+      useAppStore.getState().logout();
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+        window.location.href = '/login';
+      }
+    }
+    return res;
+  });
 };
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
