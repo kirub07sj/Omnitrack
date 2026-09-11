@@ -54,14 +54,14 @@ export default function SuperAdminLayout() {
   return (
     <div className="min-h-screen bg-gray-50/50 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 z-20">
-        <div className="p-4 border-b border-gray-200 flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100 shrink-0">
-            <img src={logo} alt="Logo" className="w-7 h-7 object-contain" />
+      <aside className="w-64 border-r-0 bg-gradient-to-b from-emerald-600 to-emerald-950 flex flex-col h-screen sticky top-0 z-20 text-emerald-50">
+        <div className="p-4 border-b border-emerald-500/20 flex items-center gap-3">
+          <div className="w-10 h-10 flex items-center justify-center shrink-0">
+            <img src={logo} alt="Logo" className="w-full h-full object-contain scale-150" />
           </div>
           <div className="overflow-hidden">
-            <h1 className="text-lg font-bold tracking-tight text-gray-900 truncate">Omnitrack</h1>
-            <p className="text-[10px] font-medium text-emerald-600 flex items-center gap-1 uppercase tracking-wider">
+            <h1 className="text-lg font-bold tracking-tight text-white truncate">Omnitrack</h1>
+            <p className="text-[10px] font-medium text-emerald-300 flex items-center gap-1 uppercase tracking-wider">
               <ShieldCheck className="w-3 h-3" /> Super Admin
             </p>
           </div>
@@ -84,36 +84,36 @@ export default function SuperAdminLayout() {
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600' : 'text-gray-400'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-emerald-50/70'}`} />
                 {item.name}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-200 space-y-1">
+        <div className="p-4 border-t border-emerald-800/50 space-y-1 mt-auto">
           <div className="px-3 py-2 flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-              <User className="w-4 h-4 text-emerald-700" />
+            <div className="w-8 h-8 rounded-full bg-emerald-800 flex items-center justify-center shrink-0">
+              <User className="w-4 h-4 text-emerald-100" />
             </div>
             <div className="overflow-hidden text-left">
-              <p className="text-sm font-medium text-gray-900 truncate">{currentUser.firstName} {currentUser.lastName}</p>
-              <p className="text-xs text-gray-500 truncate">{currentUser.email || currentUser.username}</p>
+              <p className="text-sm font-medium text-white truncate">{currentUser.firstName} {currentUser.lastName}</p>
+              <p className="text-xs text-emerald-200/70 truncate">{currentUser.email || currentUser.username}</p>
             </div>
           </div>
           
           <Link
             to="/super-admin/settings"
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-emerald-50/70 hover:bg-emerald-800/40 hover:text-white transition-colors"
           >
-            <Settings className="w-4 h-4 text-gray-400" />
+            <Settings className="w-4 h-4 text-emerald-50/70" />
             Account Settings
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-left"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-emerald-50/70 hover:bg-emerald-800/40 hover:text-white transition-colors text-left"
           >
-            <LogOut className="w-4 h-4 text-gray-400" />
+            <LogOut className="w-4 h-4 text-emerald-50/70" />
             Logout
           </button>
         </div>
