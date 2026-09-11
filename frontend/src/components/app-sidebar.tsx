@@ -98,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   ];
 
   return (
-    <Sidebar collapsible="icon" {...props} className="dark border-r-0 bg-gradient-to-b from-emerald-600 to-emerald-950 text-sidebar-foreground">
+    <Sidebar collapsible="icon" {...props} className="dark border-r-0 bg-gradient-to-b from-emerald-900 via-emerald-950 to-gray-950 text-sidebar-foreground">
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
       <SidebarHeader>
         <div className="flex items-center gap-3 py-2 px-2">

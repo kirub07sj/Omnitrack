@@ -238,9 +238,8 @@ router.get('/businesses/:id', async (req: Request, res: Response) => {
           }
         },
         
-        subscriptions: {
-          include: { account: true },
-          orderBy: { created_at: 'desc' }
+        subscription: {
+          include: { account: true }
         }
       }
     });
