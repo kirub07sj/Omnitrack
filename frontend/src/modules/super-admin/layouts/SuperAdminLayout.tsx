@@ -54,7 +54,7 @@ export default function SuperAdminLayout() {
   return (
     <div className="min-h-screen bg-gray-50/50 flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r-0 bg-gradient-to-b from-emerald-600 to-emerald-950 flex flex-col h-screen sticky top-0 z-20 text-emerald-50">
+      <aside className="w-64 border-r-0 bg-gradient-to-b from-emerald-900 via-emerald-950 to-gray-950 flex flex-col h-screen sticky top-0 z-20 text-emerald-50">
         <div className="p-4 border-b border-emerald-500/20 flex items-center gap-3">
           <div className="w-10 h-10 flex items-center justify-center shrink-0">
             <img src={logo} alt="Logo" className="w-full h-full object-contain scale-150" />
@@ -80,11 +80,11 @@ export default function SuperAdminLayout() {
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive 
-                    ? 'bg-emerald-50 text-emerald-700' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-emerald-800/80 text-white shadow-sm' 
+                    : 'text-gray-300 hover:bg-emerald-800/40 hover:text-white'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-emerald-50/70'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-300'}`} />
                 {item.name}
               </Link>
             );
@@ -104,16 +104,16 @@ export default function SuperAdminLayout() {
           
           <Link
             to="/super-admin/settings"
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-emerald-50/70 hover:bg-emerald-800/40 hover:text-white transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-emerald-800/40 hover:text-white transition-colors"
           >
-            <Settings className="w-4 h-4 text-emerald-50/70" />
+            <Settings className="w-4 h-4 text-gray-300" />
             Account Settings
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-emerald-50/70 hover:bg-emerald-800/40 hover:text-white transition-colors text-left"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-emerald-800/40 hover:text-white transition-colors text-left"
           >
-            <LogOut className="w-4 h-4 text-emerald-50/70" />
+            <LogOut className="w-4 h-4 text-gray-300" />
             Logout
           </button>
         </div>
