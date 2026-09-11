@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import SuperAdminBusinessDetails from './SuperAdminBusinessDetails';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -38,9 +39,9 @@ const tenantSchema = z.object({
 });
 
 export default function SuperAdminBusinesses() {
-  const navigate = useNavigate();
-  const [tenants, setTenants] = useState<any[]>([]);
+    const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [formError, setFormError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -463,7 +464,7 @@ export default function SuperAdminBusinesses() {
                         variant="ghost" 
                         size="icon"
                         className="h-8 w-8 text-gray-500 hover:text-emerald-700"
-                        onClick={() => navigate(`/super-admin/businesses/${tenant.business.id}`)}
+                        onClick={() => setSelectedBusinessId(tenant.business.id)}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -483,6 +484,13 @@ export default function SuperAdminBusinesses() {
           </table>
         </div>
       </div>
+
+      {/* Business Details Modal */}
+      <Dialog open={!!selectedBusinessId} onOpenChange={(open) => !open && setSelectedBusinessId(null)}>
+        <DialogContent className="max-w-5xl p-0 overflow-hidden bg-gray-50 max-h-[90vh] overflow-y-auto">
+          {selectedBusinessId && <SuperAdminBusinessDetails businessId={selectedBusinessId} onClose={() => setSelectedBusinessId(null)} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
