@@ -3,8 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Building2, CalendarClock, Users, Key, RefreshCcw, Activity, Loader2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
-export default function SuperAdminBusinessDetails() {
-  const { id } = useParams();
+interface Props {
+  businessId?: string;
+  onClose?: () => void;
+}
+
+export default function SuperAdminBusinessDetails({ businessId: propId, }: Props = {}) {
+  const { id: paramId } = useParams();
+  const id = propId || paramId;
   const [business, setBusiness] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -55,9 +61,11 @@ export default function SuperAdminBusinessDetails() {
       {/* Header */}
       <div className="flex items-start justify-between bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
         <div className="flex items-start gap-4">
-          <Link to="/super-admin/businesses" className="mt-1 flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
+          {!propId && (
+            <Link to="/super-admin/businesses" className="mt-1 flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          )}
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-2xl font-bold text-gray-900">{business.name}</h2>
