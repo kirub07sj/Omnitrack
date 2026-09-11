@@ -37,7 +37,7 @@ export const updateSettingsSchema = z.object({
     address: z.string().optional(),
     logo: z.string().optional(),
     currency: z.string().optional(),
-    tax_rate: z.number().optional(),
+    tax_rate: z.coerce.number().optional(),
     settings: z.any().optional()
   })
 });

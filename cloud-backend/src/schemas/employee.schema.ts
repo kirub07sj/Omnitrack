@@ -13,7 +13,7 @@ const employeeBody = {
   employee_number: z.string().optional(),
   position: z.string().optional(),
   department: z.string().optional(),
-  salary: z.number().optional(),
+  salary: z.coerce.number().optional(),
   employment_type: z.string().optional(),
   hire_date: z.union([z.string(), z.date()]).optional(),
   status: z.string().optional(),
