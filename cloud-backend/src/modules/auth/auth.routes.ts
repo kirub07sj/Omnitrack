@@ -86,10 +86,19 @@ router.post('/logout', (req, res) => {
 
 router.put('/update-profile', validate(updateProfileSchema), async (req, res) => {
   try {
-    const { userId, firstName, lastName, currentPin, newPin, email } = req.body;
+    const { userId, firstName, lastName, currentPin, newPin, email, username } = req.body;
 
     const user = await prisma.user.findUnique({ where: { id: userId }, include: { employee: true, role: true } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+    if (username !== undefined && username !== user.username) {
+      const existingUser = await prisma.user.findUnique({ where: { username } });
+      if (existingUser) return res.status(400).json({ success: false, message: 'Username is already taken.' });
+      await prisma.user.update({
+        where: { id: userId },
+        data: { username }
+      });
+    }
 
     if (firstName !== undefined || lastName !== undefined || email !== undefined) {
       await prisma.employee.update({

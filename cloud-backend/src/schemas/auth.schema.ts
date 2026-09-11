@@ -21,6 +21,7 @@ export const updateProfileSchema = z.object({
     userId: z.string({ required_error: 'User ID is required' }).or(z.number()),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
+    username: z.string().optional(),
     currentPin: z.string().optional(),
     newPin: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
