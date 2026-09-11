@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import SuperAdminBusinessDetails from './SuperAdminBusinessDetails';
