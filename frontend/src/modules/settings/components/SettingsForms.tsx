@@ -3,11 +3,12 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building, Wallet, ShoppingCart, Package, Receipt, Settings as SettingsIcon, Percent } from 'lucide-react';
+import { Building, Wallet, ShoppingCart, Package, Receipt, Settings as SettingsIcon, Percent, CalendarDays, CreditCard, Gift } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, isCloudMode } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // We'll export the individual tab components from here
 
@@ -536,15 +537,41 @@ export function SystemSettingsTab({ data, onChange }: { data: any, onChange: (d:
   );
 }
 
+function planLabel(plan?: string) {
+  if (plan === 'trial' || plan === 'free') return 'Free Trial';
+  if (plan === 'monthly' || plan === 'pro') return 'Paid Monthly';
+  return plan ? plan.replace(/_/g, ' ') : 'Unknown';
+}
+
+function formatLicenseDate(dateStr?: string | null) {
+  if (!dateStr) return 'No end date';
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
+function daysUntil(dateStr?: string | null) {
+  if (!dateStr) return null;
+  const diff = new Date(dateStr).getTime() - Date.now();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
 export function LicenseSettingsTab() {
   const [info, setInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch('/api/license/info')
+    const endpoint = isCloudMode ? '/api/subscription/status' : '/api/license/info';
+    apiFetch(endpoint)
       .then(r => r.json())
       .then(d => {
-        if (d.success) setInfo(d.data);
+        if (isCloudMode) {
+          setInfo(d.subscription || null);
+        } else if (d.success) {
+          setInfo(d.data);
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -555,14 +582,84 @@ export function LicenseSettingsTab() {
     return `••••-••••-••••-${last4}`;
   };
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  if (isCloudMode) {
+    const startedAt = info?.starts_at || info?.created_at;
+    const endsAt = info?.expires_at;
+    const remaining = daysUntil(endsAt);
+    const expired = typeof remaining === 'number' && remaining < 0;
+    const live = (info?.status === 'active' || info?.status === 'trial') && !expired;
+    const isTrial = info?.plan === 'trial' || info?.plan === 'free' || info?.status === 'trial';
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><SettingsIcon className="w-5 h-5 text-primary" /> License</CardTitle>
+          <CardDescription>Your Omnitrack Cloud plan and billing dates.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+              <Skeleton className="h-24 rounded-xl" />
+              <Skeleton className="h-24 rounded-xl" />
+              <Skeleton className="h-24 rounded-xl" />
+              <Skeleton className="h-24 rounded-xl" />
+            </div>
+          ) : !info ? (
+            <div className="p-4 text-muted-foreground bg-muted/40 rounded-lg border">
+              No subscription is attached to this business yet. Contact the software owner if this looks wrong.
+            </div>
+          ) : (
+            <div className="space-y-6 max-w-2xl">
+              <div className={`inline-flex items-center font-semibold gap-2 px-2.5 py-1 rounded-md border text-sm ${
+                live
+                  ? 'text-emerald-800 bg-emerald-50 border-emerald-100'
+                  : 'text-rose-700 bg-rose-50 border-rose-100'
+              }`}>
+                {live ? (info.status === 'trial' ? 'Trial active' : 'License active') : expired ? 'License expired' : 'License inactive'}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 rounded-xl border border-emerald-100 bg-emerald-50/40 space-y-2">
+                  <p className="text-xs font-medium text-emerald-800/70 uppercase tracking-wider flex items-center gap-1.5">
+                    {isTrial ? <Gift className="w-3.5 h-3.5" /> : <CreditCard className="w-3.5 h-3.5" />}
+                    Plan
+                  </p>
+                  <p className="font-semibold text-lg text-emerald-950">{planLabel(info.plan)}</p>
+                </div>
+                <div className="p-5 rounded-xl border border-emerald-100 bg-white space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</p>
+                  <p className="font-semibold text-lg capitalize">{expired ? 'Expired' : info.status}</p>
+                </div>
+                <div className="p-5 rounded-xl border border-emerald-100 bg-white space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5 text-emerald-700" />
+                    Started
+                  </p>
+                  <p className="font-medium text-md">{formatLicenseDate(startedAt)}</p>
+                </div>
+                <div className="p-5 rounded-xl border border-emerald-100 bg-white space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5 text-emerald-700" />
+                    Ends
+                  </p>
+                  <p className="font-medium text-md">{formatLicenseDate(endsAt)}</p>
+                  {typeof remaining === 'number' && !expired && (
+                    <p className="text-xs text-emerald-800">
+                      {remaining === 0 ? 'Ends today' : remaining === 1 ? '1 day left' : `${remaining} days left`}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                To renew or change this license, contact the software owner.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -601,12 +698,12 @@ export function LicenseSettingsTab() {
 
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Activated</p>
-                <p className="font-medium text-md">{formatDate(info.activatedAt || info.validUntil)}</p>
+                <p className="font-medium text-md">{formatLicenseDate(info.activatedAt || info.validUntil)}</p>
               </div>
 
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Expires</p>
-                <p className="font-medium text-md">{formatDate(info.expiresAt)}</p>
+                <p className="font-medium text-md">{formatLicenseDate(info.expiresAt)}</p>
               </div>
 
               <div className="space-y-1">

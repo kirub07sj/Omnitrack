@@ -3,18 +3,23 @@ import { prisma } from '../../config/database';
 
 export const getStatus = async (req: Request, res: Response) => {
   try {
-    const business_id = (req as any).user?.business_id;
+    const user = (req as any).user;
+    const business_id = user?.business_id;
+    const account_id = user?.account_id;
 
-    if (!business_id) {
-      res.json({ subscription: null, message: 'No business associated' });
+    if (!business_id && !account_id) {
+      res.json({ success: true, subscription: null, message: 'No business associated' });
       return;
     }
 
-    const subscription = await prisma.subscription.findUnique({
-      where: { business_id }
-    });
+    const subscription = business_id
+      ? await prisma.subscription.findUnique({ where: { business_id } })
+      : await prisma.subscription.findFirst({
+          where: { account_id },
+          orderBy: { created_at: 'desc' }
+        });
 
-    res.json({ subscription });
+    res.json({ success: true, subscription });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch subscription status', error });
   }
