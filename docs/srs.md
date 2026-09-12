@@ -24,6 +24,7 @@ Omnitrack is intended for:
 Restaurants, Cafés, Fast food businesses, Small hotels without complex reservation systems, Bars and lounges, and Coffee shops.
 
 1.4 User Roles
+- **Super Admin (Cloud Only):** Platform administrator responsible for managing SaaS tenants (businesses), subscriptions, global statistics, and system-wide settings.
 - **Owner:** Unrestricted access to all system features (Business settings, Reports, Employee management, Inventory, Expenses, Sales).
 - **Manager:** Responsible for daily operations (Inventory, Employees, Reports, Sales, Expenses). Cannot modify licenses or delete the business.
 - **Cashier:** Responsible for customer payments (Create sales, Process payments, Print receipts).
@@ -47,6 +48,7 @@ Omnitrack consists of two separate software distributions:
 
 3. Product Scope
 Omnitrack Version 1.0 includes:
+- Super Admin Tenant Management (Cloud Edition)
 - Authentication & Role-based Access
 - Employee management
 - Sales and Order management (POS)
@@ -62,12 +64,27 @@ Omnitrack Version 1.0 includes:
 Table businesses {
   id uuid [pk]
   name varchar
+  owner_name varchar
   phone varchar
   email varchar
   address text
   logo text
   currency varchar
   tax_rate decimal
+  is_kitchen_active boolean
+  settings text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table subscriptions {
+  id uuid [pk]
+  account_id varchar
+  business_id uuid
+  plan varchar
+  status varchar
+  starts_at timestamp
+  expires_at timestamp
   created_at timestamp
   updated_at timestamp
 }
@@ -83,8 +100,8 @@ Table employees {
   first_name varchar
   last_name varchar
   phone varchar
+  email varchar
   salary decimal
-  hire_date date
   status varchar
 }
 
@@ -94,9 +111,8 @@ Table users {
   employee_id uuid
   role_id uuid
   username varchar
-  password_hash text
+  password_hash varchar
   status varchar
-  last_login timestamp
 }
 
 Table restaurant_tables {
@@ -105,42 +121,45 @@ Table restaurant_tables {
   table_number varchar
   capacity int
   status varchar
+  waiter_id uuid
 }
 
 Table categories {
   id uuid [pk]
   business_id uuid
   name varchar
+  status varchar
 }
 
 Table products {
   id uuid [pk]
   business_id uuid
   category_id uuid
+  inventory_item_id uuid
   name varchar
-  sku varchar
   price decimal
   cost decimal
+  track_inventory boolean
   status varchar
 }
 
-Table inventory {
+Table inventory_items {
   id uuid [pk]
   business_id uuid
-  product_id uuid
+  name varchar
+  unit varchar
   quantity decimal
   minimum_quantity decimal
+  cost_per_unit decimal
+  supplier_id uuid
 }
 
 Table inventory_movements {
   id uuid [pk]
   business_id uuid
-  product_id uuid
+  inventory_item_id uuid
   type varchar
   quantity decimal
-  reference_type varchar
-  reference_id uuid
-  created_at timestamp
 }
 
 Table suppliers {
@@ -149,7 +168,6 @@ Table suppliers {
   name varchar
   phone varchar
   email varchar
-  address text
 }
 
 Table purchases {
@@ -158,13 +176,12 @@ Table purchases {
   supplier_id uuid
   total decimal
   status varchar
-  created_at timestamp
 }
 
 Table purchase_items {
   id uuid [pk]
   purchase_id uuid
-  product_id uuid
+  inventory_item_id uuid
   quantity decimal
   cost decimal
 }
@@ -175,8 +192,6 @@ Table orders {
   table_id uuid
   waiter_id uuid
   status varchar
-  notes text
-  created_at timestamp
 }
 
 Table order_items {
@@ -187,15 +202,16 @@ Table order_items {
   price decimal
 }
 
-Table payments {
+Table transactions {
   id uuid [pk]
   business_id uuid
   order_id uuid
+  purchase_id uuid
+  expense_id uuid
+  type varchar
   amount decimal
   method varchar
-  status varchar
-  proof_image text
-  paid_at timestamp
+  date timestamp
 }
 
 Table sales {
@@ -203,11 +219,7 @@ Table sales {
   business_id uuid
   order_id uuid
   cashier_id uuid
-  subtotal decimal
-  tax decimal
-  discount decimal
   total decimal
-  created_at timestamp
 }
 
 Table expenses {
@@ -215,73 +227,61 @@ Table expenses {
   business_id uuid
   category varchar
   amount decimal
-  description text
-  receipt_image text
-  created_at timestamp
+  status varchar
 }
 
-Table sync_queue {
+Table sync_changes {
   id uuid [pk]
   business_id uuid
-  entity varchar
-  entity_id uuid
+  entity_type varchar
   operation varchar
   status varchar
-  created_at timestamp
 }
 
+Ref: subscriptions.business_id - businesses.id
 Ref: employees.business_id > businesses.id
 Ref: users.business_id > businesses.id
 Ref: users.employee_id > employees.id
 Ref: users.role_id > roles.id
-
 Ref: restaurant_tables.business_id > businesses.id
-
+Ref: restaurant_tables.waiter_id > employees.id
 Ref: categories.business_id > businesses.id
 Ref: products.business_id > businesses.id
 Ref: products.category_id > categories.id
-
-Ref: inventory.business_id > businesses.id
-Ref: inventory.product_id > products.id
-
+Ref: products.inventory_item_id > inventory_items.id
+Ref: inventory_items.business_id > businesses.id
+Ref: inventory_items.supplier_id > suppliers.id
 Ref: inventory_movements.business_id > businesses.id
-Ref: inventory_movements.product_id > products.id
-
+Ref: inventory_movements.inventory_item_id > inventory_items.id
 Ref: suppliers.business_id > businesses.id
-
 Ref: purchases.business_id > businesses.id
 Ref: purchases.supplier_id > suppliers.id
-
 Ref: purchase_items.purchase_id > purchases.id
-Ref: purchase_items.product_id > products.id
-
+Ref: purchase_items.inventory_item_id > inventory_items.id
 Ref: orders.business_id > businesses.id
 Ref: orders.table_id > restaurant_tables.id
 Ref: orders.waiter_id > employees.id
-
 Ref: order_items.order_id > orders.id
 Ref: order_items.product_id > products.id
-
-Ref: payments.business_id > businesses.id
-Ref: payments.order_id > orders.id
-
+Ref: transactions.business_id > businesses.id
+Ref: transactions.order_id > orders.id
+Ref: transactions.purchase_id > purchases.id
+Ref: transactions.expense_id > expenses.id
 Ref: sales.business_id > businesses.id
 Ref: sales.order_id > orders.id
 Ref: sales.cashier_id > employees.id
-
 Ref: expenses.business_id > businesses.id
+Ref: sync_changes.business_id > businesses.id
 
-Ref: sync_queue.business_id > businesses.id
 
-
-# RestaurantOS Application Workflow
+# Omnitrack Application Workflow
 
 ## 1. Application Startup
 
 When the application launches, it performs a series of checks to determine the next screen.
 
 ```text
-Launch RestaurantOS
+Launch Omnitrack
         │
         ▼
 Is License Activated?
@@ -306,12 +306,12 @@ Activation         │
 
 # 2. License Activation
 
-The user enters the product key received after purchasing RestaurantOS.
+The user enters the product key received after purchasing Omnitrack.
 
 ### Process
 
 1. User enters the Product Key.
-2. RestaurantOS sends the key and device information to the License Server.
+2. Omnitrack sends the key and device information to the License Server.
 3. The License Server verifies:
 
    * Product key exists.
@@ -428,6 +428,10 @@ Process:
 
 Each role lands on the page that best matches their daily workflow.
 
+### Super Admin (Cloud Only)
+
+Tenants / Global Dashboard
+
 ### Owner
 
 Dashboard
@@ -452,7 +456,7 @@ Kitchen Queue
 
 # 6. Daily Operational Workflow
 
-Once logged in, RestaurantOS supports the following business process.
+Once logged in, Omnitrack supports the following business process.
 
 ```text
 Customer Arrives
@@ -548,7 +552,7 @@ Managers or Owners may reset employee passwords from the Employee Management mod
 
 # 10. Future Licensing Workflow
 
-RestaurantOS licensing will be managed through a separate License Management System.
+Omnitrack licensing will be managed through a separate License Management System.
 
 Responsibilities include:
 
@@ -560,7 +564,7 @@ Responsibilities include:
 * License suspension
 * Usage monitoring
 
-RestaurantOS communicates with the License Server only when:
+Omnitrack communicates with the License Server only when:
 
 * Activating a license
 * Verifying license status
