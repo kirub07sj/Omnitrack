@@ -24,6 +24,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import AccountBlockedScreen from '@/components/AccountBlockedScreen';
 import { useSettings } from '@/hooks/useSettings';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -31,7 +32,7 @@ import { format } from 'date-fns';
 
 export default function ManagerDashboard() {
   const EMERALD_COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#047857', '#a7f3d0'];
-  const { currentUser } = useAppStore();
+  const { currentUser, accountAccess } = useAppStore();
   const { currency } = useSettings();
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
@@ -61,8 +62,12 @@ export default function ManagerDashboard() {
     return <div className="p-8 text-center text-muted-foreground flex h-full items-center justify-center">Loading dashboard...</div>;
   }
 
+  if (accountAccess.blocked) {
+    return <AccountBlockedScreen />;
+  }
+
   if (!data) {
-    return <div className="p-8 text-center text-destructive flex h-full items-center justify-center">Failed to load dashboard data.</div>;
+    return <div className="p-8 text-center text-muted-foreground flex h-full items-center justify-center">Unable to load the dashboard right now. Please try again in a moment.</div>;
   }
 
   const {

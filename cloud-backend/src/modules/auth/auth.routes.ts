@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../../config/database';
 import { validate } from '../../middleware/validate';
 import { setupOwnerSchema, loginSchema, updateProfileSchema } from '../../schemas/auth.schema';
+import { describeSubscription } from '../../lib/subscription-access';
 
 const router = Router();
 
@@ -62,10 +63,16 @@ router.post('/login', validate(loginSchema), async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    const subscription = await prisma.subscription.findUnique({
+      where: { business_id: user.business_id }
+    });
+    const access = describeSubscription(subscription);
+
     res.cookie('token', token, { httpOnly: true, secure: process.env.VERCEL ? true : false, sameSite: process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'none' : 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
 
     res.json({
       success: true,
+      access,
       user: {
         id: user.id, username: user.username,
         firstName: user.employee.first_name, lastName: user.employee.last_name,

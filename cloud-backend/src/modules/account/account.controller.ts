@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../../config/database';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { describeSubscription } from '../../lib/subscription-access';
 
 // Removed top level JWT_SECRET
 
@@ -74,16 +75,16 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    // Look up active subscription to find business_id
     const subscription = await prisma.subscription.findFirst({
-      where: {
-        account_id: account.id,
-        status: { in: ['active', 'trial'] }
-      }
+      where: { account_id: account.id },
+      orderBy: { created_at: 'desc' }
     });
 
     const business_id = subscription?.business_id || null;
     const isSuperAdmin = (account as any).is_super_admin ?? false;
+    const access = isSuperAdmin
+      ? { blocked: false, code: null, message: null }
+      : describeSubscription(subscription);
 
     const token = jwt.sign(
       { account_id: account.id, email: account.email, business_id, is_super_admin: isSuperAdmin },
@@ -95,6 +96,7 @@ export const login = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
+      access,
       account: {
         id: account.id,
         email: account.email,
