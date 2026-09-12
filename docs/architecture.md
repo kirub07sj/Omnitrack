@@ -39,7 +39,7 @@ omnitrack/
 * The frontend is built using `npm run build:cloud` which utilizes `.env.cloud` variables.
 * The frontend proxies API calls via `vercel.json` rewrites to the cloud backend.
 * The cloud backend uses `@vercel/node` to run serverless functions natively via `api/index.ts`.
-* All routes are protected by a global JWT `authMiddleware` (except for public registration and status checks).
+* All routes are protected by a global JWT `authMiddleware` using HTTP-Only Cookies (except for public registration and status checks).
 
 ## FRONTEND STRUCTURE (REACT)
 
@@ -63,8 +63,8 @@ frontend/
 │   │   ├── expenses/
 │   │   ├── employees/
 │   │   ├── reports/
-│   │   ├── sync/          # (Deprecated/Disabled in new architecture)
-│   │   └── settings/
+│   │   ├── settings/
+│   │   └── super-admin/     # Cloud multi-tenant management (SaaS only)
 │   ├── routes/
 │   ├── store/             # Zustand state management
 │   ├── lib/               # apiFetch wrapper for Desktop vs Cloud routing
@@ -80,6 +80,7 @@ cloud-backend/
 │   └── schema.prisma      # PostgreSQL schema
 ├── src/
 │   ├── config/
+│   ├── schemas/           # Zod validation schemas
 │   ├── modules/           # REST Controllers and Routes
 │   ├── middleware/        # authMiddleware, subscriptionMiddleware
 │   └── server.ts          # Express app entry point
