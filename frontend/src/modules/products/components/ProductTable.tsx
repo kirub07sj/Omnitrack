@@ -32,6 +32,7 @@ interface Product {
   imageUrl?: string;
   status: string;
   categoryId?: string;
+  categoryName?: string;
 }
 
 interface Props {
@@ -76,7 +77,7 @@ export function ProductTable({ data, onView, onEdit, onToggleStatus, onDelete }:
       id: "category",
       header: "Category",
       cell: ({ row }) => {
-        const cat = row.original.categoryId || "Uncategorized";
+        const cat = row.original.categoryName || "Uncategorized";
         return <div>{cat}</div>;
       },
     },

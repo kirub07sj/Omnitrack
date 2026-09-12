@@ -106,13 +106,22 @@ export const getOwnerDashboard = async (req: Request, res: Response) => {
 export const getManagerDashboard = async (req: Request, res: Response) => {
   try {
     const business_id = (req as any).user.business_id;
+    const { dateRange } = req.query;
     if (!business_id) return res.status(400).json({ message: 'business_id is required' });
 
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const now = new Date();
+    let startDate = new Date(); startDate.setHours(0, 0, 0, 0);
+    let endDate = new Date(); endDate.setHours(23, 59, 59, 999);
+    if (dateRange === 'week') {
+      startDate.setDate(startDate.getDate() - startDate.getDay());
+    } else if (dateRange === 'month') {
+      startDate.setDate(1);
+    }
+
     const business = await prisma.business.findUnique({ where: { id: business_id } });
     const isKitchenActive = business?.is_kitchen_active ?? true;
     
-    const allOrdersToday = await prisma.order.findMany({ where: { business_id, created_at: { gte: todayStart } }, include: { table: true, items: { include: { product: true } } } });
+    const allOrdersToday = await prisma.order.findMany({ where: { business_id, created_at: { gte: startDate, lte: endDate } }, include: { table: true, items: { include: { product: true } } } });
     const pending = allOrdersToday.filter(o => o.status === 'PENDING');
     const inProgress = allOrdersToday.filter(o => o.status === 'PREPARING');
     const ready = allOrdersToday.filter(o => o.status === 'READY');
@@ -122,7 +131,6 @@ export const getManagerDashboard = async (req: Request, res: Response) => {
 
     const operationalSummary = { todayOrders: allOrdersToday.length, pending: pending.length, inProgress: inProgress.length, ready: ready.length, occupiedTables, totalTables: allTables.length, activeStaff: employees.length };
     
-    const now = new Date();
     const ordersAttention = [...pending, ...inProgress].filter(o => (now.getTime() - new Date(o.created_at).getTime()) > 15 * 60000).map(o => ({ id: o.id, table: o.table?.table_number || 'N/A', waitingMinutes: Math.floor((now.getTime() - new Date(o.created_at).getTime()) / 60000), status: o.status })).slice(0, 5);
 
     const oldestOrders = [...pending, ...inProgress].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).slice(0, 3).map(o => ({ id: o.id, table: o.table?.table_number || 'N/A', waitingMinutes: Math.floor((now.getTime() - new Date(o.created_at).getTime()) / 60000), status: o.status }));
@@ -145,20 +153,36 @@ export const getManagerDashboard = async (req: Request, res: Response) => {
 
     const completedOrders = allOrdersToday.filter(o => o.status === 'PAID' || o.status === 'SERVED');
     const cancelledOrders = allOrdersToday.filter(o => o.status === 'CANCELLED');
-    const salesToday = await prisma.sale.findMany({ where: { business_id, created_at: { gte: todayStart } } });
-    const expensesToday = await prisma.expense.findMany({ where: { business_id, date: { gte: todayStart } } });
+    const salesToday = await prisma.sale.findMany({ where: { business_id, created_at: { gte: startDate, lte: endDate } } });
+    const expensesToday = await prisma.expense.findMany({ where: { business_id, date: { gte: startDate, lte: endDate } } });
     
     const salesTotal = salesToday.reduce((sum, s) => sum + Number(s.total), 0);
     const expensesTotal = expensesToday.reduce((sum, e) => sum + Number(e.amount), 0);
     const averageOrder = salesToday.length > 0 ? salesTotal / salesToday.length : 0;
     
     const chartData: any[] = [];
-    for (let i = 0; i < 24; i++) chartData.push({ name: `${i}:00`, sales: 0, expenses: 0, orders: 0 });
-    salesToday.forEach(s => { const hour = new Date(s.created_at).getHours(); chartData[hour].sales += Number(s.total); });
-    expensesToday.forEach(e => { const hour = new Date(e.date).getHours(); chartData[hour].expenses += Number(e.amount); });
-    allOrdersToday.forEach(o => { const hour = new Date(o.created_at).getHours(); chartData[hour].orders += 1; });
+    if (dateRange === 'week') {
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      for (let i = 0; i < 7; i++) chartData.push({ name: days[i], sales: 0, expenses: 0, orders: 0 });
+      salesToday.forEach(s => { chartData[new Date(s.created_at).getDay()].sales += Number(s.total); });
+      expensesToday.forEach(e => { chartData[new Date(e.date).getDay()].expenses += Number(e.amount); });
+      allOrdersToday.forEach(o => { chartData[new Date(o.created_at).getDay()].orders += 1; });
+    } else if (dateRange === 'month') {
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      for (let i = 1; i <= daysInMonth; i++) chartData.push({ name: i.toString(), sales: 0, expenses: 0, orders: 0 });
+      salesToday.forEach(s => { chartData[new Date(s.created_at).getDate() - 1].sales += Number(s.total); });
+      expensesToday.forEach(e => { chartData[new Date(e.date).getDate() - 1].expenses += Number(e.amount); });
+      allOrdersToday.forEach(o => { chartData[new Date(o.created_at).getDate() - 1].orders += 1; });
+    } else {
+      for (let i = 0; i < 24; i++) chartData.push({ name: `${i}:00`, sales: 0, expenses: 0, orders: 0 });
+      salesToday.forEach(s => { chartData[new Date(s.created_at).getHours()].sales += Number(s.total); });
+      expensesToday.forEach(e => { chartData[new Date(e.date).getHours()].expenses += Number(e.amount); });
+      allOrdersToday.forEach(o => { chartData[new Date(o.created_at).getHours()].orders += 1; });
+    }
     const currentHour = new Date().getHours();
-    const activeChartData = chartData.slice(Math.max(0, currentHour - 8), currentHour + 2);
+    const activeChartData = dateRange === 'week' || dateRange === 'month'
+      ? chartData
+      : chartData.slice(Math.max(0, currentHour - 8), currentHour + 2);
     
     const productCounts: Record<string, number> = {};
     allOrdersToday.forEach(o => { o.items.forEach(item => { if (item.product?.name) productCounts[item.product.name] = (productCounts[item.product.name] || 0) + Number(item.quantity); }); });

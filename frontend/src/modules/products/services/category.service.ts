@@ -1,30 +1,49 @@
+import axios from 'axios';
 import { Category } from '../types/category';
+import { useAppStore } from '@/store/useAppStore';
+
+const mapCategory = (c: any): Category => ({
+  id: c.id,
+  name: c.name,
+  businessId: c.business_id || c.businessId,
+  description: c.description,
+  status: c.status || 'Active'
+});
 
 export const CategoryService = {
   getCategories: async (): Promise<Category[]> => {
-    return [
-      { id: "Food", name: "Food", businessId: "none", status: "Active" },
-      { id: "Beverages", name: "Beverages", businessId: "none", status: "Active" },
-      { id: "Desserts", name: "Desserts", businessId: "none", status: "Active" },
-      { id: "Snacks", name: "Snacks", businessId: "none", status: "Active" },
-      { id: "Combos", name: "Combos", businessId: "none", status: "Active" }
-    ];
+    const businessId = useAppStore.getState().currentUser?.business_id;
+    const response = await axios.get('/api/categories', {
+      params: businessId ? { business_id: businessId } : undefined
+    });
+    return (Array.isArray(response.data) ? response.data : []).map(mapCategory);
   },
 
   getCategoryById: async (id: string): Promise<Category | undefined> => {
-    const categories = await CategoryService.getCategories();
-    return categories.find(c => c.id === id);
+    try {
+      const response = await axios.get(`/api/categories/${id}`);
+      return mapCategory(response.data);
+    } catch {
+      const categories = await CategoryService.getCategories();
+      return categories.find(c => c.id === id);
+    }
   },
 
   createCategory: async (data: Partial<Category>): Promise<Category> => {
-    return data as Category;
+    const response = await axios.post('/api/categories', {
+      name: data.name,
+      description: data.description,
+      status: data.status || 'Active'
+    });
+    return mapCategory(response.data);
   },
 
-  updateCategory: async (_id: string, data: any): Promise<Category> => {
-    return data as Category;
+  updateCategory: async (id: string, data: any): Promise<Category> => {
+    const response = await axios.put(`/api/categories/${id}`, data);
+    return mapCategory(response.data);
   },
 
-  deleteCategory: async (_id: string): Promise<void> => {
-    return;
+  deleteCategory: async (id: string): Promise<void> => {
+    await axios.delete(`/api/categories/${id}`);
   }
 };

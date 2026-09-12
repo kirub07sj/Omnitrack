@@ -4,7 +4,8 @@ import {
   FileText, 
   Package,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from "lucide-react";
 import { 
   Card, 
@@ -100,9 +101,16 @@ export default function OwnerDashboard() {
           </div>
           
           <div className="flex flex-wrap items-center gap-2">
-            <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger className="w-[150px] bg-card border-border">
-                <SelectValue placeholder="Select period" />
+            <Select value={dateRange} onValueChange={setDateRange} disabled={loading}>
+              <SelectTrigger className="w-[170px] bg-card border-border">
+                {loading && data ? (
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-700" />
+                    Updating...
+                  </span>
+                ) : (
+                  <SelectValue placeholder="Select period" />
+                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="today">Today</SelectItem>
@@ -165,7 +173,13 @@ export default function OwnerDashboard() {
               <CardTitle className="text-base text-foreground capitalize">Sales & Expenses ({dateRange})</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full relative">
+                {loading && data && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-card/75 backdrop-blur-[2px] rounded-lg">
+                    <Loader2 className="w-8 h-8 animate-spin text-emerald-700" />
+                    <p className="text-sm text-muted-foreground">Updating chart...</p>
+                  </div>
+                )}
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} opacity={0.2} />
