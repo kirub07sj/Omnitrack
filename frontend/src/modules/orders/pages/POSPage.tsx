@@ -14,6 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image as ImageIcon, CheckCircle2, XCircle } from 'lucide-react';
 import { getImageUrl } from '@/utils/image';
+import { isProductSoldOut } from '@/utils/product';
 import { apiFetch } from '@/lib/api';
 import {
   Select,
@@ -83,12 +84,14 @@ export default function POSPage() {
   }, [currentUser?.business_id]);
 
   const addToCart = (product: any) => {
+    const current = allProducts.find(p => p.id === product.id) || product;
+    if (isProductSoldOut(current)) return;
     setCart(prev => {
-      const existing = prev.find(item => item.product.id === product.id);
+      const existing = prev.find(item => item.product.id === current.id);
       if (existing) {
-        return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => item.product.id === current.id ? { ...item, quantity: item.quantity + 1 } : item);
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product: current, quantity: 1 }];
     });
   };
 
@@ -144,6 +147,9 @@ export default function POSPage() {
       await createOrder(orderData);
       setCart([]);
       setSelectedTable('');
+      if (currentUser?.business_id) {
+        fetchProducts(currentUser.business_id, true);
+      }
       setSuccess(isKitchenActive ? "Order sent to kitchen!" : "Checkout completed!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (e: any) {
@@ -265,11 +271,13 @@ export default function POSPage() {
                     {filteredProducts.map((product, i) => {
                       const staggerClass = `omni-stagger-${Math.min((i % 8) + 1, 8)}`;
                       const catName = getCategoryName(product);
+                      const soldOut = isProductSoldOut(product);
                       return (
                         <div 
                           key={product.id} 
                           onClick={() => addToCart(product)}
-                          className={`cursor-pointer bg-card/50 hover:bg-card border border-border/50 rounded-xl transition-all duration-300 omni-card-hover omni-animate-in-scale ${staggerClass} flex flex-col overflow-hidden group`}
+                          aria-disabled={soldOut}
+                          className={`${soldOut ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:bg-card omni-card-hover'} bg-card/50 border border-border/50 rounded-xl transition-all duration-300 omni-animate-in-scale ${staggerClass} flex flex-col overflow-hidden group`}
                         >
                           <div className="relative h-32 w-full bg-muted/30 flex flex-col items-center justify-center">
                             {catName && (
@@ -279,15 +287,22 @@ export default function POSPage() {
                             )}
                             
                             {(product.image_url || product.imageUrl) ? (
-                              <img src={getImageUrl(product.image_url || product.imageUrl)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" />
+                              <img src={getImageUrl(product.image_url || product.imageUrl)} alt={product.name} className={`w-full h-full object-cover transition-transform duration-500 ease-out ${soldOut ? 'grayscale' : 'group-hover:scale-110'}`} />
                             ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/40 group-hover:text-primary/40 group-hover:scale-110 transition-all duration-500">
+                              <div className={`w-full h-full flex flex-col items-center justify-center text-muted-foreground/40 transition-all duration-500 ${soldOut ? '' : 'group-hover:text-primary/40 group-hover:scale-110'}`}>
                                 <ImageIcon size={32} />
+                              </div>
+                            )}
+                            {soldOut && (
+                              <div className="absolute inset-0 z-20 bg-black/55 flex items-center justify-center">
+                                <span className="bg-destructive text-destructive-foreground text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
+                                  Sold Out
+                                </span>
                               </div>
                             )}
                           </div>
                           <div className="p-4 flex flex-col flex-1 text-center items-center justify-between">
-                            <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">{product.name}</h3>
+                            <h3 className={`font-semibold text-sm line-clamp-2 text-foreground transition-colors ${soldOut ? '' : 'group-hover:text-primary'}`}>{product.name}</h3>
                             <p className="text-primary font-bold mt-2 text-lg"><span className="text-[0.65em] font-medium opacity-80 mr-0.5">{currency}</span> {Number(product.price).toFixed(2)}</p>
                           </div>
                         </div>
@@ -391,6 +406,7 @@ export default function POSPage() {
               <div className="space-y-4 pb-10">
                 {cart.map((item, i) => {
                   const staggerClass = `omni-stagger-${Math.min((i % 8) + 1, 8)}`;
+                  const soldOut = isProductSoldOut(allProducts.find(p => p.id === item.product.id) || item.product);
                   return (
                   <div key={item.product.id} className={`group flex flex-col bg-card rounded-xl border border-border/50 shadow-sm transition-all hover:shadow-md hover:border-primary/30 omni-animate-in ${staggerClass}`}>
                     <div className="flex items-start justify-between p-4 pb-3">
@@ -417,7 +433,11 @@ export default function POSPage() {
                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
                         </button>
                         <span className="text-sm font-bold w-8 text-center text-foreground tabular-nums">{item.quantity}</span>
-                        <button className="w-8 h-7 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-background rounded-md transition-all" onClick={() => addToCart(item.product)}>
+                        <button
+                          disabled={soldOut}
+                          className={`w-8 h-7 flex items-center justify-center text-muted-foreground rounded-md transition-all ${soldOut ? 'opacity-40 cursor-not-allowed' : 'hover:text-primary hover:bg-background'}`}
+                          onClick={() => addToCart(item.product)}
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                         </button>
                       </div>

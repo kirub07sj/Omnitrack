@@ -77,9 +77,9 @@ router.post('/tenants', validate(createTenantSchema), async (req: Request, res: 
       ownerUsername,
       ownerPassword, 
 
-      // Subscription
-      plan = 'pro',
-      durationDays = 30 
+      // Subscription: trial (14 days) or paid monthly (30 days)
+      plan = 'trial',
+      durationDays
     } = req.body;
 
     const usernameToUse = ownerUsername || ownerEmail;
@@ -100,8 +100,14 @@ router.post('/tenants', validate(createTenantSchema), async (req: Request, res: 
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(ownerPassword, salt);
 
+    const selectedPlan = plan === 'monthly' ? 'monthly' : 'trial';
+    const planDefaults = selectedPlan === 'monthly'
+      ? { days: 30, status: 'active' as const }
+      : { days: 14, status: 'trial' as const };
+    const days = Number(durationDays) > 0 ? Number(durationDays) : planDefaults.days;
+
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + Number(durationDays || 30));
+    expiresAt.setDate(expiresAt.getDate() + days);
 
     // Create everything in a transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -168,8 +174,8 @@ router.post('/tenants', validate(createTenantSchema), async (req: Request, res: 
         data: {
           account_id: account.id,
           business_id: business.id,
-          plan,
-          status: 'active',
+          plan: selectedPlan,
+          status: planDefaults.status,
           starts_at: new Date(),
           expires_at: expiresAt
         }
@@ -189,7 +195,7 @@ router.post('/tenants', validate(createTenantSchema), async (req: Request, res: 
 router.put('/tenants/:id/subscription', validate(updateSubscriptionSchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { status, addDays } = req.body;
+    const { status, addDays, action } = req.body;
 
     const subscription = await prisma.subscription.findUnique({ where: { id: id as string } });
     if (!subscription) {
@@ -198,17 +204,30 @@ router.put('/tenants/:id/subscription', validate(updateSubscriptionSchema), asyn
     }
 
     const dataToUpdate: any = {};
-    if (status) dataToUpdate.status = status;
+    const now = new Date();
+
+    if (action === 'deactivate' || status === 'canceled') {
+      dataToUpdate.status = 'canceled';
+    } else if (action === 'activate' || status === 'active') {
+      dataToUpdate.status = 'active';
+      if (!subscription.expires_at || subscription.expires_at < now) {
+        const newExpiry = new Date();
+        newExpiry.setDate(newExpiry.getDate() + 30);
+        dataToUpdate.expires_at = newExpiry;
+      }
+    } else if (status) {
+      dataToUpdate.status = status;
+    }
     
     if (addDays) {
-      const currentExpiry = subscription.expires_at && subscription.expires_at > new Date() 
+      const currentExpiry = subscription.expires_at && subscription.expires_at > now
         ? subscription.expires_at 
-        : new Date();
+        : now;
       
       const newExpiry = new Date(currentExpiry);
       newExpiry.setDate(newExpiry.getDate() + addDays);
       dataToUpdate.expires_at = newExpiry;
-      dataToUpdate.status = 'active'; // Automatically set to active if extending time
+      dataToUpdate.status = 'active';
     }
 
     const updated = await prisma.subscription.update({
