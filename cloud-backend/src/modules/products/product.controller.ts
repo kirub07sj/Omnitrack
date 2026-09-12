@@ -5,13 +5,27 @@ export const getProducts = async (req: Request, res: Response) => {
   try {
     const business_id = (req as any).user.business_id;
     if (!business_id) { res.status(400).json({ message: 'business_id is required' }); return; }
-    const products = await prisma.product.findMany({ where: { business_id } });
+    const products = await prisma.product.findMany({
+      where: { business_id },
+      include: {
+        inventory_item: {
+          select: { id: true, quantity: true, unit: true },
+        },
+      },
+    });
     res.json(products);
   } catch (error) { res.status(500).json({ message: 'Failed to fetch products', error }); }
 };
 export const getProductById = async (req: Request, res: Response) => {
   try {
-    const product = await prisma.product.findUnique({ where: { id: String(req.params.id) } });
+    const product = await prisma.product.findUnique({
+      where: { id: String(req.params.id) },
+      include: {
+        inventory_item: {
+          select: { id: true, quantity: true, unit: true },
+        },
+      },
+    });
     if (!product) { res.status(404).json({ message: 'Product not found' }); return; }
     res.json(product);
   } catch (error) { res.status(500).json({ message: 'Failed to fetch product', error }); }

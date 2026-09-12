@@ -7,6 +7,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus, X, CheckCircle2, Loader2, Image as ImageIcon, ShoppingCart, AlertCircle } from 'lucide-react';
 import { getImageUrl } from '@/utils/image';
+import { isProductSoldOut } from '@/utils/product';
 import { apiFetch } from '@/lib/api';
 import {
   Select,
@@ -128,12 +129,14 @@ export default function WaiterAppPage() {
   }, [activeProducts, selectedCategory]);
 
   const addToCart = (product: any) => {
+    const current = allProducts.find(p => p.id === product.id) || product;
+    if (isProductSoldOut(current)) return;
     setCart(prev => {
-      const existing = prev.find(item => item.product.id === product.id);
+      const existing = prev.find(item => item.product.id === current.id);
       if (existing) {
-        return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => item.product.id === current.id ? { ...item, quantity: item.quantity + 1 } : item);
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product: current, quantity: 1 }];
     });
   };
 
@@ -295,12 +298,14 @@ export default function WaiterAppPage() {
           <div className="grid grid-cols-2 gap-4 py-2">
             {filteredProducts.map(product => {
               const inCartCount = cart.find(c => c.product.id === product.id)?.quantity || 0;
+              const soldOut = isProductSoldOut(product);
               
               return (
                 <div 
                   key={product.id}
                   onClick={() => addToCart(product)}
-                  className="group relative bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-between shadow-sm active:scale-95 transition-all duration-200 overflow-hidden cursor-pointer"
+                  aria-disabled={soldOut}
+                  className={`group relative bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-between shadow-sm transition-all duration-200 overflow-hidden ${soldOut ? 'cursor-not-allowed opacity-70' : 'active:scale-95 cursor-pointer'}`}
                 >
                   {inCartCount > 0 && (
                     <div className="absolute top-2 right-2 bg-emerald-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold animate-in zoom-in z-10 shadow-sm">
@@ -309,10 +314,17 @@ export default function WaiterAppPage() {
                   )}
                   <div className="relative h-24 w-full bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100">
                     {(product.image_url || product.imageUrl) ? (
-                      <img src={getImageUrl(product.image_url || product.imageUrl)} alt={product.name} className="w-full h-full object-cover group-active:scale-110 transition-transform duration-500 ease-out" />
+                      <img src={getImageUrl(product.image_url || product.imageUrl)} alt={product.name} className={`w-full h-full object-cover transition-transform duration-500 ease-out ${soldOut ? 'grayscale' : 'group-active:scale-110'}`} />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 group-active:text-emerald-400 group-active:scale-110 transition-all duration-500">
+                      <div className={`w-full h-full flex flex-col items-center justify-center text-slate-300 transition-all duration-500 ${soldOut ? '' : 'group-active:text-emerald-400 group-active:scale-110'}`}>
                         <ImageIcon size={24} />
+                      </div>
+                    )}
+                    {soldOut && (
+                      <div className="absolute inset-0 z-20 bg-black/55 flex items-center justify-center">
+                        <span className="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
+                          Sold Out
+                        </span>
                       </div>
                     )}
                   </div>
@@ -370,7 +382,9 @@ export default function WaiterAppPage() {
           
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4 pb-6">
-              {cart.map(item => (
+              {cart.map(item => {
+                const soldOut = isProductSoldOut(allProducts.find(p => p.id === item.product.id) || item.product);
+                return (
                 <div key={item.product.id} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4">
                   <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
                     {(item.product.image_url || item.product.imageUrl) ? (
@@ -395,13 +409,15 @@ export default function WaiterAppPage() {
                     <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
                     <button 
                       onClick={() => addToCart(item.product)}
-                      className="w-8 h-8 flex items-center justify-center bg-white rounded-md text-slate-900 shadow-sm active:scale-95 transition-transform"
+                      disabled={soldOut}
+                      className={`w-8 h-8 flex items-center justify-center bg-white rounded-md text-slate-900 shadow-sm transition-transform ${soldOut ? 'opacity-40 cursor-not-allowed' : 'active:scale-95'}`}
                     >
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </ScrollArea>
           

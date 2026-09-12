@@ -14,13 +14,14 @@ export const createTenantSchema = z.object({
     ownerUsername: z.string().optional().or(z.literal('')),
     ownerPassword: z.string().min(6, 'Password must be at least 6 characters'),
     
-    plan: z.string().optional(),
+    plan: z.enum(['trial', 'monthly']).optional(),
     durationDays: z.union([z.number(), z.string()]).optional()
   })
 });
 
 export const updateSubscriptionSchema = z.object({
   body: z.object({
+    action: z.enum(['activate', 'deactivate']).optional(),
     status: z.string().optional(),
     addDays: z.number().optional()
   })
