@@ -42,6 +42,9 @@ axios.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+    if (error.response?.status === 403) {
+      useAppStore.getState().applyAccountAccessFromPayload(error.response.data);
+    }
     return Promise.reject(error);
   }
 );
@@ -65,11 +68,19 @@ window.fetch = async (...args) => {
       }
     }
   }
-  return originalFetch(resource, config).then(res => {
+  return originalFetch(resource, config).then(async (res) => {
     if (res.status === 401) {
       useAppStore.getState().logout();
       if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
         window.location.href = '/login';
+      }
+    }
+    if (res.status === 403) {
+      try {
+        const data = await res.clone().json();
+        useAppStore.getState().applyAccountAccessFromPayload(data);
+      } catch {
+        // ignore non-JSON 403s
       }
     }
     return res;

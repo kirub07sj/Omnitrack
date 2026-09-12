@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { apiFetch, isCloudMode, clearAuthToken } from '@/lib/api';
+import { accessFromPayload, type AccountAccessState } from '@/lib/account-access';
 
 interface AppState {
   isSetupComplete: boolean;
@@ -15,7 +16,10 @@ interface AppState {
   isLicensed: boolean;
   licenseError: string | null;
   isCloud: boolean;
-  
+  accountAccess: AccountAccessState;
+
+  setAccountAccess: (access: AccountAccessState) => void;
+  applyAccountAccessFromPayload: (data: any) => boolean;
   setSetupStep: (step: number) => void;
   checkSetupStatus: (retryCount?: number) => Promise<boolean>;
   markBusinessCreated: () => void;
@@ -43,6 +47,16 @@ export const useAppStore = create<AppState>()(
       isLicensed: !isCloudMode,
       licenseError: null,
       isCloud: isCloudMode,
+      accountAccess: { blocked: false, code: null, message: null },
+
+      setAccountAccess: (access) => set({ accountAccess: access }),
+
+      applyAccountAccessFromPayload: (data) => {
+        const access = accessFromPayload(data);
+        if (!access) return false;
+        set({ accountAccess: access });
+        return true;
+      },
 
       setSetupStep: (step) => set({ currentSetupStep: step }),
 
@@ -61,7 +75,7 @@ export const useAppStore = create<AppState>()(
         if (isCloudMode) {
           clearAuthToken();
         }
-        set({ currentUser: null });
+        set({ currentUser: null, accountAccess: { blocked: false, code: null, message: null } });
       },
       
       updateBusinessSettings: (settings) => set({ businessSettings: settings }),

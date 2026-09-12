@@ -5,9 +5,10 @@ import { useAppStore } from "@/store/useAppStore";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { useEffect } from "react";
+import AccountBlockedScreen from "@/components/AccountBlockedScreen";
 
 export default function DashboardLayout() {
-  const { currentUser, isLoadingStatus, checkSetupStatus } = useAppStore();
+  const { currentUser, isLoadingStatus, checkSetupStatus, accountAccess } = useAppStore();
 
   useEffect(() => {
     if (isLoadingStatus) {
@@ -30,6 +31,10 @@ export default function DashboardLayout() {
   if (!currentUser) {
     // Redirect to login if no user
     return <Navigate to="/" replace />;
+  }
+
+  if (accountAccess.blocked) {
+    return <AccountBlockedScreen />;
   }
 
   return (

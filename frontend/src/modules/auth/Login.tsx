@@ -14,7 +14,7 @@ const loginSchema = z.object({
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, checkSetupStatus } = useAppStore();
+  const { login, checkSetupStatus, applyAccountAccessFromPayload } = useAppStore();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -61,6 +61,7 @@ export default function Login() {
         }
 
         login(loggedInUser);
+        applyAccountAccessFromPayload(data);
         
         await checkSetupStatus();
         
