@@ -10,7 +10,8 @@ import {
   Activity,
   Calendar,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Loader2
 } from "lucide-react";
 import { 
   Card, 
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect } from 'react';
@@ -37,11 +39,12 @@ export default function ManagerDashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState('today');
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/dashboard/manager?business_id=${currentUser?.business_id}`);
+      const res = await axios.get(`/api/dashboard/manager?business_id=${currentUser?.business_id}&dateRange=${dateRange}`);
       if (res.data.success) {
         setData(res.data.data);
       }
@@ -56,7 +59,7 @@ export default function ManagerDashboard() {
     if (currentUser?.business_id) {
       fetchData();
     }
-  }, [currentUser?.business_id]);
+  }, [currentUser?.business_id, dateRange]);
 
   if (loading && !data) {
     return <div className="p-8 text-center text-muted-foreground flex h-full items-center justify-center">Loading dashboard...</div>;
@@ -102,6 +105,23 @@ export default function ManagerDashboard() {
           </div>
           
           <div className="flex flex-wrap items-center gap-2">
+            <Select value={dateRange} onValueChange={setDateRange} disabled={loading}>
+              <SelectTrigger className="w-[170px] bg-card border-border">
+                {loading && data ? (
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-700" />
+                    Updating...
+                  </span>
+                ) : (
+                  <SelectValue placeholder="Select period" />
+                )}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" className="bg-muted border-border" onClick={() => navigate('/manager/orders')}><ShoppingCart className="w-4 h-4 mr-2" /> Orders</Button>
             {isKitchenActive && (
               <Button variant="outline" className="bg-muted border-border" onClick={() => navigate('/manager/kitchen')}><ChefHat className="w-4 h-4 mr-2" /> Kitchen</Button>
@@ -125,7 +145,7 @@ export default function ManagerDashboard() {
               <div className="text-3xl font-bold text-white">
                 {todayActivity.sales?.toLocaleString() || 0} <span className="text-sm font-normal text-emerald-100">{currency}</span>
               </div>
-              <p className="text-xs text-emerald-100 mt-2 opacity-80 capitalize">Today</p>
+              <p className="text-xs text-emerald-100 mt-2 opacity-80 capitalize">{dateRange}</p>
             </CardContent>
           </Card>
 
@@ -162,12 +182,18 @@ export default function ManagerDashboard() {
           <Card className={`bg-card border-border omni-chart-card flex flex-col ${isKitchenActive ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
             <CardHeader className="border-b border-border bg-muted/20 flex flex-row items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <Activity className="w-5 h-5 text-indigo-500" /> Sales & Expenses (Today)
+                <Activity className="w-5 h-5 text-indigo-500" /> Sales & Expenses ({dateRange})
               </CardTitle>
               <Button variant="ghost" size="sm" className="h-8 text-xs p-0 px-2" onClick={() => navigate('/manager/reports')}>View Reports</Button>
             </CardHeader>
             <CardContent className="p-4 flex-1">
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full relative">
+                {loading && data && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-card/75 backdrop-blur-[2px] rounded-lg">
+                    <Loader2 className="w-8 h-8 animate-spin text-emerald-700" />
+                    <p className="text-sm text-muted-foreground">Updating chart...</p>
+                  </div>
+                )}
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={todayActivity.chartData || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(153, 40%, 15%)" vertical={false} opacity={0.2} />
