@@ -162,7 +162,7 @@ export function ProductTable({ data, onView, onEdit, onToggleStatus, onDelete }:
     <div className="space-y-4">
       {/* Filters and Actions */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-col sm:flex-row">
           <Input
             placeholder="Search by name..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -173,7 +173,7 @@ export function ProductTable({ data, onView, onEdit, onToggleStatus, onDelete }:
             value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
             onValueChange={(val) => table.getColumn("status")?.setFilterValue(val === "All" ? "" : val)}
           >
-            <SelectTrigger className="w-[140px] bg-background border-border">
+            <SelectTrigger className="w-full sm:w-[140px] bg-background border-border">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>

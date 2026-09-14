@@ -108,9 +108,9 @@ export default function CheckoutDialog({ order, open, onOpenChange, onSuccess, i
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl h-[90vh] sm:h-[500px] p-6 sm:p-8 flex flex-col">
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-3xl h-[90vh] sm:h-[500px] p-4 sm:p-8 flex flex-col overflow-y-auto">
         <DialogHeader className="mb-2 shrink-0">
-          <DialogTitle className="text-2xl font-bold flex justify-between items-center">
+          <DialogTitle className="text-xl sm:text-2xl font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pr-6">
             <span>{isManual ? 'Complete Manual Sale' : `Checkout Order #${order.id?.split('-')[0]}`}</span>
             <span className="text-primary">{total.toFixed(2)} {currency}</span>
           </DialogTitle>

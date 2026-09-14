@@ -165,7 +165,7 @@ export default function SuperAdminBusinessDetails({ businessId: propId, onUpdate
   return (
     <div className={`space-y-6 animate-in fade-in-50 duration-500 ${embedded ? 'p-6 pt-2' : ''}`}>
       <div className={embedded ? '' : 'flex items-start justify-between bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm'}>
-        <div className={`flex items-start justify-between gap-4 ${embedded ? '' : 'w-full'}`}>
+        <div className={`flex flex-col sm:flex-row items-start justify-between gap-4 ${embedded ? '' : 'w-full'}`}>
           <div className="flex items-start gap-4">
             {!embedded && (
               <Link to="/super-admin/businesses" className="mt-1 flex items-center justify-center w-8 h-8 rounded-full hover:bg-emerald-50 text-gray-500 hover:text-emerald-800 transition-colors">
@@ -195,10 +195,10 @@ export default function SuperAdminBusinessDetails({ businessId: propId, onUpdate
                 setActionError('');
                 setConfirmAction(licenseActive ? 'deactivate' : 'activate');
               }}
-              className={licenseActive
+              className={`${licenseActive
                 ? 'bg-white text-rose-700 border border-rose-200 hover:bg-rose-50 shadow-sm'
                 : 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm'
-              }
+              } w-full sm:w-auto shrink-0`}
               variant={licenseActive ? 'outline' : 'default'}
             >
               {licenseActive ? (
@@ -211,7 +211,7 @@ export default function SuperAdminBusinessDetails({ businessId: propId, onUpdate
         </div>
       </div>
 
-      <div className="flex space-x-1 border-b border-emerald-100 bg-white px-2 pt-2 rounded-t-xl">
+      <div className="omni-tabs-scroll space-x-1 border-b border-emerald-100 bg-white px-2 pt-2 rounded-t-xl">
         {[
           { id: 'overview', name: 'Overview', icon: Building2 },
           { id: 'users', name: 'Users', icon: Users },
@@ -226,7 +226,7 @@ export default function SuperAdminBusinessDetails({ businessId: propId, onUpdate
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`shrink-0 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 isActive
                   ? 'border-emerald-700 text-emerald-800'
                   : 'border-transparent text-gray-500 hover:text-emerald-800 hover:border-emerald-200'

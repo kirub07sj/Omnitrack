@@ -94,7 +94,7 @@ export default function KitchenAppPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-6 space-y-6">
+      <div className="min-h-screen bg-background p-4 sm:p-6 space-y-6">
         <div className="flex justify-between items-center"><Skeleton className="h-10 w-[200px]" /><Skeleton className="h-10 w-[150px]" /></div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({length: 8}).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}
@@ -120,7 +120,7 @@ export default function KitchenAppPage() {
     <div className="min-h-screen bg-background flex flex-col font-sans">
       {/* Top Fixed Toast Notifications */}
       {successMsg && (
-        <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
           <div className="px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center bg-emerald-600 text-white">
             <CheckCircle2 className="w-5 h-5 mr-2" />
             {successMsg}
@@ -128,7 +128,7 @@ export default function KitchenAppPage() {
         </div>
       )}
       {error && orders.length > 0 && (
-        <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
           <div className="px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center bg-destructive text-destructive-foreground">
             <CheckCircle2 className="w-5 h-5 mr-2" />
             {error}
@@ -162,7 +162,7 @@ export default function KitchenAppPage() {
             <p className="text-sm">New orders will appear here automatically</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {orders.map((order) => {
               const tableNum = order.table?.table_number || order.table_id || 'Walk-in';
               const isProcessing = processingId === order.id;

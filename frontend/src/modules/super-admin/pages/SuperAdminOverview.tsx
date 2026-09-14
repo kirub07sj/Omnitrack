@@ -86,7 +86,7 @@ export default function SuperAdminOverview() {
 
       {/* Recent Businesses Table Summary */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h3 className="text-lg font-bold text-gray-900">Recent Businesses</h3>
           <Button variant="outline" size="sm" asChild>
             <Link to="/super-admin/businesses">View All</Link>

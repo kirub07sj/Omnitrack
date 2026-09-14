@@ -187,7 +187,7 @@ export default function POSPage() {
     <>
       {/* Toast Notifications */}
       {(error || success) && (
-        <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
           {error && (
             <div className="bg-destructive text-destructive-foreground px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center">
               <XCircle className="w-5 h-5 mr-2" />
@@ -203,10 +203,10 @@ export default function POSPage() {
         </div>
       )}
       
-    <div className="flex h-[calc(100vh-4rem)] gap-4 p-4 bg-background text-foreground">
+    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-4.5rem)] gap-3 sm:gap-4 p-0 sm:p-1 lg:p-2 bg-background text-foreground min-w-0">
       {/* Left Area: Menu / Active Orders */}
-      <Card className="flex-1 flex flex-col bg-card/50 backdrop-blur-xl border-border/50 shadow-sm overflow-hidden omni-animate-in">
-        <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-border/50">
+      <Card className="flex-1 flex flex-col bg-card/50 backdrop-blur-xl border-border/50 shadow-sm overflow-hidden omni-animate-in min-h-[55vh] lg:min-h-0">
+        <CardHeader className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-2 border-b border-border/50">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="bg-muted/50 border border-border/50">
               <TabsTrigger value="menu" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Menu</TabsTrigger>
@@ -221,9 +221,10 @@ export default function POSPage() {
             </TabsList>
           </Tabs>
 
-              <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 transition-colors" onClick={() => setQrOpen(true)}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
-                Waiter QR Code
+              <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 transition-colors shrink-0" onClick={() => setQrOpen(true)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:mr-2"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+                <span className="hidden sm:inline">Waiter QR Code</span>
+                <span className="sm:hidden">QR</span>
               </Button>
         </CardHeader>
         
@@ -250,7 +251,7 @@ export default function POSPage() {
               
               <ScrollArea className="flex-1 px-4 pb-4">
                 {productsLoading ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-10">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 pb-10">
                     {Array.from({ length: 8 }).map((_, i) => (
                       <div key={i} className="flex flex-col rounded-2xl overflow-hidden border border-border bg-card h-[220px]">
                         <Skeleton className="h-32 w-full rounded-none" />
@@ -267,7 +268,7 @@ export default function POSPage() {
                     <p className="text-lg font-medium">No products available</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-10">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 pb-10">
                     {filteredProducts.map((product, i) => {
                       const staggerClass = `omni-stagger-${Math.min((i % 8) + 1, 8)}`;
                       const catName = getCategoryName(product);
@@ -318,8 +319,8 @@ export default function POSPage() {
                 {orders.map((order, i) => {
                    const staggerClass = `omni-stagger-${Math.min((i % 8) + 1, 8)}`;
                    return (
-                  <div key={order.id} className={`bg-card/50 hover:bg-card border border-border/50 rounded-xl p-5 flex flex-col gap-4 omni-animate-in ${staggerClass} transition-colors`}>
-                    <div className="flex justify-between items-center border-b border-border/50 pb-3">
+                  <div key={order.id} className={`bg-card/50 hover:bg-card border border-border/50 rounded-xl p-4 sm:p-5 flex flex-col gap-4 omni-animate-in ${staggerClass} transition-colors`}>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-b border-border/50 pb-3">
                       <div>
                         <span className="font-bold text-lg text-foreground">
                           {order.table?.table_number ? `${order.table.table_number} - #${order.id.split('-')[0].toUpperCase()}` : `Order #${order.id.split('-')[0].toUpperCase()}`}
@@ -368,7 +369,7 @@ export default function POSPage() {
       </Card>
 
       {/* Right Area: Cart */}
-      <Card className="w-96 flex flex-col bg-card border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] omni-animate-in omni-stagger-2 rounded-2xl overflow-hidden relative">
+      <Card className="w-full lg:w-96 lg:shrink-0 flex flex-col bg-card border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] omni-animate-in omni-stagger-2 rounded-2xl overflow-hidden relative max-h-[70vh] lg:max-h-none">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/40 via-primary to-primary/40"></div>
         <CardHeader className="border-b border-border/30 pb-5 bg-card/80 backdrop-blur-md relative z-10">
           <CardTitle className="text-xl font-bold flex items-center justify-between text-foreground tracking-tight w-full">

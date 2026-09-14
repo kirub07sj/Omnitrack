@@ -48,23 +48,25 @@ export default function EmployeeDetailsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full omni-animate-in">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+    <div className="flex flex-col gap-6 p-0 sm:p-2 max-w-[1600px] mx-auto w-full h-full omni-animate-in min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full shrink-0">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3 min-w-0">
             Employee Profile
             <EmployeeStatusBadge status={employee.status} />
           </h1>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => navigate(`${roleBase}/employees/${id}/edit`)}>
-          <Edit className="w-4 h-4 mr-2" /> Edit Profile
-        </Button>
-        <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setShowDelete(true)}>
-          <Trash2 className="w-4 h-4 mr-2" /> Delete
-        </Button>
+        <div className="flex flex-wrap gap-2 pl-12 sm:pl-0">
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => navigate(`${roleBase}/employees/${id}/edit`)}>
+            <Edit className="w-4 h-4 mr-2" /> Edit Profile
+          </Button>
+          <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setShowDelete(true)}>
+            <Trash2 className="w-4 h-4 mr-2" /> Delete
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -99,7 +101,7 @@ export default function EmployeeDetailsPage() {
 
         <div className="md:col-span-2">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="bg-muted border-border w-full justify-start rounded-md h-12 px-2">
+            <TabsList className="omni-tabs-scroll bg-muted border-border w-full justify-start rounded-md h-12 px-2">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="employment">Employment</TabsTrigger>
               <TabsTrigger value="attendance">Attendance</TabsTrigger>

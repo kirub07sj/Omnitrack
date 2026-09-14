@@ -100,7 +100,7 @@ export default function PaymentQueue() {
         <div>
           <p className="text-muted-foreground text-sm">Orders ready for payment</p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -111,17 +111,17 @@ export default function PaymentQueue() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button variant="outline" className="gap-2">
-            <Filter className="w-4 h-4" /> Filters
+          <Button variant="outline" className="gap-2 shrink-0">
+            <Filter className="w-4 h-4" /> <span className="hidden sm:inline">Filters</span>
           </Button>
-          <Button onClick={() => navigate(`/${currentUser?.role?.toLowerCase() || 'owner'}/sales/manual`)} className="gap-2 bg-primary text-primary-foreground">
+          <Button onClick={() => navigate(`/${currentUser?.role?.toLowerCase() || 'owner'}/sales/manual`)} className="gap-2 bg-primary text-primary-foreground shrink-0">
             <Plus className="w-4 h-4" /> Manual Sale
           </Button>
         </div>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array.from({length: 8}).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-xl" />)}
         </div>
       ) : filteredOrders.length === 0 ? (
@@ -135,7 +135,7 @@ export default function PaymentQueue() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredOrders.map((order) => {
             const tableNum = order.table?.table_number || 'Walk-in';
             const rawSubtotal = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.price) * parseFloat(item.quantity)), 0);

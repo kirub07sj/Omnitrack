@@ -78,7 +78,7 @@ export default function ProductListPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full omni-animate-in">
+    <div className="flex flex-col gap-6 p-0 sm:p-2 max-w-[1600px] mx-auto w-full h-full omni-animate-in min-w-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -87,7 +87,7 @@ export default function ProductListPage() {
             Manage your inventory, pricing, and catalog.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Button variant="outline" size="sm" onClick={fetchProducts} disabled={loading} className="border-border">
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -108,7 +108,7 @@ export default function ProductListPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 rounded-xl bg-card border border-border p-6 shadow-sm min-h-[500px]">
+      <div className="flex-1 rounded-xl bg-card border border-border p-3 sm:p-6 shadow-sm min-h-[500px] min-w-0">
         {error ? (
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <div className="text-red-500 mb-2">Failed to load products</div>

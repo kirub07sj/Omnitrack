@@ -86,7 +86,7 @@ export default function ManagerDashboard() {
 
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
-      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto omni-animate-in">
+      <div className="flex flex-col gap-6 sm:gap-8 p-0 sm:p-2 max-w-[1600px] mx-auto omni-animate-in min-w-0">
         
         {/* 1. Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 omni-stagger-1">
@@ -179,8 +179,8 @@ export default function ManagerDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 omni-stagger-4 mb-6">
           
           {/* 3. Sales & Expenses Chart */}
-          <Card className={`bg-card border-border omni-chart-card flex flex-col ${isKitchenActive ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
-            <CardHeader className="border-b border-border bg-muted/20 flex flex-row items-center justify-between">
+          <Card className={`bg-card border-border omni-chart-card flex flex-col min-w-0 overflow-hidden ${isKitchenActive ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+            <CardHeader className="border-b border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
                 <Activity className="w-5 h-5 text-indigo-500" /> Sales & Expenses ({dateRange})
               </CardTitle>
@@ -340,7 +340,7 @@ export default function ManagerDashboard() {
               </div>
             </CardHeader>
             <CardContent className="p-4 flex flex-col md:flex-row gap-6">
-              <div className="flex flex-col gap-4 min-w-[120px]">
+              <div className="flex flex-col gap-4 w-full md:min-w-[120px] md:w-auto">
                 <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-center">
                   <div className="text-xs font-semibold text-red-500 uppercase">Out of Stock</div>
                   <div className="text-2xl font-bold text-red-500 mt-1">{inventoryAlerts.outOfStockCount}</div>

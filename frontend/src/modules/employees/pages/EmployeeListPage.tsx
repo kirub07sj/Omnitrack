@@ -116,7 +116,7 @@ export default function EmployeeListPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full omni-animate-in">
+    <div className="flex flex-col gap-6 p-0 sm:p-2 max-w-[1600px] mx-auto w-full h-full omni-animate-in min-w-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -127,7 +127,7 @@ export default function EmployeeListPage() {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Button variant="outline" className="border-border" onClick={fetchEmployees}>
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
@@ -151,7 +151,7 @@ export default function EmployeeListPage() {
       )}
 
       {/* Table */}
-      <div className="flex-1 bg-card rounded-xl border border-border p-6 shadow-sm">
+      <div className="flex-1 bg-card rounded-xl border border-border p-3 sm:p-6 shadow-sm min-w-0">
         {loading ? (
           <div className="space-y-4 w-full">
             <Skeleton className="h-10 w-full rounded-lg" />

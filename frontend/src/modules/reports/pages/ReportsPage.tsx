@@ -24,21 +24,21 @@ export default function ReportsPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-0 sm:p-2 max-w-7xl mx-auto space-y-6 min-w-0">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Business Reports</h1>
           <p className="text-muted-foreground mt-1">Analytics and historical data overview</p>
         </div>
         
-        <div className="flex items-center gap-1 bg-white p-1 rounded-lg border shadow-sm">
+        <div className="flex flex-wrap items-center gap-1 bg-card p-1 rounded-lg border shadow-sm w-full sm:w-auto">
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
                 disabled={isCashier}
                 className={cn(
-                  "h-8 justify-start text-left font-normal px-3 w-[150px]",
+                  "h-8 justify-start text-left font-normal px-3 w-full sm:w-[150px]",
                   !dateRange.startDate && "text-muted-foreground",
                   isCashier && "opacity-50 cursor-not-allowed"
                 )}
@@ -63,7 +63,7 @@ export default function ReportsPage() {
                 variant="ghost"
                 disabled={isCashier}
                 className={cn(
-                  "h-8 justify-start text-left font-normal px-3 w-[150px]",
+                  "h-8 justify-start text-left font-normal px-3 w-full sm:w-[150px]",
                   !dateRange.endDate && "text-muted-foreground",
                   isCashier && "opacity-50 cursor-not-allowed"
                 )}
@@ -90,12 +90,12 @@ export default function ReportsPage() {
       </div>
 
       <Tabs defaultValue={isCashier ? "sales" : "overview"} className="w-full">
-        <TabsList className="w-full justify-start h-auto flex-wrap bg-transparent border-b p-0 rounded-none space-x-1 mb-6">
-          {!isCashier && <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><BarChart3 className="w-4 h-4 mr-2"/> Overview</TabsTrigger>}
-          <TabsTrigger value="sales" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><TrendingUp className="w-4 h-4 mr-2"/> Sales</TabsTrigger>
-          {!isCashier && <TabsTrigger value="expenses" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><LineChart className="w-4 h-4 mr-2"/> Expenses</TabsTrigger>}
-          <TabsTrigger value="transactions" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><PieChart className="w-4 h-4 mr-2"/> Cash Flow</TabsTrigger>
-          {!isCashier && <TabsTrigger value="inventory" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><Package className="w-4 h-4 mr-2"/> Inventory</TabsTrigger>}
+        <TabsList className="omni-tabs-scroll w-full justify-start h-auto flex-nowrap bg-transparent border-b p-0 rounded-none space-x-1 mb-6">
+          {!isCashier && <TabsTrigger value="overview" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><BarChart3 className="w-4 h-4 mr-2"/> Overview</TabsTrigger>}
+          <TabsTrigger value="sales" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><TrendingUp className="w-4 h-4 mr-2"/> Sales</TabsTrigger>
+          {!isCashier && <TabsTrigger value="expenses" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><LineChart className="w-4 h-4 mr-2"/> Expenses</TabsTrigger>}
+          <TabsTrigger value="transactions" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><PieChart className="w-4 h-4 mr-2"/> Cash Flow</TabsTrigger>
+          {!isCashier && <TabsTrigger value="inventory" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3"><Package className="w-4 h-4 mr-2"/> Inventory</TabsTrigger>}
         </TabsList>
         
         {!isCashier && (

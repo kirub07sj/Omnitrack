@@ -100,10 +100,10 @@ export default function ExpensesPage() {
   const paginatedExpenses = filteredExpenses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
+    <div className="p-0 sm:p-2 space-y-6 max-w-7xl mx-auto min-w-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
-        <Button onClick={() => setShowAdd(true)}>
+        <Button onClick={() => setShowAdd(true)} className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           Add Expense
         </Button>
@@ -141,7 +141,7 @@ export default function ExpensesPage() {
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <CardTitle className="text-xl">Recent Expenses</CardTitle>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="relative w-64">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
                   type="search" 
@@ -152,7 +152,7 @@ export default function ExpensesPage() {
                 />
               </div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-full sm:w-[160px]">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -163,7 +163,7 @@ export default function ExpensesPage() {
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger className="w-full sm:w-[130px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,7 +177,7 @@ export default function ExpensesPage() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+            <table className="w-full min-w-[640px] text-sm text-left">
               <thead className="text-xs text-muted-foreground bg-muted/50 uppercase border-b">
                 <tr>
                   <th className="px-6 py-4 font-medium">Date</th>

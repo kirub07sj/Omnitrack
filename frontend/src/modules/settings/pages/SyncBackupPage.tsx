@@ -48,7 +48,7 @@ export default function SyncBackupPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-4xl mx-auto flex items-center justify-center min-h-[400px]">
+      <div className="p-0 sm:p-2 max-w-4xl mx-auto flex items-center justify-center min-h-[400px]">
         <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -59,7 +59,7 @@ export default function SyncBackupPage() {
   const isError = status?.status === 'ERROR';
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-0 sm:p-2 max-w-4xl mx-auto space-y-6 min-w-0">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Synchronization & Backup</h1>
         <p className="text-muted-foreground mt-1">Manage cloud synchronization for offline-first architecture.</p>
