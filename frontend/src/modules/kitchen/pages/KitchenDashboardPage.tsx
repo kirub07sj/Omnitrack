@@ -103,9 +103,9 @@ export default function KitchenDashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-[1600px] mx-auto space-y-6 w-full">
+      <div className="p-4 sm:p-6 max-w-[1600px] mx-auto space-y-6 w-full min-w-0">
         <div className="flex justify-between items-center"><Skeleton className="h-10 w-[200px]" /><Skeleton className="h-10 w-[150px]" /></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}
         </div>
       </div>
@@ -113,9 +113,9 @@ export default function KitchenDashboardPage() {
   }
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+    <div className="p-0 sm:p-2 max-w-[1600px] mx-auto space-y-6 min-w-0">
       {successMsg && (
-        <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
           <div className="px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center bg-emerald-600 text-white">
             <CheckCircle2 className="w-5 h-5 mr-2" />
             {successMsg}
@@ -123,7 +123,7 @@ export default function KitchenDashboardPage() {
         </div>
       )}
       {error && orders.length > 0 && (
-        <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
           <div className="px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center bg-destructive text-destructive-foreground">
             <CheckCircle2 className="w-5 h-5 mr-2" />
             {error}
@@ -139,7 +139,7 @@ export default function KitchenDashboardPage() {
           </h1>
           <p className="text-muted-foreground mt-1">Manage and track ongoing kitchen orders</p>
         </div>
-        <Button onClick={() => setShowQR(true)} variant="outline" className="gap-2">
+        <Button onClick={() => setShowQR(true)} variant="outline" className="gap-2 w-full sm:w-auto">
           <QrCode className="w-4 h-4" />
           Kitchen QR Code
         </Button>
@@ -188,7 +188,7 @@ export default function KitchenDashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {orders.map((order) => {
             const tableNum = order.table?.table_number || order.table_id || 'Walk-in';
             const isProcessing = processingId === order.id;

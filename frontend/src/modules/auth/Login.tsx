@@ -150,9 +150,12 @@ export default function Login() {
       </div>
 
       {/* Right Panel - Form Area */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white relative px-6 sm:px-12 shadow-[-20px_0_50px_rgba(0,0,0,0.05)] z-20">
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white relative px-6 py-10 sm:px-12 min-h-screen lg:min-h-0 shadow-[-20px_0_50px_rgba(0,0,0,0.05)] z-20">
         <div className="w-full max-w-[420px]">
           <div className="text-center mb-10">
+            <div className="lg:hidden w-12 h-12 mx-auto mb-4">
+              <img src={logo} alt="Omnitrack" className="w-full h-full object-contain" />
+            </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Log In Account</h2>
             <p className="text-gray-500 text-sm">Enter your personal data to access your account.</p>
           </div>

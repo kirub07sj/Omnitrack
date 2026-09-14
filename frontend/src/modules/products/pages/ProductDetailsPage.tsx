@@ -44,8 +44,8 @@ export default function ProductDetailsPage() {
   const margin = profit && product.price ? ((profit / product.price) * 100).toFixed(1) : null;
 
   return (
-    <div className="p-8 max-w-[1200px] mx-auto w-full omni-animate-in">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-0 sm:p-2 max-w-[1200px] mx-auto w-full omni-animate-in min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
             <ArrowLeft className="h-5 w-5" />
@@ -64,7 +64,7 @@ export default function ProductDetailsPage() {
             </div>
           </div>
         </div>
-        <Button onClick={() => navigate(`../edit`, { relative: 'path' })} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+        <Button onClick={() => navigate(`../edit`, { relative: 'path' })} className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
           <Edit className="mr-2 h-4 w-4" /> Edit Product
         </Button>
       </div>

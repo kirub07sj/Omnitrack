@@ -41,27 +41,27 @@ export default function DashboardLayout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-border/60 bg-background/70 backdrop-blur-xl sticky top-0 z-30">
-          <div className="flex items-center gap-2 px-4">
+        <header className="flex h-14 sm:h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-border/60 bg-background/70 backdrop-blur-xl sticky top-0 z-30">
+          <div className="flex items-center gap-2 px-3 sm:px-4 min-w-0">
             <SidebarTrigger className="-ml-1 text-foreground/70 hover:text-foreground transition-colors" />
-            <Separator orientation="vertical" className="mr-2 h-4 bg-border/60" />
+            <Separator orientation="vertical" className="mr-2 h-4 bg-border/60 hidden sm:block" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="text-foreground/70 capitalize font-medium">{currentUser.role} Dashboard</BreadcrumbPage>
+                  <BreadcrumbPage className="text-foreground/70 capitalize font-medium truncate">{currentUser.role} Dashboard</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col bg-background text-foreground relative overflow-hidden">
+        <div className="flex flex-1 flex-col bg-background text-foreground relative overflow-hidden min-w-0">
           {/* Subtle background pattern */}
           <div className="absolute inset-0 omni-bg-dots pointer-events-none opacity-50" />
           {/* Ambient glow */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px] pointer-events-none" />
           
-          <div className="relative z-10 flex-1 omni-page-enter p-6 pt-4">
+          <div className="relative z-10 flex-1 omni-page-enter p-3 sm:p-5 lg:p-6 pt-3 min-w-0 overflow-x-hidden">
             <Outlet />
           </div>
         </div>

@@ -97,7 +97,7 @@ export default function AddExpensePage() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+    <div className="p-0 sm:p-2 space-y-6 max-w-4xl mx-auto min-w-0">
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />

@@ -109,13 +109,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="p-0 sm:p-2 max-w-5xl mx-auto space-y-6 min-w-0">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
           <p className="text-muted-foreground mt-1">Configure your business rules and workflows</p>
         </div>
-        <Button onClick={handleSave} disabled={isSaving} size="lg" className="shadow-lg">
+        <Button onClick={handleSave} disabled={isSaving} size="lg" className="shadow-lg w-full sm:w-auto">
           {isSaving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
           Save All Changes
         </Button>
@@ -123,7 +123,7 @@ export default function SettingsPage() {
 
       {/* Fixed Toast Notifications */}
       {message && (
-        <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 z-[100] flex flex-col gap-3 animate-in slide-in-from-top-5">
           <div className={`px-4 py-3 rounded-xl shadow-lg font-medium text-sm flex items-center ${message.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-destructive text-destructive-foreground'}`}>
             {message.type === 'success' ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
@@ -136,15 +136,15 @@ export default function SettingsPage() {
       )}
 
       <Tabs defaultValue="business" className="w-full">
-        <TabsList className="w-full justify-start h-auto flex-wrap bg-transparent border-b p-0 rounded-none space-x-1 mb-6">
-          <TabsTrigger value="business" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Business</TabsTrigger>
-          <TabsTrigger value="payments" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Payments</TabsTrigger>
-          <TabsTrigger value="orders" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Orders</TabsTrigger>
-          <TabsTrigger value="inventory" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Inventory</TabsTrigger>
-          <TabsTrigger value="taxes" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Taxes & Charges</TabsTrigger>
-          <TabsTrigger value="receipts" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Receipts</TabsTrigger>
-          <TabsTrigger value="system" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">System</TabsTrigger>
-          <TabsTrigger value="license" className="data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">License</TabsTrigger>
+        <TabsList className="omni-tabs-scroll w-full justify-start h-auto flex-nowrap bg-transparent border-b p-0 rounded-none space-x-1 mb-6">
+          <TabsTrigger value="business" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Business</TabsTrigger>
+          <TabsTrigger value="payments" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Payments</TabsTrigger>
+          <TabsTrigger value="orders" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Orders</TabsTrigger>
+          <TabsTrigger value="inventory" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Inventory</TabsTrigger>
+          <TabsTrigger value="taxes" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Taxes & Charges</TabsTrigger>
+          <TabsTrigger value="receipts" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">Receipts</TabsTrigger>
+          <TabsTrigger value="system" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">System</TabsTrigger>
+          <TabsTrigger value="license" className="shrink-0 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none border-b-2 border-transparent px-4 py-3">License</TabsTrigger>
         </TabsList>
         
         <TabsContent value="business" className="animate-in fade-in-50 duration-300">

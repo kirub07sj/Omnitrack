@@ -71,7 +71,7 @@ export default function TransactionsPage() {
   );
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto space-y-6 omni-animate-in">
+    <div className="p-0 sm:p-2 max-w-[1600px] mx-auto space-y-6 omni-animate-in min-w-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
@@ -79,7 +79,7 @@ export default function TransactionsPage() {
         </div>
         
         {/* Top Right Totals (Normal fonts, smaller labels) */}
-        <div className="flex items-center gap-6 bg-muted/30 px-4 py-2 rounded-lg border">
+        <div className="flex items-center gap-4 sm:gap-6 bg-muted/30 px-4 py-2 rounded-lg border w-full sm:w-auto overflow-x-auto">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground uppercase tracking-wider">income</span>
             <span className="text-emerald-600 font-bold">{totalIncome.toLocaleString()} <span className="text-xs font-normal">{currency}</span></span>
@@ -100,7 +100,7 @@ export default function TransactionsPage() {
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-2">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger className="w-full sm:w-[130px]">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -111,7 +111,7 @@ export default function TransactionsPage() {
               </Select>
               
               <Select value={methodFilter} onValueChange={setMethodFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[140px]">
                   <SelectValue placeholder="Method" />
                 </SelectTrigger>
                 <SelectContent>

@@ -50,7 +50,7 @@ export default function CashierDashboard() {
 
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
-      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto omni-animate-in">
+      <div className="flex flex-col gap-6 sm:gap-8 p-0 sm:p-2 max-w-[1600px] mx-auto omni-animate-in min-w-0">
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 omni-stagger-1">

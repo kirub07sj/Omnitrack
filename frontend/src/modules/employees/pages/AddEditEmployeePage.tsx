@@ -78,7 +78,7 @@ export default function AddEditEmployeePage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-8 max-w-[1600px] mx-auto w-full h-full omni-animate-in">
+    <div className="flex flex-col gap-6 p-0 sm:p-2 max-w-[1600px] mx-auto w-full h-full omni-animate-in min-w-0">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -98,7 +98,7 @@ export default function AddEditEmployeePage() {
         </div>
       </div>
 
-      <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+      <div className="bg-card rounded-xl border border-border p-4 sm:p-6 shadow-sm min-w-0">
         <EmployeeForm
           initialData={initialData || undefined}
           onSubmit={handleSubmit}

@@ -84,13 +84,13 @@ export default function InventoryListPage() {
   };
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto space-y-6 omni-animate-in">
-      <div className="flex justify-between items-center">
+    <div className="p-0 sm:p-2 max-w-[1600px] mx-auto space-y-6 omni-animate-in min-w-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
           <p className="text-muted-foreground">Manage your stock, view purchases, and track movements.</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Button variant="outline" onClick={() => navigate("/owner/suppliers/new")}>
             <Truck className="mr-2 h-4 w-4" /> Add Supplier
           </Button>
@@ -101,7 +101,7 @@ export default function InventoryListPage() {
       </div>
 
       <Tabs defaultValue="items" className="w-full">
-        <TabsList className="mb-4">
+        <TabsList className="omni-tabs-scroll mb-4 w-full justify-start">
           <TabsTrigger value="items">Inventory Items</TabsTrigger>
           <TabsTrigger value="purchases">Recent Purchases</TabsTrigger>
           <TabsTrigger value="movements">Stock Movement</TabsTrigger>

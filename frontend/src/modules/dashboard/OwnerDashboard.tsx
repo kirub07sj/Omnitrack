@@ -58,7 +58,7 @@ export default function OwnerDashboard() {
 
   if (loading && !data) {
     return (
-      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto w-full">
+      <div className="flex flex-col gap-6 sm:gap-8 p-0 sm:p-2 max-w-[1600px] mx-auto w-full min-w-0">
         <div className="flex justify-between items-center"><Skeleton className="h-10 w-[200px]" /><Skeleton className="h-10 w-[150px]" /></div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
@@ -91,7 +91,7 @@ export default function OwnerDashboard() {
 
   return (
     <ScrollArea className="h-full w-full bg-background text-foreground">
-      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto omni-animate-in">
+      <div className="flex flex-col gap-6 sm:gap-8 p-0 sm:p-2 max-w-[1600px] mx-auto omni-animate-in min-w-0">
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 omni-stagger-1">
@@ -168,7 +168,7 @@ export default function OwnerDashboard() {
 
         {/* Charts and Attention Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 omni-stagger-3">
-          <Card className="bg-card border-border omni-chart-card lg:col-span-2">
+          <Card className="bg-card border-border omni-chart-card lg:col-span-2 min-w-0 overflow-hidden">
             <CardHeader>
               <CardTitle className="text-base text-foreground capitalize">Sales & Expenses ({dateRange})</CardTitle>
             </CardHeader>

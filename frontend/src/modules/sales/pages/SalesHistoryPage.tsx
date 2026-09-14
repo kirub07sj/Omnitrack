@@ -88,7 +88,7 @@ export default function SalesHistoryPage() {
           <h2 className="text-2xl font-bold tracking-tight">Sales History</h2>
           <p className="text-muted-foreground">View and manage completed financial transactions</p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -106,7 +106,7 @@ export default function SalesHistoryPage() {
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-[240px] justify-start text-left font-normal",
+                      "w-full sm:w-[240px] justify-start text-left font-normal",
                       !date && "text-muted-foreground"
                     )}
                   >
@@ -296,7 +296,7 @@ export default function SalesHistoryPage() {
       />
 
       {refundSuccess && (
-        <div className="fixed top-6 right-6 bg-emerald-500 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 z-50 animate-in slide-in-from-top-5 fade-in duration-300">
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 bg-emerald-500 text-white px-4 sm:px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 z-50 animate-in slide-in-from-top-5 fade-in duration-300">
           <CheckCircle2 className="w-5 h-5" />
           <p className="font-medium">Refund processed successfully!</p>
         </div>

@@ -170,18 +170,18 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
         <Input
           placeholder="Search employees..."
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-xs bg-background border-border"
+          className="w-full sm:max-w-xs bg-background border-border"
         />
         <Select
           value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
           onValueChange={(val) => table.getColumn("status")?.setFilterValue(val === "all" ? "" : val)}
         >
-          <SelectTrigger className="w-[160px] bg-background border-border">
+          <SelectTrigger className="w-full sm:w-[160px] bg-background border-border">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -192,7 +192,7 @@ export function EmployeeTable({ data, onView, onEdit, onDeactivate, onDelete }: 
             <SelectItem value="Terminated">Terminated</SelectItem>
           </SelectContent>
         </Select>
-        <div className="ml-auto text-sm text-muted-foreground">
+        <div className="sm:ml-auto text-sm text-muted-foreground">
           {table.getFilteredRowModel().rows.length} of {data.length} employees
         </div>
       </div>

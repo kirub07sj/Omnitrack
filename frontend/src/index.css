@@ -94,6 +94,12 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+  }
+
+  html, #root {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 
@@ -443,4 +449,42 @@
 .omni-order-card:hover {
   border-color: hsl(var(--primary) / 0.3);
   box-shadow: 0 4px 20px -6px hsl(var(--primary) / 0.15);
+}
+
+/* ═══════════════════════════════════════════
+   Mobile layout helpers
+   ═══════════════════════════════════════════ */
+
+.omni-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.omni-tabs-scroll {
+  display: flex;
+  width: 100%;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.omni-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .omni-kpi-card:hover,
+  .omni-card-hover:hover,
+  .omni-product-card:hover {
+    transform: none;
+  }
+
+  h1.text-3xl,
+  h2.text-3xl {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
 }

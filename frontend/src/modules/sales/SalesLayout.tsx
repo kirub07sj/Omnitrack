@@ -20,14 +20,14 @@ export default function SalesLayout() {
   };
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
+    <div className="flex-1 space-y-4 p-0 sm:p-2 min-w-0">
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-3xl font-bold tracking-tight">Sales & Payments</h2>
       </div>
       
       {!isManual && (
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-[400px] grid-cols-2">
+          <TabsList className="grid w-full sm:w-[400px] grid-cols-2">
             <TabsTrigger value="queue">Payment Queue</TabsTrigger>
             <TabsTrigger value="history">Sales History</TabsTrigger>
           </TabsList>
