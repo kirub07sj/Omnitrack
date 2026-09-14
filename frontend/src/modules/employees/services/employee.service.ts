@@ -49,6 +49,7 @@ export const EmployeeService = {
       hireDate: emp.hire_date,
       hasLoginAccount: emp.users && emp.users.length > 0,
       username: emp.users && emp.users.length > 0 ? emp.users[0].username : undefined,
+      role: emp.users && emp.users.length > 0 && emp.users[0].role ? emp.users[0].role.name : undefined
     };
   },
 
@@ -113,6 +114,10 @@ export const EmployeeService = {
       employment_type: data.employmentType,
       hire_date: data.hireDate,
       status: data.status,
+      createLoginAccount: data.createLoginAccount,
+      username: data.username,
+      password_hash: data.password || undefined,
+      role: data.role,
     };
     
     // Remove undefined values
