@@ -195,3 +195,106 @@ export const getManagerDashboard = async (req: Request, res: Response) => {
     res.json({ success: true, data: { isKitchenActive, operationalSummary, ordersAttention, kitchenStatus, tableStatus, inventoryAlerts, staffActivity, todayActivity, recentActivity } });
   } catch (error: any) { res.status(500).json({ success: false, error: error.message }); }
 };
+
+export const getNotifications = async (req: Request, res: Response) => {
+  try {
+    const business_id = (req as any).user.business_id;
+    if (!business_id) return res.status(400).json({ message: 'business_id is required' });
+
+    const role = String((req as any).user.role || '').toLowerCase();
+    const roleBase = `/${role || 'owner'}`;
+    const notifications: {
+      id: string;
+      type: string;
+      title: string;
+      message: string;
+      href: string;
+      createdAt: string;
+    }[] = [];
+
+    const inventoryItems = await prisma.inventoryItem.findMany({ where: { business_id } });
+    inventoryItems.forEach((item) => {
+      const qty = Number(item.quantity);
+      const min = Number(item.minimum_quantity);
+      if (qty <= 0) {
+        notifications.push({
+          id: `stock-out-${item.id}`,
+          type: 'inventory',
+          title: `${item.name} is out of stock`,
+          message: `Current stock is 0 ${item.unit}. Restock this item before it affects sales.`,
+          href: `${roleBase}/inventory`,
+          createdAt: new Date().toISOString()
+        });
+      } else if (qty <= min) {
+        notifications.push({
+          id: `stock-low-${item.id}`,
+          type: 'inventory',
+          title: `${item.name} is running low`,
+          message: `Only ${qty} ${item.unit} left (minimum ${min} ${item.unit}).`,
+          href: `${roleBase}/inventory`,
+          createdAt: new Date().toISOString()
+        });
+      }
+    });
+
+    const unpaidExpenses = await prisma.expense.count({ where: { business_id, status: 'UNPAID' } });
+    if (unpaidExpenses > 0) {
+      notifications.push({
+        id: 'unpaid-expenses',
+        type: 'expense',
+        title: `${unpaidExpenses} unpaid expense${unpaidExpenses === 1 ? '' : 's'}`,
+        message: 'Review and settle pending expenses so daily cash is accurate.',
+        href: `${roleBase}/expenses`,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    const unpaidPurchases = await prisma.purchase.count({ where: { business_id, status: { in: ['Unpaid', 'UNPAID'] } } });
+    if (unpaidPurchases > 0) {
+      notifications.push({
+        id: 'unpaid-purchases',
+        type: 'purchase',
+        title: `${unpaidPurchases} unpaid supplier purchase${unpaidPurchases === 1 ? '' : 's'}`,
+        message: 'There are supplier bills that still need to be paid.',
+        href: `${roleBase}/inventory`,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    const pendingOrders = await prisma.order.count({
+      where: { business_id, status: { notIn: ['PAID', 'CANCELLED', 'Completed', 'COMPLETED'] } }
+    });
+    if (pendingOrders > 0) {
+      notifications.push({
+        id: 'pending-orders',
+        type: 'order',
+        title: `${pendingOrders} open order${pendingOrders === 1 ? '' : 's'}`,
+        message: 'Some tables still have unpaid or unfinished orders.',
+        href: `${roleBase}/sales`,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    const subscription = await prisma.subscription.findUnique({ where: { business_id } });
+    if (subscription?.expires_at) {
+      const expiresAt = new Date(subscription.expires_at);
+      const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      if (daysLeft <= 7) {
+        notifications.push({
+          id: 'license-expiry',
+          type: 'license',
+          title: daysLeft < 0 ? 'License has expired' : `License expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
+          message: daysLeft < 0
+            ? 'Contact the software owner to restore access.'
+            : `Your ${subscription.plan === 'trial' || subscription.plan === 'free' ? 'free trial' : 'monthly license'} ends on ${expiresAt.toLocaleDateString()}.`,
+          href: `${roleBase}/settings`,
+          createdAt: subscription.expires_at.toISOString()
+        });
+      }
+    }
+
+    res.json({ success: true, notifications, count: notifications.length });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Failed to load notifications', error: error.message });
+  }
+};

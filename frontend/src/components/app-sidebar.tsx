@@ -78,22 +78,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       ],
     }] : []),
     ...(!isCashier ? [{
-      title: "HR & Admin",
-      url: "#",
+      title: "Employees",
+      url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees`,
       icon: Users,
-      items: isManager ? [
-        { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
-      ] : [
-        { title: "Employees", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/employees` },
-              ],
     }] : []),
     ...((isManager || isCashier) ? [] : [{
-      title: "System",
-      url: "#",
+      title: "Settings",
+      url: `/${currentUser?.role?.toLowerCase() || 'owner'}/settings`,
       icon: Settings,
-      items: [
-                { title: "Settings", url: `/${currentUser?.role?.toLowerCase() || 'owner'}/settings` },
-      ],
     }]),
   ];
 

@@ -43,6 +43,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
       status: initialData?.status || "Active",
       
       createLoginAccount: initialData?.createLoginAccount || false,
+      hasLoginAccount: initialData?.hasLoginAccount || false,
       username: initialData?.username || "",
       password: "",
       confirmPassword: "",
@@ -74,6 +75,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
         status: initialData.status || "Active",
         
         createLoginAccount: initialData.createLoginAccount || initialData.hasLoginAccount || false,
+        hasLoginAccount: initialData.hasLoginAccount || false,
         username: initialData.username || "",
         password: "",
         confirmPassword: "",
@@ -422,7 +424,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Create Login Account</FormLabel>
+                    <FormLabel>{initialData?.hasLoginAccount ? "Login account enabled" : "Create Login Account"}</FormLabel>
                     <FormDescription>
                       Allow this employee to log into the system with an assigned role.
                     </FormDescription>
@@ -442,6 +444,11 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                       <FormControl>
                         <Input placeholder="johndoe" {...field} className="bg-background border-border" />
                       </FormControl>
+                      <FormDescription>
+                        {initialData?.hasLoginAccount
+                          ? "This employee can sign in with this username."
+                          : "They will use this username to log in."}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -475,10 +482,18 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{initialData?.hasLoginAccount ? "New Password" : "Password"}</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} className="bg-background border-border" />
+                        <Input
+                          type="password"
+                          placeholder={initialData?.hasLoginAccount ? "Leave blank to keep current password" : "Enter a password"}
+                          {...field}
+                          className="bg-background border-border"
+                        />
                       </FormControl>
+                      {initialData?.hasLoginAccount && (
+                        <FormDescription>Only fill this in if you want to reset their login password.</FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -488,7 +503,7 @@ export function EmployeeForm({ initialData, onSubmit, isLoading, onCancel }: Pro
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
+                      <FormLabel>{initialData?.hasLoginAccount ? "Confirm New Password" : "Confirm Password"}</FormLabel>
                       <FormControl>
                         <Input type="password" {...field} className="bg-background border-border" />
                       </FormControl>

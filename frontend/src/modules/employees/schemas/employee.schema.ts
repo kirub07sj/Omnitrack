@@ -27,19 +27,24 @@ export const employeeSchema = z.object({
 
   // Optional Login Account
   createLoginAccount: z.boolean().default(false),
+  hasLoginAccount: z.boolean().optional(),
   username: z.string().optional(),
   password: z.string().optional(),
   confirmPassword: z.string().optional(),
   role: z.enum(["Owner", "Manager", "Cashier", "Waiter", "Kitchen"]).optional(),
 }).superRefine((data, ctx) => {
-  if (data.createLoginAccount) {
-    if (!data.username || data.username.length < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["username"],
-        message: "Username is required (min 3 chars)",
-      });
-    }
+  if (!data.createLoginAccount) return;
+
+  if (!data.username || data.username.length < 3) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["username"],
+      message: "Username is required (min 3 chars)",
+    });
+  }
+
+  const isNewLogin = !data.hasLoginAccount;
+  if (isNewLogin) {
     if (!data.password || data.password.length < 6) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -54,13 +59,29 @@ export const employeeSchema = z.object({
         message: "Passwords do not match",
       });
     }
-    if (!data.role) {
+  } else if (data.password) {
+    if (data.password.length < 6) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["role"],
-        message: "Role is required for login accounts",
+        path: ["password"],
+        message: "New password must be at least 6 characters",
       });
     }
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["confirmPassword"],
+        message: "Passwords do not match",
+      });
+    }
+  }
+
+  if (!data.role) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["role"],
+      message: "Role is required for login accounts",
+    });
   }
 });
 

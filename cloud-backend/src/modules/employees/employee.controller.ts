@@ -16,7 +16,10 @@ export const getEmployees = async (req: Request, res: Response) => {
 
 export const getEmployeeById = async (req: Request, res: Response) => {
   try {
-    const employee = await prisma.employee.findUnique({ where: { id: String(req.params.id) }, include: { users: true } });
+    const employee = await prisma.employee.findUnique({
+      where: { id: String(req.params.id) },
+      include: { users: { include: { role: true } } }
+    });
     if (!employee) { res.status(404).json({ message: 'Employee not found' }); return; }
     res.json(employee);
   } catch (error) { res.status(500).json({ message: 'Failed to fetch employee', error }); }
@@ -62,17 +65,86 @@ export const createEmployee = async (req: Request, res: Response) => {
 export const updateEmployee = async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id);
-    const data = req.body;
-    if (data.hire_date) data.hire_date = new Date(data.hire_date);
-    if (data.age) data.age = parseInt(data.age, 10);
+    const {
+      createLoginAccount,
+      username,
+      password_hash,
+      role,
+      hire_date,
+      age,
+      ...rest
+    } = req.body;
 
-    const existing = await prisma.employee.findUnique({ where: { id } });
-    if (existing?.position === 'Owner') {
-      if (data.position && data.position !== 'Owner') return res.status(403).json({ message: 'Cannot change the position of the system owner' });
-      if (data.status && data.status !== 'Active') return res.status(403).json({ message: 'Cannot deactivate or terminate the system owner' });
+    const employeeData: any = { ...rest };
+    if (hire_date) employeeData.hire_date = new Date(hire_date);
+    if (age) employeeData.age = parseInt(age, 10);
+
+    const existing = await prisma.employee.findUnique({
+      where: { id },
+      include: { users: { include: { role: true } } }
+    });
+    if (!existing) return res.status(404).json({ message: 'Employee not found' });
+
+    if (existing.position === 'Owner') {
+      if (employeeData.position && employeeData.position !== 'Owner') {
+        return res.status(403).json({ message: 'Cannot change the position of the system owner' });
+      }
+      if (employeeData.status && employeeData.status !== 'Active') {
+        return res.status(403).json({ message: 'Cannot deactivate or terminate the system owner' });
+      }
     }
 
-    const employee = await prisma.employee.update({ where: { id }, data, include: { users: true } });
+    await prisma.employee.update({ where: { id }, data: employeeData });
+
+    const existingUser = existing.users[0];
+    if (createLoginAccount) {
+      let role_id = existingUser?.role_id || null;
+      if (role) {
+        let foundRole = await prisma.role.findFirst({ where: { name: role } });
+        if (!foundRole) foundRole = await prisma.role.create({ data: { name: role } });
+        role_id = foundRole.id;
+      }
+
+      let hashed: string | undefined;
+      if (password_hash) {
+        const salt = await bcrypt.genSalt(10);
+        hashed = await bcrypt.hash(password_hash, salt);
+      }
+
+      if (existingUser) {
+        const userUpdate: any = {};
+        if (username && username !== existingUser.username) {
+          const taken = await prisma.user.findUnique({ where: { username } });
+          if (taken && taken.id !== existingUser.id) {
+            return res.status(409).json({ message: 'Username is already taken' });
+          }
+          userUpdate.username = username;
+        }
+        if (hashed) userUpdate.password_hash = hashed;
+        if (role_id) userUpdate.role_id = role_id;
+        if (Object.keys(userUpdate).length > 0) {
+          await prisma.user.update({ where: { id: existingUser.id }, data: userUpdate });
+        }
+      } else if (username && hashed && role_id) {
+        const taken = await prisma.user.findUnique({ where: { username } });
+        if (taken) return res.status(409).json({ message: 'Username is already taken' });
+        await prisma.user.create({
+          data: {
+            business_id: existing.business_id,
+            employee_id: id,
+            username,
+            password_hash: hashed,
+            role_id,
+            status: 'Active'
+          }
+        });
+      }
+    }
+
+    const employee = await prisma.employee.findUnique({
+      where: { id },
+      include: { users: { include: { role: true } } }
+    });
     res.json(employee);
   } catch (error) { res.status(500).json({ message: 'Failed to update employee', error }); }
 };
